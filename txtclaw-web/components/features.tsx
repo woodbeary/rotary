@@ -3,61 +3,66 @@ import { Brain, Globe, KeyRound, Lock, Smartphone } from "lucide-react"
 const features = [
   {
     icon: Smartphone,
-    title: "Real phone number, real SMS",
+    title: "Real phone number",
     description:
-      "Your agent gets a dedicated US phone number. Text it from any phone, anywhere. No app, no login.",
+      "A dedicated US number that's yours. Text it from any phone on the planet. No apps, no accounts.",
   },
   {
     icon: Brain,
-    title: "Persistent memory & tools",
+    title: "Persistent memory",
     description:
-      "Your agent remembers past conversations. It can browse the web, run code, and use tools on your behalf.",
+      "Your agent remembers every conversation. Context builds over time. It actually knows you.",
+  },
+  {
+    icon: Globe,
+    title: "Web + code execution",
+    description:
+      "Browse the web, run code, automate tasks. Not a chatbot — an agent that does things.",
   },
   {
     icon: KeyRound,
     title: "Bring your own keys",
     description:
-      "Use your own API keys for OpenAI, Anthropic, or any supported model. Pay less, own more.",
+      "Use your OpenAI, Anthropic, or any supported model API keys. No markup on model costs.",
   },
   {
     icon: Lock,
     title: "Privacy-first, no lock-in",
     description:
-      "Your data stays yours. No unsolicited messages, ever. Cancel anytime, export everything.",
-  },
-  {
-    icon: Globe,
-    title: "Powered by OpenClaw on Cloudflare",
-    description:
-      "Built on the OpenClaw / Moltworker stack running at the edge. Fast, reliable, open.",
+      "No unsolicited messages. No data selling. Cancel anytime. Export everything.",
   },
 ]
 
 export function Features() {
   return (
-    <section className="mx-auto max-w-4xl px-4 py-20">
-      <h2 className="mb-2 text-center text-sm font-medium uppercase tracking-widest text-primary">
-        What you get
-      </h2>
-      <p className="mb-12 text-center text-2xl font-semibold text-foreground md:text-3xl">
-        A real AI agent, not a chatbot toy
-      </p>
+    <section id="features" className="px-6 py-24">
+      <div className="mx-auto max-w-5xl">
+        <p className="mb-3 font-mono text-sm text-primary">Capabilities</p>
+        <h2 className="mb-4 max-w-lg text-3xl font-bold text-foreground md:text-4xl">
+          Not a chatbot. An agent that works for you.
+        </h2>
+        <p className="mb-12 max-w-lg text-muted-foreground">
+          Everything you need from an AI assistant, delivered over the simplest interface there is: a text message.
+        </p>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {features.map((feature) => (
-          <div
-            key={feature.title}
-            className="rounded-lg border border-border bg-card p-6"
-          >
-            <div className="mb-3 flex items-center gap-3">
-              <feature.icon className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-foreground">{feature.title}</h3>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="group rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/30"
+            >
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
+                <feature.icon className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="mb-2 font-semibold text-foreground">
+                {feature.title}
+              </h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {feature.description}
+              </p>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {feature.description}
-            </p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   )

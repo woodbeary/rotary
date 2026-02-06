@@ -8,8 +8,8 @@ const _inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const _jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' })
 
 export const metadata: Metadata = {
-  title: 'ClawPhone - Your personal AI that lives on a real phone number',
-  description: 'Text it like a friend, no app needed. SMS-based personal AI agent powered by OpenClaw & Cloudflare.',
+  title: 'TXT CLAW - AI agent on a real phone number',
+  description: 'Text a real phone number. Get an AI that texts back. No app, no login. Your own dedicated AI agent over SMS.',
 }
 
 export const viewport: Viewport = {

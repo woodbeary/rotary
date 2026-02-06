@@ -1,56 +1,65 @@
+import { MessageSquare, Handshake, Smartphone, Settings } from "lucide-react"
+
 const steps = [
   {
-    number: "01",
-    title: "Text the gateway number",
+    icon: MessageSquare,
+    number: "1",
+    title: "Text the number",
     description:
-      "Send any message to +1 (573) 879-2529. You'll get a free taste of your AI agent — no account needed.",
+      "Send anything to +1 (573) 879-2529. You'll hit the free gateway agent instantly. No signup.",
   },
   {
-    number: "02",
-    title: "Chat & negotiate",
+    icon: Handshake,
+    number: "2",
+    title: "Try it out, haggle a price",
     description:
-      "Try the agent for free (limited turns). If you like it, negotiate a fun discount for your first month. Yes, really.",
+      "Chat for free. Like it? Negotiate your first month's price with the AI. It starts at $19 but you can talk it down.",
   },
   {
-    number: "03",
+    icon: Smartphone,
+    number: "3",
     title: "Get your own number",
     description:
-      "On payment, you instantly receive a dedicated US phone number routed to your own private agent.",
+      "Pay and instantly receive a dedicated US phone number routed to your own private, persistent agent.",
   },
   {
-    number: "04",
+    icon: Settings,
+    number: "4",
     title: "Make it yours",
     description:
-      "Customize prompts, connect your own API keys, use tools — your agent evolves with you over time.",
+      "Custom prompts, BYOK model access, persistent memory. Your agent learns and grows with you.",
   },
 ]
 
 export function HowItWorks() {
   return (
-    <section className="mx-auto max-w-3xl px-4 py-20">
-      <h2 className="mb-2 text-center text-sm font-medium uppercase tracking-widest text-primary">
-        How it works
-      </h2>
-      <p className="mb-12 text-center text-2xl font-semibold text-foreground md:text-3xl">
-        Four texts to your own AI
-      </p>
+    <section id="how" className="px-6 py-24">
+      <div className="mx-auto max-w-5xl">
+        <p className="mb-3 font-mono text-sm text-primary">How it works</p>
+        <h2 className="mb-12 text-3xl font-bold text-foreground md:text-4xl">
+          Four texts to your own AI
+        </h2>
 
-      <div className="flex flex-col gap-8">
-        {steps.map((step) => (
-          <div key={step.number} className="flex gap-5">
-            <span className="shrink-0 font-mono text-3xl font-bold text-primary/30">
-              {step.number}
-            </span>
-            <div>
-              <h3 className="mb-1 font-semibold text-foreground">
+        <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step) => (
+            <div key={step.number} className="flex flex-col gap-4 bg-card p-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <step.icon className="h-5 w-5 text-primary" />
+                </div>
+                <span className="font-mono text-sm text-muted-foreground">
+                  Step {step.number}
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">
                 {step.title}
               </h3>
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {step.description}
               </p>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   )

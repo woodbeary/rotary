@@ -1,8 +1,8 @@
 export default function LaunchCopyPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="mb-2 text-3xl font-bold text-foreground">
-        ClawPhone Launch Package
+    <div className="mx-auto max-w-3xl px-6 py-16">
+      <h1 className="mb-2 font-mono text-3xl font-bold text-foreground">
+        TXT CLAW Launch Package
       </h1>
       <p className="mb-12 text-muted-foreground">
         Copy-paste ready marketing materials. Edit as needed.
@@ -10,7 +10,7 @@ export default function LaunchCopyPage() {
 
       {/* --- X / TWITTER THREAD --- */}
       <section className="mb-16">
-        <h2 className="mb-6 border-b border-border pb-2 text-xl font-semibold text-primary">
+        <h2 className="mb-6 border-b border-border pb-2 font-mono text-xl font-semibold text-primary">
           X / Twitter Launch Thread
         </h2>
 
@@ -22,11 +22,11 @@ Text +1 (573) 879-2529 right now — it'll reply in seconds.
 
 No app. No login. Just SMS.
 
-It's called ClawPhone, and I just shipped it. Here's what it does:`}
+It's called TXT CLAW, and I just shipped it. Here's what it does:`}
           </Tweet>
 
           <Tweet number={2}>
-            {`ClawPhone gives you a dedicated US phone number routed to your own private AI agent.
+            {`TXT CLAW gives you a dedicated US phone number routed to your own private AI agent.
 
 It has:
 - Persistent memory (it remembers you)
@@ -63,18 +63,18 @@ Or check the site: [your-landing-page-url]
 
       {/* --- REDDIT / HN POST --- */}
       <section className="mb-16">
-        <h2 className="mb-6 border-b border-border pb-2 text-xl font-semibold text-primary">
+        <h2 className="mb-6 border-b border-border pb-2 font-mono text-xl font-semibold text-primary">
           Reddit / HN Post
         </h2>
 
-        <div className="rounded-lg border border-border bg-card p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <h3 className="mb-4 font-mono text-lg font-semibold text-foreground">
             Title: I gave an AI its own phone number — text it right now and
             it&apos;ll reply over SMS (no app, no login)
           </h3>
 
           <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-muted-foreground">
-            {`Hey everyone — I'm Jacob. I built ClawPhone, an SMS-based personal AI agent.
+            {`Hey everyone — I'm Jacob. I built TXT CLAW, an SMS-based personal AI agent.
 
 The idea is simple: you text a phone number, and a real AI agent texts you back. No app download. No account creation. Just SMS.
 
@@ -100,19 +100,19 @@ Text it now: +1 (573) 879-2529`}
 
       {/* --- GATEWAY SYSTEM PROMPT --- */}
       <section className="mb-16">
-        <h2 className="mb-6 border-b border-border pb-2 text-xl font-semibold text-primary">
+        <h2 className="mb-6 border-b border-border pb-2 font-mono text-xl font-semibold text-primary">
           Gateway AI System Prompt
         </h2>
 
-        <div className="rounded-lg border border-border bg-card p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-muted-foreground">
-            {`You are the ClawPhone Gateway Assistant — the friendly first point of contact for ClawPhone, an SMS-based personal AI agent service built by @jacoblopez.
+            {`You are the TXT CLAW Gateway Assistant — the friendly first point of contact for TXT CLAW, an SMS-based personal AI agent service built by @jacoblopez.
 
 ## Your Role
-You help new users understand what ClawPhone is, answer questions, and guide them toward signing up for their own dedicated AI phone number.
+You help new users understand what TXT CLAW is, answer questions, and guide them toward signing up for their own dedicated AI phone number.
 
-## About ClawPhone
-- ClawPhone gives users their own dedicated US phone number routed to a private, persistent AI agent
+## About TXT CLAW
+- TXT CLAW gives users their own dedicated US phone number routed to a private, persistent AI agent
 - The agent has: persistent memory, web browsing, code execution, tool use, custom system prompts, and BYOK (bring your own API keys) support
 - All communication is user-initiated SMS — we never send unsolicited messages
 - Built with OpenClaw / Moltworker on Cloudflare by @jacoblopez (solo indie dev)
@@ -147,7 +147,7 @@ You help new users understand what ClawPhone is, answer questions, and guide the
 - Helpful, clear, a little witty — like a knowledgeable friend, not a salesperson
 - Keep responses concise (SMS-friendly: 1-3 short paragraphs max)
 - Never be pushy or use fake urgency ("limited spots!", "act now!")
-- Be honest about what ClawPhone can and can't do
+- Be honest about what TXT CLAW can and can't do
 - If asked something you can't help with, say so and suggest they'll be able to do more with their own agent
 - Reference @jacoblopez as the builder if asked who made this
 
@@ -170,7 +170,7 @@ function Tweet({
   children: string
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <span className="mb-2 inline-block font-mono text-xs text-primary">
         Tweet {number}
       </span>
