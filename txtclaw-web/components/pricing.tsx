@@ -1,4 +1,18 @@
+"use client"
+
 import { Check, ArrowRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
+import { cn } from "@/lib/utils"
 
 const tiers = [
   {
@@ -13,8 +27,8 @@ const tiers = [
       "Custom system prompts",
       "Standard model access",
     ],
-    highlight: true,
-    label: "Most popular",
+    highlighted: true,
+    badge: "Most popular",
   },
   {
     name: "Max",
@@ -28,8 +42,8 @@ const tiers = [
       "Higher usage limits",
       "Early access to new tools",
     ],
-    highlight: false,
-    label: null,
+    highlighted: false,
+    badge: null,
   },
   {
     name: "BYOK",
@@ -43,79 +57,97 @@ const tiers = [
       "Full model selection",
       "Same agent infrastructure",
     ],
-    highlight: false,
-    label: "Best value",
+    highlighted: false,
+    badge: "Best value",
   },
 ]
 
 export function Pricing() {
+  const { ref, isVisible } = useAnimateOnScroll()
+
   return (
-    <section id="pricing" className="px-6 py-24">
-      <div className="mx-auto max-w-5xl">
-        <p className="mb-3 font-mono text-sm text-primary">Pricing</p>
-        <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
-          Simple, honest pricing
-        </h2>
-        <p className="mb-12 max-w-md text-muted-foreground">
-          Try it free. Then negotiate your intro price with the AI. Seriously
-          — the floor is $12/mo.
-        </p>
+    <section id="pricing" ref={ref} className="relative px-6 py-24 md:py-32">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+      <div className="mx-auto max-w-6xl">
+        <div
+          className={cn(
+            "mb-14 max-w-lg opacity-0",
+            isVisible && "animate-fade-up"
+          )}
+        >
+          <p className="mb-3 font-mono text-sm text-muted-foreground">
+            Pricing
+          </p>
+          <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+            Simple, honest pricing.
+          </h2>
+          <p className="text-muted-foreground">
+            Try it free. Then negotiate your intro price with the AI.
+            Seriously&nbsp;&mdash; the floor is $12/mo.
+          </p>
+        </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {tiers.map((tier) => (
-            <div
+          {tiers.map((tier, i) => (
+            <Card
               key={tier.name}
-              className={`relative flex flex-col rounded-xl border p-6 ${
-                tier.highlight
-                  ? "border-primary/50 bg-primary/5"
-                  : "border-border bg-card"
-              }`}
+              className={cn(
+                "relative flex flex-col opacity-0 transition-all duration-300 hover:shadow-lg hover:shadow-foreground/[0.02]",
+                tier.highlighted && "border-foreground/20 shadow-lg shadow-foreground/[0.03]",
+                isVisible && "animate-fade-up"
+              )}
+              style={{ animationDelay: `${i * 100 + 100}ms` }}
             >
-              {tier.label && (
-                <span className="absolute -top-3 left-4 rounded-full bg-primary px-3 py-1 font-mono text-xs font-semibold text-primary-foreground">
-                  {tier.label}
-                </span>
+              {tier.badge && (
+                <Badge
+                  className="absolute -top-2.5 left-5 font-mono text-[10px]"
+                  variant={tier.highlighted ? "default" : "secondary"}
+                >
+                  {tier.badge}
+                </Badge>
               )}
 
-              <h3 className="mb-1 font-mono text-lg font-bold text-foreground">
-                {tier.name}
-              </h3>
-              <div className="mb-3 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight text-foreground">
-                  {tier.price}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {tier.period}
-                </span>
-              </div>
-              <p className="mb-6 text-sm text-muted-foreground">
-                {tier.description}
-              </p>
+              <CardHeader className="pb-4">
+                <CardTitle className="font-mono text-lg">{tier.name}</CardTitle>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold tracking-tight text-foreground">
+                    {tier.price}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {tier.period}
+                  </span>
+                </div>
+                <CardDescription>{tier.description}</CardDescription>
+              </CardHeader>
 
-              <ul className="mb-8 flex flex-col gap-3">
-                {tier.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-start gap-2.5 text-sm text-muted-foreground"
-                  >
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+              <CardContent className="flex-1">
+                <ul className="flex flex-col gap-3">
+                  {tier.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-2.5 text-sm text-muted-foreground"
+                    >
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
 
-              <a
-                href="sms:+15738792529"
-                className={`mt-auto flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                  tier.highlight
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}
-              >
-                Get started
-                <ArrowRight className="h-3.5 w-3.5" />
-              </a>
-            </div>
+              <CardFooter>
+                <Button
+                  className="w-full gap-2"
+                  variant={tier.highlighted ? "default" : "outline"}
+                  asChild
+                >
+                  <a href="sms:+15738792529">
+                    Get started
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                </Button>
+              </CardFooter>
+            </Card>
           ))}
         </div>
       </div>

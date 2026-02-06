@@ -1,17 +1,22 @@
+import { Separator } from "@/components/ui/separator"
+
 export function Footer() {
   return (
-    <footer className="border-t border-border px-6 py-8">
-      <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 md:flex-row md:justify-between">
-        <div className="flex items-center gap-6 text-sm text-muted-foreground">
-          <span className="font-mono font-semibold text-foreground">TXT CLAW</span>
-          <span className="hidden h-4 w-px bg-border md:block" />
+    <footer className="px-6 pb-8 pt-4">
+      <Separator className="mb-8" />
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 md:flex-row md:justify-between">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+          <span className="font-mono text-xs font-semibold text-foreground">
+            TXT CLAW
+          </span>
+          <span className="hidden h-3.5 w-px bg-border md:block" />
           <span>
             Built with{" "}
             <a
               href="https://openclaw.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-foreground underline underline-offset-4 transition-colors hover:text-primary"
+              className="text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
             >
               OpenClaw
             </a>
@@ -20,14 +25,14 @@ export function Footer() {
               href="https://cloudflare.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-foreground underline underline-offset-4 transition-colors hover:text-primary"
+              className="text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
             >
               Cloudflare
             </a>
           </span>
         </div>
 
-        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+        <div className="flex items-center gap-5 text-sm text-muted-foreground">
           <a
             href="#"
             className="transition-colors hover:text-foreground"
