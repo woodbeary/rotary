@@ -34,10 +34,16 @@ export function Footer() {
 
         <div className="flex items-center gap-5 text-sm text-muted-foreground">
           <a
-            href="#"
+            href="/privacy"
             className="transition-colors hover:text-foreground"
           >
             Privacy
+          </a>
+          <a
+            href="/terms"
+            className="transition-colors hover:text-foreground"
+          >
+            Terms
           </a>
           <a
             href="https://x.com/jacoblopez"
