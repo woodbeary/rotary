@@ -1,7 +1,6 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import { ArrowLeft, Sparkles } from "lucide-react"
-import { auth } from "@clerk/nextjs/server"
 import { WaitlistSignUp } from "@/components/waitlist-signup"
 
 export const metadata: Metadata = {
@@ -14,7 +13,6 @@ export const dynamic = "force-dynamic"
 
 export default async function WaitlistPage() {
   const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
-  const { userId } = await auth()
 
   return (
     <main className="min-h-screen bg-background">
@@ -54,25 +52,7 @@ export default async function WaitlistPage() {
 
           <div className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
             {clerkEnabled ? (
-              userId ? (
-                <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-5">
-                  <p className="text-sm font-medium text-foreground">
-                    You&apos;re already on the waitlist.
-                  </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Thanks for signing up. You can view your confirmation and next
-                    steps below.
-                  </p>
-                  <Link
-                    href="/waitlist/success"
-                    className="mt-4 inline-flex items-center rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-                  >
-                    View confirmation
-                  </Link>
-                </div>
-              ) : (
-                <WaitlistSignUp source="waitlist_page" />
-              )
+              <WaitlistSignUp />
             ) : (
               <div className="rounded-xl border border-border/60 bg-muted/20 p-5">
                 <p className="text-sm font-medium text-foreground">

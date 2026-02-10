@@ -1,8 +1,8 @@
 "use client"
 
-import type { ComponentProps } from "react"
+import type { ComponentProps, MouseEvent } from "react"
 import { ArrowRight } from "lucide-react"
-import { SignUpButton, SignedIn, SignedOut } from "@clerk/nextjs"
+import { useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { getWaitlistSuccessRedirectUrl } from "@/lib/waitlist"
 
@@ -21,8 +21,10 @@ export function WaitlistModalButton({
   signedInLabel = "You're on waitlist",
   source = "site",
   showIcon = true,
+  onClick,
   ...buttonProps
 }: WaitlistModalButtonProps) {
+  const clerk = useClerk()
   const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
   const successRedirectUrl = getWaitlistSuccessRedirectUrl()
 
@@ -41,24 +43,26 @@ export function WaitlistModalButton({
     )
   }
 
-  return (
-    <>
-      <SignedOut>
-        <SignUpButton
-          mode="modal"
-          forceRedirectUrl={successRedirectUrl}
-          fallbackRedirectUrl={successRedirectUrl}
-          unsafeMetadata={{ waitlist_source: source }}
-        >
-          <Button {...buttonProps}>{content(label)}</Button>
-        </SignUpButton>
-      </SignedOut>
+  // Retained for compatibility with existing callsites.
+  void signedInLabel
 
-      <SignedIn>
-        <Button asChild {...buttonProps}>
-          <a href="/waitlist/success">{content(signedInLabel)}</a>
-        </Button>
-      </SignedIn>
-    </>
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    onClick?.(event)
+    if (event.defaultPrevented) return
+
+    clerk.openWaitlist({
+      afterJoinWaitlistUrl: successRedirectUrl,
+    })
+  }
+
+  return (
+    <Button
+      type="button"
+      data-waitlist-source={source}
+      {...buttonProps}
+      onClick={handleClick}
+    >
+      {content(label)}
+    </Button>
   )
 }

@@ -1,22 +1,14 @@
 "use client"
 
-import { SignUp } from "@clerk/nextjs"
+import { Waitlist } from "@clerk/nextjs"
 import { getWaitlistSuccessRedirectUrl } from "@/lib/waitlist"
 
-type WaitlistSignUpProps = {
-  source?: string
-}
-
-export function WaitlistSignUp({ source = "waitlist_page" }: WaitlistSignUpProps) {
+export function WaitlistSignUp() {
   const successRedirectUrl = getWaitlistSuccessRedirectUrl()
 
   return (
-    <SignUp
-      routing="path"
-      path="/waitlist"
-      forceRedirectUrl={successRedirectUrl}
-      fallbackRedirectUrl={successRedirectUrl}
-      unsafeMetadata={{ waitlist_source: source }}
+    <Waitlist
+      afterJoinWaitlistUrl={successRedirectUrl}
       appearance={{
         elements: {
           card: "bg-card border border-border shadow-none",

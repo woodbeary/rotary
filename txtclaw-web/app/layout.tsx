@@ -41,7 +41,7 @@ export default function RootLayout({
   const app = (
     <ThemeProvider
       attribute="class"
-      defaultTheme="dark"
+      defaultTheme="system"
       enableSystem
       disableTransitionOnChange
     >
