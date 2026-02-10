@@ -18,11 +18,11 @@ export default async function WaitlistPage() {
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl px-6 py-16 md:py-24">
         <Link
-          href="/api-reference"
+          href="/"
           className="mb-10 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to API preview
+          Back to home
         </Link>
 
         <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-start">

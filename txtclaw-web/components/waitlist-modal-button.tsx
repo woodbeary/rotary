@@ -28,6 +28,14 @@ export function WaitlistModalButton({
   const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
   const successRedirectUrl = getWaitlistSuccessRedirectUrl()
 
+  // Retained for compatibility with existing callsites.
+  void signedInLabel
+
+  const openWaitlistFallback = () => {
+    const params = new URLSearchParams({ source })
+    window.location.assign(`/waitlist?${params.toString()}`)
+  }
+
   const content = (text: string) => (
     <>
       {text}
@@ -43,16 +51,21 @@ export function WaitlistModalButton({
     )
   }
 
-  // Retained for compatibility with existing callsites.
-  void signedInLabel
-
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     onClick?.(event)
     if (event.defaultPrevented) return
 
-    clerk.openWaitlist({
-      afterJoinWaitlistUrl: successRedirectUrl,
-    })
+    try {
+      void Promise.resolve(
+        clerk.openWaitlist({
+          afterJoinWaitlistUrl: successRedirectUrl,
+        })
+      ).catch(() => {
+        openWaitlistFallback()
+      })
+    } catch {
+      openWaitlistFallback()
+    }
   }
 
   return (

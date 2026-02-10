@@ -34,10 +34,21 @@ export function SmsDemo() {
   useEffect(() => {
     const container = messagesRef.current
     if (!container) return
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: "smooth",
-    })
+
+    const scrollToBottom = () => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      })
+    }
+
+    const frame = requestAnimationFrame(scrollToBottom)
+    const timeout = setTimeout(scrollToBottom, 160)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      clearTimeout(timeout)
+    }
   }, [visibleCount])
 
   return (
@@ -73,7 +84,7 @@ export function SmsDemo() {
           ref={messagesRef}
           className="h-[420px] overflow-y-auto overscroll-contain p-4 sm:h-[390px]"
         >
-          <div className="flex flex-col gap-3 pb-2">
+          <div className="flex flex-col gap-3 pb-6">
             {messages.slice(0, visibleCount).map((msg, i) => (
               <div
                 key={i}
