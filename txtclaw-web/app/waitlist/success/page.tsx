@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowRight, CheckCircle2 } from "lucide-react"
+import { WaitlistSuccessFlag } from "@/components/waitlist-success-flag"
 
 export const metadata: Metadata = {
   title: "You're on the waitlist — TXT CLAW",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function WaitlistSuccessPage() {
   return (
     <main className="min-h-screen bg-background">
+      <WaitlistSuccessFlag />
       <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
         <div className="rounded-2xl border border-border/60 bg-card p-8 md:p-10">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">

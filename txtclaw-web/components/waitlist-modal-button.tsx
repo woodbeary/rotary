@@ -1,10 +1,14 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import type { ComponentProps, MouseEvent } from "react"
 import { ArrowRight } from "lucide-react"
 import { useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
-import { getWaitlistSuccessRedirectUrl } from "@/lib/waitlist"
+import {
+  getWaitlistSuccessRedirectUrl,
+  isWaitlistMarkedJoinedInBrowser,
+} from "@/lib/waitlist"
 
 type WaitlistModalButtonProps = Omit<
   ComponentProps<typeof Button>,
@@ -27,9 +31,25 @@ export function WaitlistModalButton({
   const clerk = useClerk()
   const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
   const successRedirectUrl = getWaitlistSuccessRedirectUrl()
+  const [alreadyJoined, setAlreadyJoined] = useState(false)
 
-  // Retained for compatibility with existing callsites.
-  void signedInLabel
+  useEffect(() => {
+    if (!clerkEnabled) return
+
+    const syncJoinedState = () => {
+      const signedIn = Boolean(clerk.user?.id)
+      setAlreadyJoined(signedIn || isWaitlistMarkedJoinedInBrowser())
+    }
+
+    syncJoinedState()
+    window.addEventListener("storage", syncJoinedState)
+    window.addEventListener("txtclaw:waitlist-joined", syncJoinedState)
+
+    return () => {
+      window.removeEventListener("storage", syncJoinedState)
+      window.removeEventListener("txtclaw:waitlist-joined", syncJoinedState)
+    }
+  }, [clerk.user?.id, clerkEnabled])
 
   const openWaitlistFallback = () => {
     const params = new URLSearchParams({ source })
@@ -47,6 +67,14 @@ export function WaitlistModalButton({
     return (
       <Button asChild {...buttonProps}>
         <a href="/waitlist">{content(label)}</a>
+      </Button>
+    )
+  }
+
+  if (alreadyJoined) {
+    return (
+      <Button type="button" disabled {...buttonProps}>
+        {content(signedInLabel)}
       </Button>
     )
   }
