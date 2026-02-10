@@ -12,6 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
+import { WaitlistModalButton } from "@/components/waitlist-modal-button"
+import { SMS_GATEWAY_LIVE, SMS_PHONE_HREF } from "@/lib/launch"
 import { cn } from "@/lib/utils"
 
 const tiers = [
@@ -136,16 +138,25 @@ export function Pricing() {
               </CardContent>
 
               <CardFooter>
-                <Button
-                  className="w-full gap-2"
-                  variant={tier.highlighted ? "default" : "outline"}
-                  asChild
-                >
-                  <a href="sms:+15738792529">
-                    Get started
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </a>
-                </Button>
+                {SMS_GATEWAY_LIVE ? (
+                  <Button
+                    className="w-full gap-2"
+                    variant={tier.highlighted ? "default" : "outline"}
+                    asChild
+                  >
+                    <a href={SMS_PHONE_HREF}>
+                      Get started
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
+                  </Button>
+                ) : (
+                  <WaitlistModalButton
+                    className="w-full gap-2"
+                    variant={tier.highlighted ? "default" : "outline"}
+                    source={`pricing_${tier.name.toLowerCase()}`}
+                    showIcon={false}
+                  />
+                )}
               </CardFooter>
             </Card>
           ))}

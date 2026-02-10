@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { SMS_GATEWAY_LIVE, SMS_PHONE_DISPLAY } from "@/lib/launch"
 import { cn } from "@/lib/utils"
 
 const messages = [
@@ -18,6 +19,7 @@ const messages = [
 
 export function SmsDemo() {
   const [visibleCount, setVisibleCount] = useState(0)
+  const messagesRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (visibleCount < messages.length) {
@@ -27,6 +29,15 @@ export function SmsDemo() {
       )
       return () => clearTimeout(timeout)
     }
+  }, [visibleCount])
+
+  useEffect(() => {
+    const container = messagesRef.current
+    if (!container) return
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    })
   }, [visibleCount])
 
   return (
@@ -45,7 +56,7 @@ export function SmsDemo() {
           <div>
             <p className="text-sm font-semibold text-foreground">TXT CLAW</p>
             <p className="font-mono text-xs text-muted-foreground">
-              +1 (573) 879-2529
+              {SMS_GATEWAY_LIVE ? SMS_PHONE_DISPLAY : "Launching soon"}
             </p>
           </div>
           <div className="ml-auto flex items-center gap-1.5">
@@ -58,47 +69,52 @@ export function SmsDemo() {
         </div>
 
         {/* Messages */}
-        <div className="flex flex-col gap-3 p-4" style={{ minHeight: 280 }}>
-          {messages.slice(0, visibleCount).map((msg, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex",
-                msg.from === "user" ? "justify-end" : "justify-start"
-              )}
-              style={{
-                animation: "fade-up 0.4s ease-out both",
-                animationDelay: "0ms",
-              }}
-            >
+        <div
+          ref={messagesRef}
+          className="h-[420px] overflow-y-auto overscroll-contain p-4 sm:h-[390px]"
+        >
+          <div className="flex flex-col gap-3 pb-2">
+            {messages.slice(0, visibleCount).map((msg, i) => (
               <div
+                key={i}
                 className={cn(
-                  "max-w-[80%] rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed",
-                  msg.from === "user"
-                    ? "rounded-br-sm bg-foreground text-background"
-                    : "rounded-bl-sm border border-border bg-card text-card-foreground"
+                  "flex",
+                  msg.from === "user" ? "justify-end" : "justify-start"
                 )}
+                style={{
+                  animation: "fade-up 0.4s ease-out both",
+                  animationDelay: "0ms",
+                }}
               >
-                {msg.text}
+                <div
+                  className={cn(
+                    "max-w-[90%] rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed sm:max-w-[82%]",
+                    msg.from === "user"
+                      ? "rounded-br-sm bg-foreground text-background"
+                      : "rounded-bl-sm border border-border bg-card text-card-foreground"
+                  )}
+                >
+                  {msg.text}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {visibleCount < messages.length && (
-            <div className="flex justify-start">
-              <div className="flex gap-1.5 rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3">
-                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground animate-pulse-soft" />
-                <span
-                  className="h-1.5 w-1.5 rounded-full bg-muted-foreground animate-pulse-soft"
-                  style={{ animationDelay: "0.2s" }}
-                />
-                <span
-                  className="h-1.5 w-1.5 rounded-full bg-muted-foreground animate-pulse-soft"
-                  style={{ animationDelay: "0.4s" }}
-                />
+            {visibleCount < messages.length && (
+              <div className="flex justify-start">
+                <div className="flex gap-1.5 rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3">
+                  <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-muted-foreground" />
+                  <span
+                    className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-muted-foreground"
+                    style={{ animationDelay: "0.2s" }}
+                  />
+                  <span
+                    className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-muted-foreground"
+                    style={{ animationDelay: "0.4s" }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -7,41 +7,71 @@ import {
   Settings,
 } from "lucide-react"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
+import { SMS_GATEWAY_LIVE, SMS_PHONE_DISPLAY } from "@/lib/launch"
 import { cn } from "@/lib/utils"
-
-const steps = [
-  {
-    icon: MessageSquare,
-    number: "01",
-    title: "Text the number",
-    description:
-      "Send anything to +1 (573) 879-2529. The free gateway agent responds in seconds. No signup required.",
-  },
-  {
-    icon: Handshake,
-    number: "02",
-    title: "Try it, negotiate a price",
-    description:
-      "Chat for free. Like it? Negotiate your first month with the AI. It starts at $19/mo but you can talk it down.",
-  },
-  {
-    icon: Smartphone,
-    number: "03",
-    title: "Get your own number",
-    description:
-      "Pay and instantly receive a dedicated US phone number routed to your own private, persistent agent.",
-  },
-  {
-    icon: Settings,
-    number: "04",
-    title: "Make it yours",
-    description:
-      "Custom system prompts, BYOK model access, persistent memory. Your agent learns and grows with you.",
-  },
-]
 
 export function HowItWorks() {
   const { ref, isVisible } = useAnimateOnScroll()
+  const steps = SMS_GATEWAY_LIVE
+    ? [
+        {
+          icon: MessageSquare,
+          number: "01",
+          title: "Text the number",
+          description: `Send anything to ${SMS_PHONE_DISPLAY}. The free gateway agent responds in seconds. No signup required.`,
+        },
+        {
+          icon: Handshake,
+          number: "02",
+          title: "Try it, negotiate a price",
+          description:
+            "Chat for free. Like it? Negotiate your first month with the AI. It starts at $19/mo but you can talk it down.",
+        },
+        {
+          icon: Smartphone,
+          number: "03",
+          title: "Get your own number",
+          description:
+            "Pay and instantly receive a dedicated US phone number routed to your own private, persistent agent.",
+        },
+        {
+          icon: Settings,
+          number: "04",
+          title: "Make it yours",
+          description:
+            "Custom system prompts, BYOK model access, persistent memory. Your agent learns and grows with you.",
+        },
+      ]
+    : [
+        {
+          icon: MessageSquare,
+          number: "01",
+          title: "Join the waitlist",
+          description:
+            "Reserve early access while we finish launch approvals.",
+        },
+        {
+          icon: Handshake,
+          number: "02",
+          title: "Get early invite",
+          description:
+            "We invite waitlist members in batches as soon as launch goes live.",
+        },
+        {
+          icon: Smartphone,
+          number: "03",
+          title: "Claim your number",
+          description:
+            "Pick your dedicated US phone number and start your private agent setup.",
+        },
+        {
+          icon: Settings,
+          number: "04",
+          title: "Make it yours",
+          description:
+            "Custom prompts, BYOK model access, and persistent memory tuned to your workflow.",
+        },
+      ]
 
   return (
     <section id="how" ref={ref} className="px-6 py-24 md:py-32">

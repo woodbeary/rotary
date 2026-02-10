@@ -1,9 +1,12 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { WaitlistModalButton } from "@/components/waitlist-modal-button"
+import { SMS_GATEWAY_LIVE, SMS_PHONE_HREF } from "@/lib/launch"
 import {
   Sheet,
   SheetContent,
@@ -15,6 +18,9 @@ const links = [
   { href: "#how", label: "How it works" },
   { href: "#features", label: "Features" },
   { href: "#pricing", label: "Pricing" },
+  { href: "/api-reference", label: "API Docs" },
+  { href: "/changelog", label: "Changelog" },
+  { href: "/waitlist", label: "Waitlist" },
 ]
 
 export function Navbar() {
@@ -22,12 +28,28 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+      <nav className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
         <a
-          href="#"
-          className="font-mono text-base font-bold tracking-tighter text-foreground"
+          href="/"
+          className="flex items-center gap-2"
+          aria-label="TXT CLAW home"
         >
-          TXT CLAW
+          <Image
+            src="/logo_horizontal_lightmode.png"
+            alt="TXT CLAW"
+            width={3458}
+            height={1026}
+            className="h-14 w-auto dark:hidden"
+            priority
+          />
+          <Image
+            src="/logo_horizontal_darkmode.png"
+            alt="TXT CLAW"
+            width={3458}
+            height={1026}
+            className="hidden h-14 w-auto dark:block"
+            priority
+          />
         </a>
 
         {/* Desktop */}
@@ -43,9 +65,20 @@ export function Navbar() {
           ))}
           <div className="mx-2 h-4 w-px bg-border" />
           <ThemeToggle />
-          <Button size="sm" className="ml-1" asChild>
-            <a href="sms:+15738792529">Text now</a>
-          </Button>
+          {SMS_GATEWAY_LIVE ? (
+            <Button size="sm" className="ml-1" asChild>
+              <a href={SMS_PHONE_HREF}>Text now</a>
+            </Button>
+          ) : (
+            <WaitlistModalButton
+              size="sm"
+              className="ml-1"
+              label="Join waitlist"
+              signedInLabel="You're in"
+              showIcon={false}
+              source="navbar_desktop"
+            />
+          )}
         </div>
 
         {/* Mobile */}
@@ -73,11 +106,22 @@ export function Navbar() {
                   </a>
                 ))}
                 <div className="my-3 h-px bg-border" />
-                <Button className="w-full" asChild>
-                  <a href="sms:+15738792529" onClick={() => setOpen(false)}>
-                    Text now
-                  </a>
-                </Button>
+                {SMS_GATEWAY_LIVE ? (
+                  <Button className="w-full" asChild>
+                    <a href={SMS_PHONE_HREF} onClick={() => setOpen(false)}>
+                      Text now
+                    </a>
+                  </Button>
+                ) : (
+                  <WaitlistModalButton
+                    className="w-full"
+                    label="Join waitlist"
+                    signedInLabel="You're in"
+                    showIcon={false}
+                    source="navbar_mobile"
+                    onClick={() => setOpen(false)}
+                  />
+                )}
               </div>
             </SheetContent>
           </Sheet>

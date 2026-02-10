@@ -1,5 +1,6 @@
 import React from "react"
 import type { Metadata, Viewport } from "next"
+import { ClerkProvider } from "@clerk/nextjs"
 import { Inter, JetBrains_Mono } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
@@ -18,6 +19,11 @@ export const metadata: Metadata = {
   title: "TXT CLAW — AI agent on a real phone number",
   description:
     "Text a real phone number. Get an AI that texts back. No app, no login. Your own dedicated AI agent over SMS.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/icon.png",
+  },
 }
 
 export const viewport: Viewport = {
@@ -32,19 +38,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const app = (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem
+      disableTransitionOnChange
+    >
+      {children}
+    </ThemeProvider>
+  )
+
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
+          <ClerkProvider>{app}</ClerkProvider>
+        ) : (
+          app
+        )}
       </body>
     </html>
   )
