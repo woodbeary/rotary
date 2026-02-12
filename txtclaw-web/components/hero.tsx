@@ -42,10 +42,6 @@ export function Hero() {
             <span className="text-muted-foreground">One text away.</span>
           </h1>
 
-          <div className="w-full lg:hidden">
-            <SmsDemo />
-          </div>
-
           <p className="hidden max-w-lg text-pretty text-lg leading-relaxed text-muted-foreground sm:text-xl lg:block">
             No download. No&nbsp;account. No&nbsp;learning&nbsp;curve.
           </p>
@@ -66,10 +62,21 @@ export function Hero() {
               </Button>
             </div>
           ) : (
-            <div className="flex w-full max-w-xl flex-col items-center">
-              <WaitlistInlineForm source="hero_inline" className="sm:max-w-xl" />
+            <div
+              id="waitlist-form"
+              className="flex w-full max-w-xl scroll-mt-28 flex-col items-center"
+            >
+              <WaitlistInlineForm
+                source="hero_inline"
+                prominent
+                className="sm:max-w-xl"
+              />
             </div>
           )}
+
+          <div className="w-full lg:hidden">
+            <SmsDemo />
+          </div>
 
           {SMS_GATEWAY_LIVE && (
             <p className="mt-1 font-mono text-xs text-muted-foreground/70">

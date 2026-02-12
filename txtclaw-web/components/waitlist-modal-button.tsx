@@ -3,13 +3,10 @@
 import { useEffect, useState } from "react"
 import type { ComponentProps, MouseEvent } from "react"
 import { ArrowRight } from "lucide-react"
-import { useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
-import { CLERK_ENABLED } from "@/lib/clerk-config"
-import {
-  getWaitlistSuccessRedirectUrl,
-  isWaitlistMarkedJoinedInBrowser,
-} from "@/lib/waitlist"
+import { isWaitlistMarkedJoinedInBrowser } from "@/lib/waitlist"
+
+const WAITLIST_FORM_ID = "waitlist-form"
 
 type WaitlistModalButtonProps = Omit<
   ComponentProps<typeof Button>,
@@ -30,7 +27,16 @@ function renderContent(text: string, showIcon: boolean) {
   )
 }
 
-function ClerkWaitlistModalButton({
+function scrollToWaitlistForm() {
+  const target = document.getElementById(WAITLIST_FORM_ID)
+  if (!target) return false
+
+  target.scrollIntoView({ behavior: "smooth", block: "start" })
+  window.history.replaceState({}, "", `/#${WAITLIST_FORM_ID}`)
+  return true
+}
+
+export function WaitlistModalButton({
   label = "Join Waitlist",
   signedInLabel = "You're on waitlist",
   source = "site",
@@ -38,8 +44,6 @@ function ClerkWaitlistModalButton({
   onClick,
   ...buttonProps
 }: WaitlistModalButtonProps) {
-  const clerk = useClerk()
-  const successRedirectUrl = getWaitlistSuccessRedirectUrl()
   const [alreadyJoined, setAlreadyJoined] = useState(false)
 
   useEffect(() => {
@@ -55,12 +59,7 @@ function ClerkWaitlistModalButton({
       window.removeEventListener("storage", syncJoinedState)
       window.removeEventListener("txtclaw:waitlist-joined", syncJoinedState)
     }
-  }, [clerk.user?.id])
-
-  const openWaitlistFallback = () => {
-    const params = new URLSearchParams({ source })
-    window.location.assign(`/waitlist?${params.toString()}`)
-  }
+  }, [])
 
   if (alreadyJoined) {
     return (
@@ -70,53 +69,29 @@ function ClerkWaitlistModalButton({
     )
   }
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    onClick?.(event)
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    onClick?.(event as unknown as MouseEvent<HTMLButtonElement>)
     if (event.defaultPrevented) return
 
-    try {
-      void Promise.resolve(
-        clerk.openWaitlist({
-          afterJoinWaitlistUrl: successRedirectUrl,
-        })
-      ).catch(() => {
-        openWaitlistFallback()
-      })
-    } catch {
-      openWaitlistFallback()
-    }
+    const isHomepage = window.location.pathname === "/"
+    if (!isHomepage) return
+
+    event.preventDefault()
+    if (scrollToWaitlistForm()) return
+
+    const params = new URLSearchParams({ source })
+    window.location.assign(`/waitlist?${params.toString()}`)
   }
 
   return (
-    <Button
-      type="button"
-      data-waitlist-source={source}
-      {...buttonProps}
-      onClick={handleClick}
-    >
-      {renderContent(label, showIcon)}
+    <Button asChild {...buttonProps}>
+      <a
+        href={`/#${WAITLIST_FORM_ID}`}
+        data-waitlist-source={source}
+        onClick={handleClick}
+      >
+        {renderContent(label, showIcon)}
+      </a>
     </Button>
   )
-}
-
-export function WaitlistModalButton(props: WaitlistModalButtonProps) {
-  const {
-    label = "Join Waitlist",
-    showIcon = true,
-    source = "site",
-    ...buttonProps
-  } = props
-  const params = new URLSearchParams({ source })
-
-  if (!CLERK_ENABLED) {
-    return (
-      <Button asChild {...buttonProps}>
-        <a href={`/waitlist?${params.toString()}`}>
-          {renderContent(label, showIcon)}
-        </a>
-      </Button>
-    )
-  }
-
-  return <ClerkWaitlistModalButton {...props} />
 }

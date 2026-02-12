@@ -1,7 +1,7 @@
 import { clerkClient } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
 
-const DEFAULT_INVITE_BATCH_SIZE = 25
+const DEFAULT_INVITE_BATCH_SIZE = 10
 const MAX_INVITE_BATCH_SIZE = 200
 
 export const runtime = "nodejs"
@@ -13,7 +13,10 @@ type InviteFailure = {
 }
 
 function parseInviteBatchSize() {
-  const raw = process.env.WAITLIST_INVITES_PER_HOUR?.trim()
+  const raw =
+    process.env.WAITLIST_INVITES_PER_RUN?.trim() ||
+    process.env.WAITLIST_INVITES_PER_DAY?.trim() ||
+    process.env.WAITLIST_INVITES_PER_HOUR?.trim()
   if (!raw) return DEFAULT_INVITE_BATCH_SIZE
 
   const parsed = Number(raw)
@@ -94,6 +97,7 @@ async function runWaitlistInviteBatch(request: NextRequest) {
       ok: failed.length === 0,
       dryRun: false,
       batchSize,
+      inviteCapPerRun: batchSize,
       selectedCount: entries.length,
       invitedCount,
       failedCount: failed.length,

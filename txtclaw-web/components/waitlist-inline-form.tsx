@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 type WaitlistInlineFormProps = {
   source?: string
   className?: string
+  prominent?: boolean
 }
 
 function normalizeEmail(value: string) {
@@ -22,6 +23,7 @@ function normalizeEmail(value: string) {
 export function WaitlistInlineForm({
   source = "inline_waitlist",
   className,
+  prominent = false,
 }: WaitlistInlineFormProps) {
   const [email, setEmail] = useState("")
   const [submitting, setSubmitting] = useState(false)
@@ -101,7 +103,7 @@ export function WaitlistInlineForm({
 
   return (
     <form
-      className={cn("w-full space-y-2 sm:max-w-xl", className)}
+      className={cn("w-full space-y-2.5 sm:max-w-xl", className)}
       onSubmit={onSubmit}
     >
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
@@ -113,13 +115,21 @@ export function WaitlistInlineForm({
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@icloud.com"
-          className="h-11 border-border/80 bg-background/70"
+          className={cn(
+            "border-border/80 bg-background/70",
+            prominent
+              ? "h-12 border-foreground/20 text-base shadow-sm sm:h-11"
+              : "h-11"
+          )}
           aria-label="Apple ID email"
         />
         <Button
           type="submit"
           disabled={!emailLooksValid || submitting}
-          className="h-11 gap-2 px-5"
+          className={cn(
+            "gap-2 px-5",
+            prominent ? "h-12 text-base sm:h-11 sm:text-sm" : "h-11"
+          )}
         >
           {submitting ? "Joining..." : "Join waitlist"}
           <ArrowRight className="h-4 w-4" />

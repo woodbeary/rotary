@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/navbar"
 import { Hero } from "@/components/hero"
-import { TrustBadges } from "@/components/trust-badges"
+import { AppleProofSection } from "@/components/apple-proof-section"
 import { HowItWorks } from "@/components/how-it-works"
 import { Features } from "@/components/features"
 import { Pricing } from "@/components/pricing"
@@ -13,7 +13,7 @@ export default function Page() {
       <Navbar />
       <main>
         <Hero />
-        <TrustBadges />
+        <AppleProofSection />
         <HowItWorks />
         <Features />
         <Pricing />

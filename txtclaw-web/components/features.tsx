@@ -7,6 +7,7 @@ import {
   Lock,
   Smartphone,
 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { cn } from "@/lib/utils"
 
@@ -88,6 +89,11 @@ export function Features() {
               <h3 className="text-base font-semibold text-foreground">
                 {feature.title}
               </h3>
+              {feature.title === "Real phone number" ? (
+                <Badge variant="secondary" className="w-fit font-mono text-[10px] uppercase">
+                  Coming soon
+                </Badge>
+              ) : null}
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {feature.description}
               </p>

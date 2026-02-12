@@ -23,14 +23,14 @@ export default function WaitlistSuccessPage() {
             You&apos;re on the list
           </h1>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            You&apos;re queued for Apple beta invites. We&apos;ll send rollout
-            updates as each batch opens.
+            You&apos;re on the Apple beta waitlist. We&apos;ll send updates as new
+            invite batches open.
           </p>
 
           <div className="mt-8 space-y-3 rounded-xl border border-border/60 bg-muted/20 p-5 text-sm">
             <p className="font-medium text-foreground">What happens next:</p>
             <p className="text-muted-foreground">
-              1) We queue your waitlist entry for the next invite batch.
+              1) Your waitlist signup is confirmed for the next invite batch.
             </p>
             <p className="text-muted-foreground">
               2) We send invite instructions to your waitlist email.
