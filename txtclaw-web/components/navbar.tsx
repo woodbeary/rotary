@@ -5,7 +5,6 @@ import Image from "next/image"
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { WaitlistModalButton } from "@/components/waitlist-modal-button"
 import { SMS_GATEWAY_LIVE, SMS_PHONE_HREF } from "@/lib/launch"
 import {
   Sheet,
@@ -18,9 +17,6 @@ const links = [
   { href: "#how", label: "How it works" },
   { href: "#features", label: "Features" },
   { href: "#pricing", label: "Pricing" },
-  { href: "/api-reference", label: "API Docs" },
-  { href: "/changelog", label: "Changelog" },
-  { href: "/waitlist", label: "Waitlist" },
 ]
 
 export function Navbar() {
@@ -63,21 +59,18 @@ export function Navbar() {
               {link.label}
             </a>
           ))}
+          <a
+            href="/api-reference"
+            className="ml-1 inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:border-foreground/25 hover:text-foreground"
+          >
+            View API Docs
+          </a>
           <div className="mx-2 h-4 w-px bg-border" />
           <ThemeToggle />
-          {SMS_GATEWAY_LIVE ? (
+          {SMS_GATEWAY_LIVE && (
             <Button size="sm" className="ml-1" asChild>
               <a href={SMS_PHONE_HREF}>Text now</a>
             </Button>
-          ) : (
-            <WaitlistModalButton
-              size="sm"
-              className="ml-1"
-              label="Join waitlist"
-              signedInLabel="You're in"
-              showIcon={false}
-              source="navbar_desktop"
-            />
           )}
         </div>
 
@@ -105,22 +98,20 @@ export function Navbar() {
                     {link.label}
                   </a>
                 ))}
+                <a
+                  href="/api-reference"
+                  onClick={() => setOpen(false)}
+                  className="mt-1 inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:border-foreground/25 hover:text-foreground"
+                >
+                  View API Docs
+                </a>
                 <div className="my-3 h-px bg-border" />
-                {SMS_GATEWAY_LIVE ? (
+                {SMS_GATEWAY_LIVE && (
                   <Button className="w-full" asChild>
                     <a href={SMS_PHONE_HREF} onClick={() => setOpen(false)}>
                       Text now
                     </a>
                   </Button>
-                ) : (
-                  <WaitlistModalButton
-                    className="w-full"
-                    label="Join waitlist"
-                    signedInLabel="You're in"
-                    showIcon={false}
-                    source="navbar_mobile"
-                    onClick={() => setOpen(false)}
-                  />
                 )}
               </div>
             </SheetContent>

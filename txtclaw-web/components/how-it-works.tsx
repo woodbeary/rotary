@@ -48,21 +48,21 @@ export function HowItWorks() {
           number: "01",
           title: "Join the waitlist",
           description:
-            "Reserve early access while we finish launch approvals.",
+            "Join the invite-only Apple beta waitlist. Use your Apple ID / iCloud email for invite matching.",
         },
         {
           icon: Handshake,
           number: "02",
-          title: "Get early invite",
+          title: "Get approved in batches",
           description:
-            "We invite waitlist members in batches as soon as launch goes live.",
+            "We roll out in controlled waves to harden reliability and support quality during private beta.",
         },
         {
           icon: Smartphone,
           number: "03",
-          title: "Claim your number",
+          title: "Chat on Apple",
           description:
-            "Pick your dedicated US phone number and start your private agent setup.",
+            "Activate and start using your private TXT CLAW agent directly in your Apple chat app (your phone number stays private).",
         },
         {
           icon: Settings,
@@ -78,7 +78,7 @@ export function HowItWorks() {
       <div className="mx-auto max-w-6xl">
         <div
           className={cn(
-            "mb-14 max-w-lg opacity-0",
+            "mb-14 max-w-xl opacity-0",
             isVisible && "animate-fade-up"
           )}
         >
@@ -88,6 +88,9 @@ export function HowItWorks() {
           <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Four texts to your own AI.
           </h2>
+          <p className="mt-4 text-muted-foreground">
+            Get an AI that remembers you, browses the web for you, and handles tasks — all from your normal texting app.
+          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

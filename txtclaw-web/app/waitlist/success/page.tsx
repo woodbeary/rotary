@@ -5,7 +5,7 @@ import { WaitlistSuccessFlag } from "@/components/waitlist-success-flag"
 
 export const metadata: Metadata = {
   title: "You're on the waitlist — TXT CLAW",
-  description: "Waitlist signup complete. Next steps for TXT CLAW API early access.",
+  description: "Waitlist signup complete. Next steps for TXT CLAW Apple beta access.",
 }
 
 export default function WaitlistSuccessPage() {
@@ -23,20 +23,20 @@ export default function WaitlistSuccessPage() {
             You&apos;re on the list
           </h1>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            Your handle is reserved. We&apos;ll send a rollout update when your
-            private beta batch opens.
+            You&apos;re queued for Apple beta invites. We&apos;ll send rollout
+            updates as each batch opens.
           </p>
 
           <div className="mt-8 space-y-3 rounded-xl border border-border/60 bg-muted/20 p-5 text-sm">
             <p className="font-medium text-foreground">What happens next:</p>
             <p className="text-muted-foreground">
-              1) We review your signup and queue your handle.
+              1) We queue your waitlist entry for the next invite batch.
             </p>
             <p className="text-muted-foreground">
-              2) You receive invite instructions when your batch opens.
+              2) We send invite instructions to your waitlist email.
             </p>
             <p className="text-muted-foreground">
-              3) You can start with API docs and a provisioning sandbox flow.
+              3) You activate and begin chatting in the Apple beta thread.
             </p>
           </div>
 

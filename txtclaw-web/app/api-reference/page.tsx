@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowLeft, BookOpen, Rocket } from "lucide-react"
-import { WaitlistModalButton } from "@/components/waitlist-modal-button"
 
 export const metadata: Metadata = {
   title: "API Reference — TXT CLAW",
@@ -81,11 +80,9 @@ export default function ApiReferencePage() {
             </div>
           </div>
 
-          <WaitlistModalButton
-            className="mt-8"
-            variant="outline"
-            source="api_reference"
-          />
+          <p className="mt-8 text-sm text-muted-foreground">
+            API access announcements will be posted as rollout expands.
+          </p>
         </div>
       </div>
     </main>

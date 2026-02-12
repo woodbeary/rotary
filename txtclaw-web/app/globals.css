@@ -141,6 +141,24 @@
   }
 }
 
+@keyframes logo-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes logo-marquee-reverse {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 .animate-fade-up {
   animation: fade-up 0.6s ease-out both;
 }
@@ -159,4 +177,22 @@
 
 .animate-pulse-soft {
   animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-logo-marquee {
+  animation: logo-marquee var(--marquee-duration, 34s) linear infinite;
+  will-change: transform;
+}
+
+.animate-logo-marquee-reverse {
+  animation: logo-marquee-reverse var(--marquee-duration, 38s) linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-logo-marquee,
+  .animate-logo-marquee-reverse {
+    animation: none;
+    transform: none;
+  }
 }

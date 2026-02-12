@@ -5,6 +5,7 @@ import type { ComponentProps, MouseEvent } from "react"
 import { ArrowRight } from "lucide-react"
 import { useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
+import { CLERK_ENABLED } from "@/lib/clerk-config"
 import {
   getWaitlistSuccessRedirectUrl,
   isWaitlistMarkedJoinedInBrowser,
@@ -20,7 +21,16 @@ type WaitlistModalButtonProps = Omit<
   showIcon?: boolean
 }
 
-export function WaitlistModalButton({
+function renderContent(text: string, showIcon: boolean) {
+  return (
+    <>
+      {text}
+      {showIcon && <ArrowRight className="h-4 w-4" />}
+    </>
+  )
+}
+
+function ClerkWaitlistModalButton({
   label = "Join Waitlist",
   signedInLabel = "You're on waitlist",
   source = "site",
@@ -29,16 +39,12 @@ export function WaitlistModalButton({
   ...buttonProps
 }: WaitlistModalButtonProps) {
   const clerk = useClerk()
-  const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
   const successRedirectUrl = getWaitlistSuccessRedirectUrl()
   const [alreadyJoined, setAlreadyJoined] = useState(false)
 
   useEffect(() => {
-    if (!clerkEnabled) return
-
     const syncJoinedState = () => {
-      const signedIn = Boolean(clerk.user?.id)
-      setAlreadyJoined(signedIn || isWaitlistMarkedJoinedInBrowser())
+      setAlreadyJoined(isWaitlistMarkedJoinedInBrowser())
     }
 
     syncJoinedState()
@@ -49,32 +55,17 @@ export function WaitlistModalButton({
       window.removeEventListener("storage", syncJoinedState)
       window.removeEventListener("txtclaw:waitlist-joined", syncJoinedState)
     }
-  }, [clerk.user?.id, clerkEnabled])
+  }, [clerk.user?.id])
 
   const openWaitlistFallback = () => {
     const params = new URLSearchParams({ source })
     window.location.assign(`/waitlist?${params.toString()}`)
   }
 
-  const content = (text: string) => (
-    <>
-      {text}
-      {showIcon && <ArrowRight className="h-4 w-4" />}
-    </>
-  )
-
-  if (!clerkEnabled) {
-    return (
-      <Button asChild {...buttonProps}>
-        <a href="/waitlist">{content(label)}</a>
-      </Button>
-    )
-  }
-
   if (alreadyJoined) {
     return (
       <Button type="button" disabled {...buttonProps}>
-        {content(signedInLabel)}
+        {renderContent(signedInLabel, showIcon)}
       </Button>
     )
   }
@@ -103,7 +94,29 @@ export function WaitlistModalButton({
       {...buttonProps}
       onClick={handleClick}
     >
-      {content(label)}
+      {renderContent(label, showIcon)}
     </Button>
   )
+}
+
+export function WaitlistModalButton(props: WaitlistModalButtonProps) {
+  const {
+    label = "Join Waitlist",
+    showIcon = true,
+    source = "site",
+    ...buttonProps
+  } = props
+  const params = new URLSearchParams({ source })
+
+  if (!CLERK_ENABLED) {
+    return (
+      <Button asChild {...buttonProps}>
+        <a href={`/waitlist?${params.toString()}`}>
+          {renderContent(label, showIcon)}
+        </a>
+      </Button>
+    )
+  }
+
+  return <ClerkWaitlistModalButton {...props} />
 }

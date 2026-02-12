@@ -22,13 +22,28 @@ export function CTA() {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-foreground/[0.02] to-transparent" />
 
         <div className="relative flex flex-col items-center gap-6 p-10 text-center md:p-16">
+          {!SMS_GATEWAY_LIVE && (
+            <div className="mb-1 max-w-2xl text-center">
+              <p className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Why Apple first
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                We are launching on Apple first for a tighter privacy and reliability baseline, then expanding to broader channels after beta hardening.
+              </p>
+            </div>
+          )}
+          {!SMS_GATEWAY_LIVE && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-medium text-foreground/90">
+              Apple beta
+            </div>
+          )}
           <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            {SMS_GATEWAY_LIVE ? "Ready? Just text it." : "Launching soon"}
+            {SMS_GATEWAY_LIVE ? "Ready? Just text it." : "Apple beta is open"}
           </h2>
           <p className="max-w-md text-muted-foreground">
             {SMS_GATEWAY_LIVE
-              ? "No sign-up form. No app store. Send a text and meet your AI."
-              : "Join the waitlist and get first access when TXT CLAW goes live."}
+              ? "No sign-up form. No app store. Message it and meet your AI."
+              : "Join the invite-only Apple beta waitlist. Use your Apple ID email."}
           </p>
           {SMS_GATEWAY_LIVE ? (
             <Button size="lg" className="gap-2 font-mono text-sm" asChild>
@@ -40,7 +55,8 @@ export function CTA() {
           ) : (
             <WaitlistModalButton
               size="lg"
-              className="gap-2 font-mono text-sm"
+              variant="default"
+              className="gap-2 font-mono text-sm !text-primary-foreground"
               source="cta_section"
             />
           )}

@@ -1,19 +1,13 @@
 import React from "react"
 import type { Metadata, Viewport } from "next"
 import { ClerkProvider } from "@clerk/nextjs"
-import { Inter, JetBrains_Mono } from "next/font/google"
+import { GeistPixelGrid, GeistPixelSquare } from "geist/font/pixel"
 import { ThemeProvider } from "@/components/theme-provider"
+import { CLERK_ENABLED } from "@/lib/clerk-config"
 import "./globals.css"
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-})
+const geistPixelSquare = GeistPixelSquare
+const geistPixelGrid = GeistPixelGrid
 
 export const metadata: Metadata = {
   title: "TXT CLAW — AI agent on a real phone number",
@@ -52,9 +46,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+        className={`${geistPixelSquare.variable} ${geistPixelGrid.variable} font-sans antialiased`}
       >
-        {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
+        {CLERK_ENABLED ? (
           <ClerkProvider>{app}</ClerkProvider>
         ) : (
           app

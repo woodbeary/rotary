@@ -1,10 +1,10 @@
 "use client"
 
-import { ArrowRight, MessageCircle } from "lucide-react"
+import { MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { SmsDemo } from "@/components/sms-demo"
-import { WaitlistModalButton } from "@/components/waitlist-modal-button"
+import { WaitlistInlineForm } from "@/components/waitlist-inline-form"
 import {
   SMS_GATEWAY_LIVE,
   SMS_PHONE_DISPLAY,
@@ -23,13 +23,17 @@ export function Hero() {
         {/* Left: Copy */}
         <div className="flex max-w-2xl flex-1 flex-col items-center gap-5 text-center lg:items-start lg:text-left">
           <Badge variant="secondary" className="gap-2 px-3.5 py-1.5 text-sm font-normal">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            </span>
+            {SMS_GATEWAY_LIVE ? (
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+            ) : (
+              <span className="h-2 w-2 rounded-full bg-amber-400" />
+            )}
             {SMS_GATEWAY_LIVE
               ? "Live — try it right now"
-              : "Launching soon — claim your @handle"}
+              : "Apple beta — invite required"}
           </Badge>
 
           <h1 className="text-balance text-[2.5rem] font-bold leading-[1.1] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
@@ -38,42 +42,34 @@ export function Hero() {
             <span className="text-muted-foreground">One text away.</span>
           </h1>
 
-          <p className="max-w-lg text-pretty text-lg leading-relaxed text-muted-foreground sm:text-xl">
-            Send a text. Get an AI that remembers you, browses the web for you,
-            and handles tasks&nbsp;&mdash; all from your normal texting&nbsp;app.
+          <div className="w-full lg:hidden">
+            <SmsDemo />
+          </div>
+
+          <p className="hidden max-w-lg text-pretty text-lg leading-relaxed text-muted-foreground sm:text-xl lg:block">
             No download. No&nbsp;account. No&nbsp;learning&nbsp;curve.
           </p>
 
           <p className="max-w-lg text-sm text-muted-foreground">
             {SMS_GATEWAY_LIVE
               ? "Free to try · Takes 5 seconds"
-              : "Waitlist open · Claim your @handle"}
+              : "Invite-only Apple beta · Use your Apple ID email"}
           </p>
 
-          <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-4">
-            {SMS_GATEWAY_LIVE ? (
+          {SMS_GATEWAY_LIVE ? (
+            <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-4">
               <Button size="lg" className="w-full gap-2.5 text-base sm:w-auto" asChild>
                 <a href={SMS_PHONE_HREF}>
                   <MessageCircle className="h-5 w-5" />
                   {`Text ${SMS_PHONE_DISPLAY}`}
                 </a>
               </Button>
-            ) : (
-              <WaitlistModalButton
-                size="lg"
-                className="w-full gap-2.5 text-base sm:w-auto"
-                label="Claim @handle"
-                signedInLabel="Handle reserved"
-                source="hero_primary"
-              />
-            )}
-            <Button size="lg" variant="outline" className="w-full gap-2.5 text-base sm:w-auto" asChild>
-              <a href="/api-reference">
-                View API Docs
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
+            </div>
+          ) : (
+            <div className="flex w-full max-w-xl flex-col items-center">
+              <WaitlistInlineForm source="hero_inline" className="sm:max-w-xl" />
+            </div>
+          )}
 
           {SMS_GATEWAY_LIVE && (
             <p className="mt-1 font-mono text-xs text-muted-foreground/70">
@@ -83,7 +79,7 @@ export function Hero() {
         </div>
 
         {/* Right: SMS Demo */}
-        <div className="w-full max-w-sm shrink-0 lg:max-w-md">
+        <div className="hidden w-full max-w-sm shrink-0 lg:block lg:max-w-md">
           <SmsDemo />
         </div>
       </div>
