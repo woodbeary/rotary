@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/navbar"
 import { Hero } from "@/components/hero"
+import { LifestyleHighlights } from "@/components/lifestyle-highlights"
 import { AppleProofSection } from "@/components/apple-proof-section"
 import { HowItWorks } from "@/components/how-it-works"
 import { Features } from "@/components/features"
@@ -13,6 +14,7 @@ export default function Page() {
       <Navbar />
       <main>
         <Hero />
+        <LifestyleHighlights />
         <AppleProofSection />
         <HowItWorks />
         <Features />

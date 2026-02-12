@@ -6,6 +6,7 @@ import {
   KeyRound,
   Lock,
   Smartphone,
+  Watch,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
@@ -41,6 +42,12 @@ const features = [
     title: "Privacy-first",
     description:
       "No unsolicited messages. No data selling. Cancel anytime. Export everything.",
+  },
+  {
+    icon: Watch,
+    title: "Apple Watch ready",
+    description:
+      "Your assistant lives in Messages, so it follows you across iPhone, iPad, Mac, and Apple Watch.",
   },
 ]
 
