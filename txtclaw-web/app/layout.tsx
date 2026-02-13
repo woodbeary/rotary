@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     siteName: "TXT CLAW",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/opengraph.png",
         width: 1200,
         height: 630,
         alt: "TXT CLAW",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     title: "TXT CLAW — AI agent on a real phone number",
     description:
       "Text a real phone number. Get an AI that texts back. No app, no login. Your own dedicated AI agent over SMS.",
-    images: ["/opengraph-image"],
+    images: ["/opengraph.png"],
   },
   icons: {
     icon: "/favicon.ico",

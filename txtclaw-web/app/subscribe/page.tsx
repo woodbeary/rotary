@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react"
 import { SubscribePanel } from "@/components/subscribe-panel"
 import { CLERK_ENABLED } from "@/lib/clerk-config"
 import { getUserBetaState, getUserOfferCode } from "@/lib/billing"
+import { getPromotionsMetadata } from "@/lib/promo-metadata"
 
 export const dynamic = "force-dynamic"
 
@@ -76,6 +77,7 @@ export default async function SubscribePage() {
 
   const betaState = getUserBetaState(user)
   const offerCode = getUserOfferCode(user)
+  const promotions = getPromotionsMetadata(user)
 
   return (
     <main className="min-h-screen bg-background">
@@ -92,6 +94,8 @@ export default async function SubscribePage() {
           email={primaryEmail}
           betaState={betaState}
           offerCode={offerCode}
+          promoBalanceCents={promotions.balanceCents}
+          promoTotalGrantedCents={promotions.totalGrantedCents}
         />
       </div>
     </main>

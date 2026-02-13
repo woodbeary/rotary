@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "codes:generate": "node scripts/generate-launch-codes.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.3",

@@ -1,16 +1,19 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { type FormEvent, useEffect, useMemo, useState } from "react"
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 type SubscribePanelProps = {
   email?: string
   betaState?: string
   offerCode?: string
+  promoBalanceCents?: number
+  promoTotalGrantedCents?: number
 }
 
 type LaunchStatsPayload = {
@@ -27,6 +30,17 @@ type CheckoutResponse = {
   error?: string
 }
 
+type PromoRedeemResponse = {
+  ok?: boolean
+  applied?: boolean
+  idempotent?: boolean
+  grantCents?: number
+  balanceCents?: number
+  totalGrantedCents?: number
+  message?: string
+  error?: string
+}
+
 const DEFAULT_STATS = {
   earlyBirdClaimed: 0,
   earlyBirdCap: 100,
@@ -34,15 +48,32 @@ const DEFAULT_STATS = {
   ltdCap: 10,
 }
 
+function toUsd(cents: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(cents / 100)
+}
+
 export function SubscribePanel({
   email,
   betaState,
   offerCode,
+  promoBalanceCents = 0,
+  promoTotalGrantedCents = 0,
 }: SubscribePanelProps) {
   const [stats, setStats] = useState(DEFAULT_STATS)
   const [loadingStats, setLoadingStats] = useState(true)
   const [loadingType, setLoadingType] = useState<"monthly" | "ltd" | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [promoCodeInput, setPromoCodeInput] = useState("")
+  const [promoBalance, setPromoBalance] = useState(Math.max(promoBalanceCents, 0))
+  const [promoTotalGranted, setPromoTotalGranted] = useState(
+    Math.max(promoTotalGrantedCents, 0)
+  )
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoError, setPromoError] = useState<string | null>(null)
+  const [promoNotice, setPromoNotice] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -96,10 +127,21 @@ export function SubscribePanel({
     }
   }, [])
 
+  useEffect(() => {
+    setPromoBalance(Math.max(promoBalanceCents, 0))
+    setPromoTotalGranted(Math.max(promoTotalGrantedCents, 0))
+  }, [promoBalanceCents, promoTotalGrantedCents])
+
   const earlyBirdRemaining = Math.max(stats.earlyBirdCap - stats.earlyBirdClaimed, 0)
   const ltdRemaining = Math.max(stats.ltdCap - stats.ltdClaimed, 0)
   const monthlyPrice = earlyBirdRemaining > 0 ? "$16/mo" : "$19/mo"
   const monthlyTag = earlyBirdRemaining > 0 ? "Early bird" : "Standard"
+  const normalizedPromoCode = promoCodeInput.trim().toUpperCase()
+  const promoBalanceLabel = useMemo(() => toUsd(promoBalance), [promoBalance])
+  const promoTotalGrantedLabel = useMemo(
+    () => toUsd(promoTotalGranted),
+    [promoTotalGranted]
+  )
 
   const alreadyPaid =
     betaState === "paid_waiting_apple_invite" || betaState === "apple_invited"
@@ -148,6 +190,61 @@ export function SubscribePanel({
     }
   }
 
+  const redeemPromoCode = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!normalizedPromoCode || promoLoading) return
+
+    setPromoLoading(true)
+    setPromoError(null)
+    setPromoNotice(null)
+
+    try {
+      const response = await fetch("/api/promo/redeem", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: normalizedPromoCode,
+        }),
+      })
+
+      const payload = (await response.json().catch(() => null)) as
+        | PromoRedeemResponse
+        | null
+
+      if (!response.ok || !payload?.ok) {
+        throw new Error(payload?.error || "Unable to redeem code.")
+      }
+
+      if (typeof payload.balanceCents === "number") {
+        setPromoBalance(Math.max(payload.balanceCents, 0))
+      }
+      if (typeof payload.totalGrantedCents === "number") {
+        setPromoTotalGranted(Math.max(payload.totalGrantedCents, 0))
+      }
+
+      if (payload.message) {
+        setPromoNotice(payload.message)
+      } else if (payload.idempotent) {
+        setPromoNotice("Code already redeemed on this account.")
+      } else {
+        const granted = typeof payload.grantCents === "number" ? payload.grantCents : 0
+        setPromoNotice(`Code redeemed. ${toUsd(granted)} added to usage credits.`)
+      }
+
+      setPromoCodeInput("")
+    } catch (redeemError) {
+      setPromoError(
+        redeemError instanceof Error
+          ? redeemError.message
+          : "Unable to redeem code."
+      )
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+
   return (
     <div className="grid gap-6">
       <div className="rounded-xl border border-border/60 bg-card p-5 md:p-6">
@@ -175,6 +272,55 @@ export function SubscribePanel({
           </p>
         ) : null}
       </div>
+
+      <Card className="border-foreground/15">
+        <CardHeader>
+          <CardTitle className="text-xl">Redeem launch credit code</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
+            <p className="text-xs text-muted-foreground">Usage credit balance</p>
+            <p className="mt-1 text-3xl font-bold text-foreground">{promoBalanceLabel}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Total granted to this account: {promoTotalGrantedLabel}
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Credits apply to usage budget; subscription checkout is unchanged.
+          </p>
+          <form className="space-y-3" onSubmit={redeemPromoCode}>
+            <Input
+              value={promoCodeInput}
+              onChange={(event) => setPromoCodeInput(event.target.value)}
+              placeholder="TXT100-XXXXXXXXXXXX-XXXXXXXX"
+              className="font-mono uppercase"
+              maxLength={40}
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+            />
+            <Button
+              type="submit"
+              variant="secondary"
+              className="w-full gap-2 md:w-auto"
+              disabled={!normalizedPromoCode || promoLoading}
+            >
+              {promoLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Redeeming...
+                </>
+              ) : (
+                "Redeem code"
+              )}
+            </Button>
+          </form>
+          {promoNotice ? (
+            <p className="text-sm text-emerald-300">{promoNotice}</p>
+          ) : null}
+          {promoError ? <p className="text-sm text-red-400">{promoError}</p> : null}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="border-foreground/15">
