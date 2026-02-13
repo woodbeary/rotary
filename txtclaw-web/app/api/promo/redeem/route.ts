@@ -2,10 +2,11 @@ import { auth, clerkClient, type User } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
 import { getUserPrivateMetadata } from "@/lib/billing"
 import {
-  PROMO_CODE_DEFAULT_CAMPAIGN_ID,
-  PROMO_CODE_DEFAULT_GRANT_CENTS,
-  parsePromoGrantCents,
-  parsePromoRedeemEnabled,
+  getPromoCampaignId,
+  getPromoGrantCents,
+  isPromoRedeemEnabled,
+} from "@/lib/promo-config"
+import {
   verifyPromoCode,
 } from "@/lib/promo-codes"
 import {
@@ -23,17 +24,6 @@ const LIST_USERS_MAX = 2000
 
 type RedeemPayload = {
   code?: string
-}
-
-function getCampaignId(): string {
-  return process.env.PROMO_CAMPAIGN_ID?.trim() || PROMO_CODE_DEFAULT_CAMPAIGN_ID
-}
-
-function getGrantCents(): number {
-  return parsePromoGrantCents(
-    process.env.PROMO_GRANT_CENTS,
-    PROMO_CODE_DEFAULT_GRANT_CENTS
-  )
 }
 
 async function listUsersForPromoScan(
@@ -81,7 +71,7 @@ function jsonError(message: string, status: number) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!parsePromoRedeemEnabled(process.env.PROMO_REDEEM_ENABLED)) {
+  if (!isPromoRedeemEnabled()) {
     return jsonError(
       "Promo code redemption is currently disabled. Try again later.",
       503
@@ -101,8 +91,8 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const campaignId = getCampaignId()
-  const grantCents = getGrantCents()
+  const campaignId = getPromoCampaignId()
+  const grantCents = getPromoGrantCents()
 
   let payload: RedeemPayload
   try {

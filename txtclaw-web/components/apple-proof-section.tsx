@@ -10,7 +10,7 @@ type Mockup = {
   alt: string
   width: number
   height: number
-  caption?: string
+  hiddenDescription?: string
 }
 
 type AppleFeature = {
@@ -50,14 +50,14 @@ const features: AppleFeature[] = [
       alt: "Apple Pay checkout iPhone mockup",
       width: 458,
       height: 926,
-      caption: "Apple Pay confirmation preview",
+      hiddenDescription: "Apple Pay confirmation preview",
     },
     secondary: {
       src: "/apple/purchase_opengraph.png",
       alt: "Messages commerce checkout iPhone mockup",
       width: 1440,
       height: 2944,
-      caption: "Checkout and payment preview",
+      hiddenDescription: "Checkout and payment preview",
     },
   },
   {
@@ -75,14 +75,14 @@ const features: AppleFeature[] = [
       alt: "AT&T sign-in iPhone mockup",
       width: 2586,
       height: 5336,
-      caption: "Sign-in prompt preview",
+      hiddenDescription: "Sign-in prompt preview",
     },
     secondary: {
       src: "/apple/T-Mobile.png",
       alt: "T-Mobile sign-in iPhone mockup",
       width: 738,
       height: 1491,
-      caption: "Verify account preview",
+      hiddenDescription: "Verify account preview",
     },
   },
   {
@@ -99,14 +99,14 @@ const features: AppleFeature[] = [
       alt: "Purchase complete with Sign up with Apple iPhone mockup",
       width: 536,
       height: 1162,
-      caption: "Purchase complete preview",
+      hiddenDescription: "Purchase complete preview",
     },
     secondary: {
       src: "/apple/flight.png",
       alt: "Travel and itinerary iPhone mockup",
       width: 1440,
       height: 2944,
-      caption: "Booking and itinerary preview",
+      hiddenDescription: "Booking and itinerary preview",
     },
   },
 ]
@@ -129,9 +129,9 @@ function phonePair(primary: Mockup, secondary: Mockup) {
               sizes="(max-width: 640px) 42vw, (max-width: 1024px) 34vw, 18vw"
             />
           </div>
-          {mock.caption ? (
-            <figcaption className="mt-2 text-xs text-muted-foreground">
-              {mock.caption}
+          {mock.hiddenDescription ? (
+            <figcaption className="sr-only">
+              {mock.hiddenDescription}
             </figcaption>
           ) : null}
         </figure>
