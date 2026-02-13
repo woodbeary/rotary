@@ -44,6 +44,12 @@ export default async function SubscribePage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
+                href="/sign-in"
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground hover:bg-accent"
+              >
+                Sign in
+              </Link>
+              <Link
                 href="/waitlist"
                 className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-accent"
               >

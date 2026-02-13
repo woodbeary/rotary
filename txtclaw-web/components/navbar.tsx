@@ -12,6 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { CLERK_ENABLED } from "@/lib/clerk-config"
 
 const links = [
   { href: "#how", label: "How it works" },
@@ -63,6 +64,14 @@ export function Navbar() {
           >
             View API Docs
           </a>
+          {CLERK_ENABLED ? (
+            <a
+              href="/sign-in"
+              className="ml-1 inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:border-foreground/25 hover:text-foreground"
+            >
+              Sign in
+            </a>
+          ) : null}
           <div className="mx-2 h-4 w-px bg-border" />
           <ThemeToggle />
           {SMS_GATEWAY_LIVE && (
@@ -103,6 +112,15 @@ export function Navbar() {
                 >
                   View API Docs
                 </a>
+                {CLERK_ENABLED ? (
+                  <a
+                    href="/sign-in"
+                    onClick={() => setOpen(false)}
+                    className="mt-2 inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:border-foreground/25 hover:text-foreground"
+                  >
+                    Sign in
+                  </a>
+                ) : null}
                 <div className="my-3 h-px bg-border" />
                 {SMS_GATEWAY_LIVE && (
                   <Button className="w-full" asChild>
