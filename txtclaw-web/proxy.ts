@@ -1,6 +1,14 @@
-import { clerkMiddleware } from "@clerk/nextjs/server"
+import type { NextFetchEvent, NextRequest } from "next/server"
+import { NextResponse } from "next/server"
+import { CLERK_ENABLED } from "@/lib/clerk-config"
 
-export default clerkMiddleware()
+export default async function middleware(request: NextRequest, event: NextFetchEvent) {
+  if (!CLERK_ENABLED) return NextResponse.next()
+
+  const { clerkMiddleware } = await import("@clerk/nextjs/server")
+  const handler = clerkMiddleware()
+  return handler(request, event)
+}
 
 export const config = {
   matcher: [

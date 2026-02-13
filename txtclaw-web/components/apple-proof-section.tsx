@@ -10,6 +10,7 @@ type Mockup = {
   alt: string
   width: number
   height: number
+  caption?: string
 }
 
 type AppleFeature = {
@@ -49,12 +50,14 @@ const features: AppleFeature[] = [
       alt: "Apple Pay checkout iPhone mockup",
       width: 458,
       height: 926,
+      caption: "Apple Pay confirmation preview",
     },
     secondary: {
       src: "/apple/purchase_opengraph.png",
       alt: "Messages commerce checkout iPhone mockup",
       width: 1440,
       height: 2944,
+      caption: "Checkout and payment preview",
     },
   },
   {
@@ -72,12 +75,14 @@ const features: AppleFeature[] = [
       alt: "AT&T sign-in iPhone mockup",
       width: 2586,
       height: 5336,
+      caption: "Sign-in prompt preview",
     },
     secondary: {
       src: "/apple/T-Mobile.png",
       alt: "T-Mobile sign-in iPhone mockup",
       width: 738,
       height: 1491,
+      caption: "Verify account preview",
     },
   },
   {
@@ -94,12 +99,14 @@ const features: AppleFeature[] = [
       alt: "Purchase complete with Sign up with Apple iPhone mockup",
       width: 536,
       height: 1162,
+      caption: "Purchase complete preview",
     },
     secondary: {
       src: "/apple/flight.png",
       alt: "Travel and itinerary iPhone mockup",
       width: 1440,
       height: 2944,
+      caption: "Booking and itinerary preview",
     },
   },
 ]
@@ -107,30 +114,28 @@ const features: AppleFeature[] = [
 function phonePair(primary: Mockup, secondary: Mockup) {
   return (
     <div className="grid grid-cols-2 items-end gap-3 sm:gap-4">
-      <div className="rounded-2xl border border-border/60 bg-card/80 p-2 shadow-sm sm:p-3">
-        <div className="flex h-[220px] items-end justify-center sm:h-[300px] lg:h-[340px]">
-          <Image
-            src={primary.src}
-            alt={primary.alt}
-            width={primary.width}
-            height={primary.height}
-            className="h-full w-auto"
-            sizes="(max-width: 640px) 42vw, (max-width: 1024px) 34vw, 21vw"
-          />
-        </div>
-      </div>
-      <div className="rounded-2xl border border-border/60 bg-card/80 p-2 shadow-sm sm:p-3">
-        <div className="flex h-[220px] items-end justify-center sm:h-[300px] lg:h-[340px]">
-          <Image
-            src={secondary.src}
-            alt={secondary.alt}
-            width={secondary.width}
-            height={secondary.height}
-            className="h-full w-auto"
-            sizes="(max-width: 640px) 42vw, (max-width: 1024px) 34vw, 21vw"
-          />
-        </div>
-      </div>
+      {[primary, secondary].map((mock, idx) => (
+        <figure
+          key={`${mock.src}-${idx}`}
+          className="rounded-2xl border border-border/60 bg-card/80 p-2 shadow-sm sm:p-3"
+        >
+          <div className="flex h-[220px] items-end justify-center sm:h-[260px] lg:h-[240px] xl:h-[260px]">
+            <Image
+              src={mock.src}
+              alt={mock.alt}
+              width={mock.width}
+              height={mock.height}
+              className="h-full w-auto"
+              sizes="(max-width: 640px) 42vw, (max-width: 1024px) 34vw, 18vw"
+            />
+          </div>
+          {mock.caption ? (
+            <figcaption className="mt-2 text-xs text-muted-foreground">
+              {mock.caption}
+            </figcaption>
+          ) : null}
+        </figure>
+      ))}
     </div>
   )
 }
@@ -162,7 +167,7 @@ export function AppleProofSection() {
           </p>
         </div>
 
-        <div className="space-y-5">
+        <div className="grid gap-5 lg:grid-cols-3">
           {features.map((feature, index) => (
             <article
               key={feature.title}
@@ -172,35 +177,34 @@ export function AppleProofSection() {
               )}
               style={{ animationDelay: `${index * 80 + 100}ms` }}
             >
-              <div className="grid items-center gap-6 lg:grid-cols-12 lg:gap-10">
-                <div
-                  className={cn(
-                    "lg:col-span-5",
-                    index % 2 === 1 && "lg:order-2"
-                  )}
-                >
+              <div className="flex flex-col gap-4">
+                <div className="flex items-start justify-between gap-4">
                   <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
                     {feature.eyebrow}
                   </p>
-                  {feature.mark ? (
-                    <Image
-                      src={feature.mark.src}
-                      alt={feature.mark.alt}
-                      width={feature.mark.width}
-                      height={feature.mark.height}
-                      className="mt-2 h-6 w-auto"
-                    />
-                  ) : null}
                   {feature.badge === "passkey" ? (
-                    <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs text-muted-foreground">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] text-muted-foreground">
                       <KeyRound className="h-3.5 w-3.5" />
                       Passkey-ready
                     </div>
                   ) : null}
-                  <h3 className="mt-2 text-balance text-3xl font-semibold tracking-tight text-foreground">
+                </div>
+
+                {feature.mark ? (
+                  <Image
+                    src={feature.mark.src}
+                    alt={feature.mark.alt}
+                    width={feature.mark.width}
+                    height={feature.mark.height}
+                    className="h-6 w-auto"
+                  />
+                ) : null}
+
+                <div>
+                  <h3 className="text-balance text-2xl font-semibold tracking-tight text-foreground">
                     {feature.title}
                   </h3>
-                  <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     {feature.description}
                   </p>
                   <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
@@ -210,12 +214,7 @@ export function AppleProofSection() {
                   </ul>
                 </div>
 
-                <div
-                  className={cn(
-                    "rounded-2xl border border-border/60 bg-gradient-to-b from-[#f5f5f7] to-[#ececf0] p-3 dark:from-zinc-900/60 dark:to-zinc-900/20 lg:col-span-7 sm:p-4",
-                    index % 2 === 1 && "lg:order-1"
-                  )}
-                >
+                <div className="mt-2 rounded-2xl border border-border/60 bg-gradient-to-b from-[#f5f5f7] to-[#ececf0] p-3 dark:from-zinc-900/60 dark:to-zinc-900/20 sm:p-4">
                   {phonePair(feature.primary, feature.secondary)}
                 </div>
               </div>

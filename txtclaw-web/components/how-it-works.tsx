@@ -13,35 +13,30 @@ import { cn } from "@/lib/utils"
 const steps = [
   {
     icon: MessageSquare,
-    number: "01",
     title: "Join waitlist",
     description:
       "Join the Apple beta waitlist with your Apple ID email.",
   },
   {
     icon: MailCheck,
-    number: "02",
     title: "Get invited",
     description:
       "Invites are sent in daily batches as capacity opens.",
   },
   {
     icon: CreditCard,
-    number: "03",
     title: "Redeem code or continue to payment",
     description:
       "Use your activation code if you have one, otherwise continue with fixed-price checkout on web.",
   },
   {
     icon: ShieldCheck,
-    number: "04",
     title: "Receive Apple invite",
     description:
       "After payment, you'll receive your Apple invite instructions.",
   },
   {
     icon: Sparkles,
-    number: "05",
     title: "Start chatting",
     description:
       "First inbound message auto-activates your runtime and replies in-thread.",
@@ -61,10 +56,10 @@ export function HowItWorks() {
           )}
         >
           <p className="mb-3 font-mono text-sm text-muted-foreground">
-            How it works
+            Invite-only onboarding
           </p>
           <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            How onboarding works
+            Onboarding that stays out of your way.
           </h2>
           <p className="mt-4 text-muted-foreground">
             Get an AI that remembers you, browses the web for you, and handles tasks — all from your normal texting app.
@@ -74,7 +69,7 @@ export function HowItWorks() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
           {steps.map((step, i) => (
             <div
-              key={step.number}
+              key={step.title}
               className={cn(
                 "group relative flex flex-col gap-4 rounded-xl border border-border bg-card p-6 opacity-0 transition-colors hover:border-foreground/20",
                 isVisible && "animate-fade-up"
@@ -85,9 +80,6 @@ export function HowItWorks() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary transition-colors group-hover:bg-foreground/10">
                   <step.icon className="h-5 w-5 text-foreground" />
                 </div>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {step.number}
-                </span>
               </div>
               <h3 className="text-base font-semibold text-foreground">
                 {step.title}

@@ -96,7 +96,7 @@ export function WaitlistInlineForm({
           className
         )}
       >
-        You&apos;re on the Apple beta list. We&apos;ll invite in staged batches.
+        You&apos;re on the Apple beta list. You&apos;ll receive Apple invite instructions by email.
       </div>
     )
   }
