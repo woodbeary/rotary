@@ -1,5 +1,6 @@
 import { clerkClient } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -8,6 +9,9 @@ type JoinPayload = {
   email?: string
   source?: string
 }
+
+const WAITLIST_JOIN_RATE_LIMIT = 8
+const WAITLIST_JOIN_RATE_WINDOW_MS = 60_000
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase()
@@ -18,6 +22,28 @@ function isValidEmail(email: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request)
+  const rate = checkRateLimit({
+    key: `waitlist-join:${ip}`,
+    limit: WAITLIST_JOIN_RATE_LIMIT,
+    windowMs: WAITLIST_JOIN_RATE_WINDOW_MS,
+  })
+
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { ok: false, error: "Too many attempts. Please wait a minute and retry." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.max(
+            1,
+            Math.ceil((rate.resetAt - Date.now()) / 1000)
+          ).toString(),
+        },
+      }
+    )
+  }
+
   let payload: JoinPayload
 
   try {
@@ -92,4 +118,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

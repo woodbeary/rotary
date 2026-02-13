@@ -22,6 +22,7 @@ type LaunchStatsPayload = {
   earlyBirdCap?: number
   ltdClaimed?: number
   ltdCap?: number
+  waitlistCount?: number
   recentPaid?: Array<{ initial?: string; timestamp?: string }>
 }
 
@@ -30,6 +31,7 @@ const DEFAULT_STATS = {
   earlyBirdCap: 100,
   ltdClaimed: 0,
   ltdCap: 10,
+  waitlistCount: 0,
   recentPaid: [] as Array<{ initial: string; timestamp: string }>,
 }
 
@@ -73,6 +75,10 @@ export function Pricing() {
             typeof payload.ltdCap === "number"
               ? payload.ltdCap
               : DEFAULT_STATS.ltdCap,
+          waitlistCount:
+            typeof payload.waitlistCount === "number"
+              ? payload.waitlistCount
+              : DEFAULT_STATS.waitlistCount,
           recentPaid: Array.isArray(payload.recentPaid)
             ? payload.recentPaid
                 .map((entry) => ({
@@ -204,6 +210,8 @@ export function Pricing() {
               </div>
               <p className="text-xs text-muted-foreground">
                 Claimed: {stats.earlyBirdClaimed}/{stats.earlyBirdCap}
+                {" · "}
+                Waitlist: {stats.waitlistCount}
               </p>
             </CardFooter>
           </Card>
@@ -274,6 +282,8 @@ export function Pricing() {
               </div>
               <p className="text-xs text-muted-foreground">
                 Claimed: {stats.ltdClaimed}/{stats.ltdCap}
+                {" · "}
+                Waitlist: {stats.waitlistCount}
               </p>
             </CardFooter>
           </Card>

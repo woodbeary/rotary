@@ -14,9 +14,6 @@ type SubscribePanelProps = {
   offerCode?: string
   promoBalanceCents?: number
   promoTotalGrantedCents?: number
-  canGeneratePromoCodes?: boolean
-  promoCampaignId?: string
-  promoGrantCents?: number
 }
 
 type LaunchStatsPayload = {
@@ -25,6 +22,7 @@ type LaunchStatsPayload = {
   earlyBirdCap?: number
   ltdClaimed?: number
   ltdCap?: number
+  waitlistCount?: number
 }
 
 type CheckoutResponse = {
@@ -44,20 +42,12 @@ type PromoRedeemResponse = {
   error?: string
 }
 
-type PromoGenerateResponse = {
-  ok?: boolean
-  count?: number
-  codes?: string[]
-  campaignId?: string
-  grantCents?: number
-  error?: string
-}
-
 const DEFAULT_STATS = {
   earlyBirdClaimed: 0,
   earlyBirdCap: 100,
   ltdClaimed: 0,
   ltdCap: 10,
+  waitlistCount: 0,
 }
 
 function toUsd(cents: number) {
@@ -73,9 +63,6 @@ export function SubscribePanel({
   offerCode,
   promoBalanceCents = 0,
   promoTotalGrantedCents = 0,
-  canGeneratePromoCodes = false,
-  promoCampaignId,
-  promoGrantCents,
 }: SubscribePanelProps) {
   const [stats, setStats] = useState(DEFAULT_STATS)
   const [loadingStats, setLoadingStats] = useState(true)
@@ -89,12 +76,6 @@ export function SubscribePanel({
   const [promoLoading, setPromoLoading] = useState(false)
   const [promoError, setPromoError] = useState<string | null>(null)
   const [promoNotice, setPromoNotice] = useState<string | null>(null)
-  const [generateCountInput, setGenerateCountInput] = useState("10")
-  const [generatingCodes, setGeneratingCodes] = useState(false)
-  const [generatedCodes, setGeneratedCodes] = useState<string[]>([])
-  const [generateError, setGenerateError] = useState<string | null>(null)
-  const [generateNotice, setGenerateNotice] = useState<string | null>(null)
-  const [copyNotice, setCopyNotice] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -133,6 +114,10 @@ export function SubscribePanel({
             typeof payload.ltdCap === "number"
               ? payload.ltdCap
               : DEFAULT_STATS.ltdCap,
+          waitlistCount:
+            typeof payload.waitlistCount === "number"
+              ? payload.waitlistCount
+              : DEFAULT_STATS.waitlistCount,
         })
       } finally {
         if (!cancelled) {
@@ -162,10 +147,6 @@ export function SubscribePanel({
   const promoTotalGrantedLabel = useMemo(
     () => toUsd(promoTotalGranted),
     [promoTotalGranted]
-  )
-  const promoGrantLabel = useMemo(
-    () => toUsd(typeof promoGrantCents === "number" ? promoGrantCents : 0),
-    [promoGrantCents]
   )
 
   const alreadyPaid =
@@ -270,64 +251,6 @@ export function SubscribePanel({
     }
   }
 
-  const generatePromoCodes = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (generatingCodes) return
-
-    const parsed = Number(generateCountInput)
-    const count = Number.isFinite(parsed) ? Math.max(1, Math.min(200, Math.floor(parsed))) : 10
-
-    setGeneratingCodes(true)
-    setGenerateError(null)
-    setGenerateNotice(null)
-    setCopyNotice(null)
-
-    try {
-      const response = await fetch("/api/promo/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ count }),
-      })
-
-      const payload = (await response.json().catch(() => null)) as
-        | PromoGenerateResponse
-        | null
-
-      if (!response.ok || !payload?.ok || !Array.isArray(payload.codes)) {
-        throw new Error(payload?.error || "Unable to generate codes.")
-      }
-
-      setGeneratedCodes(payload.codes)
-      setGenerateCountInput(String(payload.count ?? payload.codes.length))
-      setGenerateNotice(`Generated ${payload.codes.length} code(s).`)
-    } catch (generateCodesError) {
-      setGeneratedCodes([])
-      setGenerateError(
-        generateCodesError instanceof Error
-          ? generateCodesError.message
-          : "Unable to generate codes."
-      )
-    } finally {
-      setGeneratingCodes(false)
-    }
-  }
-
-  const copyGeneratedCodes = async () => {
-    if (generatedCodes.length === 0) return
-    setCopyNotice(null)
-
-    try {
-      await navigator.clipboard.writeText(generatedCodes.join("\n"))
-      setCopyNotice("Copied codes to clipboard.")
-    } catch {
-      setCopyNotice(
-        "Clipboard copy failed on this device. You can still copy from the list below."
-      )
-    }
-  }
-
   return (
     <div className="grid gap-6">
       <div className="rounded-xl border border-border/60 bg-card p-5 md:p-6">
@@ -405,66 +328,6 @@ export function SubscribePanel({
         </CardContent>
       </Card>
 
-      {canGeneratePromoCodes ? (
-        <Card className="border-foreground/15">
-          <CardHeader>
-            <CardTitle className="text-xl">Generate launch codes (admin)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-xs text-muted-foreground">
-              Campaign: <span className="text-foreground">{promoCampaignId || "default"}</span>
-              {" · "}
-              Per-code credit: <span className="text-foreground">{promoGrantLabel}</span>
-            </p>
-
-            <form className="flex flex-col gap-3 sm:flex-row sm:items-center" onSubmit={generatePromoCodes}>
-              <Input
-                type="number"
-                min={1}
-                max={200}
-                value={generateCountInput}
-                onChange={(event) => setGenerateCountInput(event.target.value)}
-                className="sm:w-40"
-              />
-              <Button type="submit" variant="outline" disabled={generatingCodes}>
-                {generatingCodes ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  "Generate codes"
-                )}
-              </Button>
-            </form>
-
-            {generatedCodes.length > 0 ? (
-              <div className="space-y-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="w-full sm:w-auto"
-                  onClick={copyGeneratedCodes}
-                >
-                  Copy all codes
-                </Button>
-                <div className="max-h-56 overflow-auto rounded-md border border-border/60 bg-muted/20 p-3">
-                  <pre className="whitespace-pre-wrap break-all font-mono text-xs text-foreground">
-                    {generatedCodes.join("\n")}
-                  </pre>
-                </div>
-              </div>
-            ) : null}
-
-            {generateNotice ? (
-              <p className="text-sm text-emerald-300">{generateNotice}</p>
-            ) : null}
-            {copyNotice ? <p className="text-sm text-emerald-300">{copyNotice}</p> : null}
-            {generateError ? <p className="text-sm text-red-400">{generateError}</p> : null}
-          </CardContent>
-        </Card>
-      ) : null}
-
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="border-foreground/15">
           <CardHeader>
@@ -479,6 +342,8 @@ export function SubscribePanel({
             </div>
             <p className="text-sm text-muted-foreground">
               Early bird seats claimed: {stats.earlyBirdClaimed}/{stats.earlyBirdCap}
+              {" · "}
+              Waitlist: {stats.waitlistCount}
             </p>
             <p className="text-xs text-muted-foreground">
               {earlyBirdRemaining > 0
@@ -516,6 +381,8 @@ export function SubscribePanel({
             </div>
             <p className="text-sm text-muted-foreground">
               Lifetime seats claimed: {stats.ltdClaimed}/{stats.ltdCap}
+              {" · "}
+              Waitlist: {stats.waitlistCount}
             </p>
             <p className="text-xs text-muted-foreground">
               {ltdRemaining > 0

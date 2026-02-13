@@ -46,7 +46,7 @@ export function canUserGeneratePromoCodes(userId: string | null | undefined): bo
   if (!isPromoGenerateEnabled()) return false
 
   const adminUserIds = parseAdminUserIds(process.env.PROMO_ADMIN_USER_IDS)
-  if (adminUserIds.length === 0) return true
+  if (adminUserIds.length === 0) return false
 
   return adminUserIds.includes(userId)
 }
