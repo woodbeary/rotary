@@ -3,6 +3,7 @@
 import { ArrowRight, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { WaitlistModalButton } from "@/components/waitlist-modal-button"
+import { StreamText } from "@/components/stream-text"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { SMS_GATEWAY_LIVE, SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
 import { cn } from "@/lib/utils"
@@ -67,11 +68,15 @@ export function CTA() {
             <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
               {SMS_GATEWAY_LIVE ? "Ready? Just text it." : "Apple beta is open"}
             </h2>
-            <p className="max-w-md text-muted-foreground">
-              {SMS_GATEWAY_LIVE
-                ? "No sign-up form. No app store. Message it and meet your AI."
-                : "Join the invite-only Apple beta waitlist. Use your Apple ID email."}
-            </p>
+            <StreamText
+              className="max-w-md text-muted-foreground"
+              text={
+                SMS_GATEWAY_LIVE
+                  ? "No sign-up form. No app store. Message it and meet your AI."
+                  : "Join the invite-only Apple beta waitlist. Use your Apple ID email."
+              }
+              active={isVisible}
+            />
 
             {SMS_GATEWAY_LIVE ? (
               <Button size="lg" className="gap-2 font-mono text-sm" asChild>

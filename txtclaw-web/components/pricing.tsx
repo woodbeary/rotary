@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { ArrowRight, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { StreamText } from "@/components/stream-text"
 import {
   Card,
   CardContent,
@@ -144,9 +145,11 @@ export function Pricing() {
           <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Fixed launch pricing.
           </h2>
-          <p className="text-muted-foreground">
-            Website checkout only. No negotiation. Fixed launch pricing for early access.
-          </p>
+          <StreamText
+            className="text-muted-foreground"
+            text="Website checkout only. No negotiation. Fixed launch pricing for early access."
+            active={isVisible}
+          />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">

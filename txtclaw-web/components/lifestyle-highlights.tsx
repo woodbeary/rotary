@@ -2,6 +2,7 @@
 
 import { BellRing, Languages, MessageSquareText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { StreamText } from "@/components/stream-text"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { cn } from "@/lib/utils"
 
@@ -45,10 +46,11 @@ export function LifestyleHighlights() {
           <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Text is the interface everyone already knows.
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            TXT CLAW is designed for people who want an assistant, not another
-            app to learn.
-          </p>
+          <StreamText
+            className="mt-4 text-muted-foreground"
+            text="TXT CLAW is designed for people who want an assistant, not another app to learn."
+            active={isVisible}
+          />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -84,4 +86,3 @@ export function LifestyleHighlights() {
     </section>
   )
 }
-

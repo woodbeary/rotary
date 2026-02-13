@@ -1,7 +1,9 @@
 "use client"
 
 import Image from "next/image"
+import { useState } from "react"
 import { KeyRound } from "lucide-react"
+import { StreamText } from "@/components/stream-text"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { cn } from "@/lib/utils"
 
@@ -46,17 +48,17 @@ const features: AppleFeature[] = [
       height: 106,
     },
     primary: {
-      src: "/apple/Apple.png",
+      src: "/apple/Apple.webp",
       alt: "Apple Pay checkout iPhone mockup",
       width: 458,
       height: 926,
       hiddenDescription: "Apple Pay confirmation preview",
     },
     secondary: {
-      src: "/apple/purchase_opengraph.png",
+      src: "/apple/purchase_opengraph.webp",
       alt: "Messages commerce checkout iPhone mockup",
-      width: 1440,
-      height: 2944,
+      width: 900,
+      height: 1840,
       hiddenDescription: "Checkout and payment preview",
     },
   },
@@ -71,14 +73,14 @@ const features: AppleFeature[] = [
     ],
     badge: "passkey",
     primary: {
-      src: "/apple/AT&T.png",
+      src: "/apple/AT&T.webp",
       alt: "AT&T sign-in iPhone mockup",
-      width: 2586,
-      height: 5336,
+      width: 900,
+      height: 1858,
       hiddenDescription: "Sign-in prompt preview",
     },
     secondary: {
-      src: "/apple/T-Mobile.png",
+      src: "/apple/T-Mobile.webp",
       alt: "T-Mobile sign-in iPhone mockup",
       width: 738,
       height: 1491,
@@ -95,47 +97,75 @@ const features: AppleFeature[] = [
       "Apple beta invite instructions are delivered through Apple's official flow.",
     ],
     primary: {
-      src: "/apple/purchase_complete_apple.png",
+      src: "/apple/purchase_complete_apple.webp",
       alt: "Purchase complete with Sign up with Apple iPhone mockup",
       width: 536,
       height: 1162,
       hiddenDescription: "Purchase complete preview",
     },
     secondary: {
-      src: "/apple/flight.png",
+      src: "/apple/flight.webp",
       alt: "Travel and itinerary iPhone mockup",
-      width: 1440,
-      height: 2944,
+      width: 900,
+      height: 1840,
       hiddenDescription: "Booking and itinerary preview",
     },
   },
 ]
 
-function phonePair(primary: Mockup, secondary: Mockup) {
+function MockupCard({
+  mock,
+  priority = false,
+}: {
+  mock: Mockup
+  priority?: boolean
+}) {
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [hasError, setHasError] = useState(false)
+
   return (
-    <div className="grid grid-cols-2 items-end gap-3 sm:gap-4">
-      {[primary, secondary].map((mock, idx) => (
-        <figure
-          key={`${mock.src}-${idx}`}
-          className="rounded-2xl border border-border/60 bg-card/80 p-2 shadow-sm sm:p-3"
+    <figure className="w-full rounded-2xl border border-border/60 bg-card/80 p-2 shadow-sm sm:p-3">
+      <div className="relative flex h-[220px] items-end justify-center sm:h-[250px] lg:h-[280px] xl:h-[300px]">
+        <div
+          className="relative aspect-[9/19] h-full overflow-hidden rounded-[1rem] bg-black/40"
         >
-          <div className="flex h-[220px] items-end justify-center sm:h-[260px] lg:h-[240px] xl:h-[260px]">
-            <Image
-              src={mock.src}
-              alt={mock.alt}
-              width={mock.width}
-              height={mock.height}
-              className="h-full w-auto"
-              sizes="(max-width: 640px) 42vw, (max-width: 1024px) 34vw, 18vw"
-            />
-          </div>
-          {mock.hiddenDescription ? (
-            <figcaption className="sr-only">
-              {mock.hiddenDescription}
-            </figcaption>
+          {!isLoaded && !hasError ? (
+            <div className="absolute inset-0 animate-pulse bg-muted/35" />
           ) : null}
-        </figure>
-      ))}
+          <Image
+            src={mock.src}
+            alt={mock.alt}
+            width={mock.width}
+            height={mock.height}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            onLoad={() => setIsLoaded(true)}
+            onError={() => setHasError(true)}
+            className={cn(
+              "h-full w-auto object-contain object-top transition-opacity duration-300",
+              isLoaded ? "opacity-100" : "opacity-0"
+            )}
+            sizes="(max-width: 640px) 44vw, (max-width: 1024px) 34vw, 17vw"
+          />
+          {hasError ? (
+            <span className="absolute inset-0 grid place-items-center px-3 text-center text-xs text-muted-foreground">
+              Image failed to load
+            </span>
+          ) : null}
+        </div>
+      </div>
+      {mock.hiddenDescription ? (
+        <span className="sr-only">{mock.hiddenDescription}</span>
+      ) : null}
+    </figure>
+  )
+}
+
+function phonePair(primary: Mockup, secondary: Mockup, prioritizeFirst = false) {
+  return (
+    <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4">
+      <MockupCard mock={primary} priority={prioritizeFirst} />
+      <MockupCard mock={secondary} />
     </div>
   )
 }
@@ -161,27 +191,37 @@ export function AppleProofSection() {
           <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Premium iPhone-native flows that make signing up feel effortless.
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            We designed onboarding, checkout, and follow-up to feel familiar to
-            everyday iPhone users while keeping the experience fast and simple.
-          </p>
+          <StreamText
+            className="mt-4 text-muted-foreground"
+            text="We designed onboarding, checkout, and follow-up to feel familiar to everyday iPhone users while keeping the experience fast and simple."
+            active={isVisible}
+          />
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div className="grid gap-5 lg:hidden">
           {features.map((feature, index) => (
             <article
               key={feature.title}
               className={cn(
-                "relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 opacity-0 sm:p-7",
+                "relative h-full overflow-hidden rounded-2xl border border-border/70 bg-card p-5 opacity-0 sm:p-7",
                 isVisible && "animate-fade-up"
               )}
               style={{ animationDelay: `${index * 80 + 100}ms` }}
             >
-              <div className="flex flex-col gap-4">
-                <div className="flex items-start justify-between gap-4">
+              <div className="flex h-full flex-col gap-4">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
                     {feature.eyebrow}
                   </p>
+                  {feature.mark ? (
+                    <Image
+                      src={feature.mark.src}
+                      alt={feature.mark.alt}
+                      width={feature.mark.width}
+                      height={feature.mark.height}
+                      className="h-5 w-auto"
+                    />
+                  ) : null}
                   {feature.badge === "passkey" ? (
                     <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] text-muted-foreground">
                       <KeyRound className="h-3.5 w-3.5" />
@@ -189,16 +229,6 @@ export function AppleProofSection() {
                     </div>
                   ) : null}
                 </div>
-
-                {feature.mark ? (
-                  <Image
-                    src={feature.mark.src}
-                    alt={feature.mark.alt}
-                    width={feature.mark.width}
-                    height={feature.mark.height}
-                    className="h-6 w-auto"
-                  />
-                ) : null}
 
                 <div>
                   <h3 className="text-balance text-2xl font-semibold tracking-tight text-foreground">
@@ -214,12 +244,78 @@ export function AppleProofSection() {
                   </ul>
                 </div>
 
-                <div className="mt-2 rounded-2xl border border-border/60 bg-gradient-to-b from-[#f5f5f7] to-[#ececf0] p-3 dark:from-zinc-900/60 dark:to-zinc-900/20 sm:p-4">
-                  {phonePair(feature.primary, feature.secondary)}
+                <div className="mt-auto rounded-2xl border border-border/60 bg-gradient-to-b from-[#f5f5f7] to-[#ececf0] p-3 dark:from-zinc-900/60 dark:to-zinc-900/20 sm:p-4">
+                  {phonePair(feature.primary, feature.secondary, index === 0)}
                 </div>
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="hidden lg:flex lg:flex-col lg:gap-6">
+          {features.map((feature, index) => {
+            const reverse = index % 2 === 1
+            return (
+              <article
+                key={`${feature.title}-desktop`}
+                className={cn(
+                  "relative overflow-hidden rounded-3xl border border-border/70 bg-card p-8 opacity-0 xl:p-10",
+                  isVisible && "animate-fade-up"
+                )}
+                style={{ animationDelay: `${index * 90 + 120}ms` }}
+              >
+                <div
+                  className={cn(
+                    "grid items-center gap-10",
+                    reverse
+                      ? "grid-cols-[minmax(340px,460px)_minmax(0,1fr)]"
+                      : "grid-cols-[minmax(0,1fr)_minmax(340px,460px)]"
+                  )}
+                >
+                  <div className={cn(reverse && "order-2")}>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                        {feature.eyebrow}
+                      </p>
+                      {feature.mark ? (
+                        <Image
+                          src={feature.mark.src}
+                          alt={feature.mark.alt}
+                          width={feature.mark.width}
+                          height={feature.mark.height}
+                          className="h-5 w-auto"
+                        />
+                      ) : null}
+                      {feature.badge === "passkey" ? (
+                        <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] text-muted-foreground">
+                          <KeyRound className="h-3.5 w-3.5" />
+                          Passkey-ready
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <h3 className="mt-5 text-balance text-5xl font-semibold tracking-tight text-foreground">
+                      {feature.title}
+                    </h3>
+                    <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                      {feature.description}
+                    </p>
+                    <ul className="mt-6 space-y-3 text-lg text-muted-foreground">
+                      {feature.bullets.map((item) => (
+                        <li key={item}>• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className={cn(reverse && "order-1")}>
+                    <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-[#f5f5f7] to-[#ececf0] p-4 dark:from-zinc-900/60 dark:to-zinc-900/20">
+                      {phonePair(feature.primary, feature.secondary, index === 0)}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>

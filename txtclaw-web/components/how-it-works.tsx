@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react"
+import { StreamText } from "@/components/stream-text"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { cn } from "@/lib/utils"
 
@@ -61,9 +62,11 @@ export function HowItWorks() {
           <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Onboarding that stays out of your way.
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            Get an AI that remembers you, browses the web for you, and handles tasks — all from your normal texting app.
-          </p>
+          <StreamText
+            className="mt-4 text-muted-foreground"
+            text="Get an AI that remembers you, browses the web for you, and handles tasks all from your normal texting app."
+            active={isVisible}
+          />
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
@@ -80,6 +83,9 @@ export function HowItWorks() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary transition-colors group-hover:bg-foreground/10">
                   <step.icon className="h-5 w-5 text-foreground" />
                 </div>
+                <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-border/70 px-2 font-mono text-[11px] text-muted-foreground">
+                  {i + 1}
+                </span>
               </div>
               <h3 className="text-base font-semibold text-foreground">
                 {step.title}

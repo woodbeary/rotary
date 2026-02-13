@@ -9,6 +9,7 @@ import {
   Watch,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { StreamText } from "@/components/stream-text"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { cn } from "@/lib/utils"
 
@@ -74,10 +75,11 @@ export function Features() {
             <br />
             An agent that works for you.
           </h2>
-          <p className="text-muted-foreground">
-            Everything you need from an AI assistant, delivered over the
-            simplest interface there is.
-          </p>
+          <StreamText
+            className="text-muted-foreground"
+            text="Everything you need from an AI assistant, delivered over the simplest interface there is."
+            active={isVisible}
+          />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -115,6 +115,10 @@ export function Footer() {
               </a>
             </div>
           </div>
+          <p className="text-center text-[11px] text-muted-foreground/60">
+            Independent project. TXT CLAW is not affiliated with Apple,
+            Anthropic, or OpenClaw.
+          </p>
           <p className="text-center text-xs text-muted-foreground">
             © {new Date().getFullYear()} TXT CLAW
           </p>
