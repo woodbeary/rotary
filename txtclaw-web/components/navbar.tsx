@@ -31,20 +31,18 @@ export function Navbar() {
           aria-label="TXT CLAW home"
         >
           <Image
-            src="/logo_horizontal_lightmode.png"
+            src="/logo_horizontal_lightmode.webp"
             alt="TXT CLAW"
-            width={3458}
-            height={1026}
+            width={1200}
+            height={295}
             className="h-14 w-auto dark:hidden"
-            priority
           />
           <Image
-            src="/logo_horizontal_darkmode.png"
+            src="/logo_horizontal_darkmode.webp"
             alt="TXT CLAW"
-            width={3458}
-            height={1026}
+            width={1200}
+            height={295}
             className="hidden h-14 w-auto dark:block"
-            priority
           />
         </a>
 

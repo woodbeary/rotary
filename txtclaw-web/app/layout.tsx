@@ -1,14 +1,49 @@
 import React from "react"
 import type { Metadata, Viewport } from "next"
-import { GeistPixelGrid, GeistPixelSquare } from "geist/font/pixel"
+import localFont from "next/font/local"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CLERK_ENABLED } from "@/lib/clerk-config"
 import "./globals.css"
 
-const geistPixelSquare = GeistPixelSquare
-const geistPixelGrid = GeistPixelGrid
+const geistPixelSquare = localFont({
+  src: "./fonts/GeistPixel-Square.woff2",
+  variable: "--font-geist-pixel-square",
+  weight: "500",
+  adjustFontFallback: false,
+  fallback: [
+    "Geist Mono",
+    "ui-monospace",
+    "SFMono-Regular",
+    "Roboto Mono",
+    "Menlo",
+    "Monaco",
+    "Liberation Mono",
+    "DejaVu Sans Mono",
+    "Courier New",
+    "monospace",
+  ],
+})
+
+const geistPixelGrid = localFont({
+  src: "./fonts/GeistPixel-Grid.woff2",
+  variable: "--font-geist-pixel-grid",
+  weight: "500",
+  adjustFontFallback: false,
+  fallback: [
+    "Geist Mono",
+    "ui-monospace",
+    "SFMono-Regular",
+    "Roboto Mono",
+    "Menlo",
+    "Monaco",
+    "Liberation Mono",
+    "DejaVu Sans Mono",
+    "Courier New",
+    "monospace",
+  ],
+})
 
 const appUrl =
   process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "") ||
@@ -70,6 +105,8 @@ export default function RootLayout({
       attribute="class"
       defaultTheme="system"
       enableSystem
+      enableColorScheme
+      storageKey="txtclaw-theme"
       disableTransitionOnChange
     >
       {children}
