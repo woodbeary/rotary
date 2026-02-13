@@ -1,6 +1,8 @@
 import React from "react"
 import type { Metadata, Viewport } from "next"
 import { GeistPixelGrid, GeistPixelSquare } from "geist/font/pixel"
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CLERK_ENABLED } from "@/lib/clerk-config"
 import "./globals.css"
@@ -71,6 +73,8 @@ export default function RootLayout({
       disableTransitionOnChange
     >
       {children}
+      <Analytics />
+      <SpeedInsights />
     </ThemeProvider>
   )
 
