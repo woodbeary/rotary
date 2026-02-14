@@ -35,12 +35,12 @@ export default function PrivacyPolicy() {
             </h2>
             <p>
               TXT CLAW (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is an
-              SMS-based AI agent service operated by Jacob Lopez
+              SMS-based AI agent service operated by The Interpreting App, LLC
               (&quot;Operator&quot;). This Privacy Policy explains how we
               collect, use, disclose, and safeguard your personal information
               when you interact with our service by sending text messages (SMS)
               to our phone number{" "}
-              <span className="font-mono font-medium">+1 (573) 879-2529</span>{" "}
+              <span className="font-mono font-medium">+1 (866) 251-1599</span>{" "}
               or by visiting our website at{" "}
               <span className="font-medium">txtclaw.com</span> (collectively,
               the &quot;Service&quot;).
@@ -79,7 +79,7 @@ export default function PrivacyPolicy() {
               <li>
                 <strong>Payment information.</strong> If you subscribe to a paid
                 plan, we collect payment details (such as credit/debit card
-                information) through our third-party payment processor (Stripe).
+                information) through our third-party payment processor (Square).
                 We do not store your full card number on our servers.
               </li>
             </ul>
@@ -131,7 +131,7 @@ export default function PrivacyPolicy() {
               </li>
               <li>
                 <strong>Process payments.</strong> Complete subscription
-                transactions and manage billing through Stripe.
+                transactions and manage billing through Square.
               </li>
               <li>
                 <strong>Improve the Service.</strong> Analyze aggregate usage
@@ -168,7 +168,7 @@ export default function PrivacyPolicy() {
             <p>
               TXT CLAW is a <strong>user-initiated, two-way SMS service</strong>
               . You opt in to our service by texting our gateway number{" "}
-              <span className="font-mono font-medium">+1 (573) 879-2529</span>{" "}
+              <span className="font-mono font-medium">+1 (866) 251-1599</span>{" "}
               first. We will never send you unsolicited messages. Every
               conversation is started by you.
             </p>
@@ -306,15 +306,15 @@ export default function PrivacyPolicy() {
                 temporarily for context continuity.
               </li>
               <li>
-                <strong>Stripe</strong> — Our payment processor for subscription
+                <strong>Square</strong> — Our payment processor for subscription
                 billing. See{" "}
                 <a
-                  href="https://stripe.com/privacy"
+                  href="https://squareup.com/us/en/legal/general/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-foreground underline underline-offset-4"
                 >
-                  Stripe&apos;s Privacy Policy
+                  Square&apos;s Privacy Policy
                 </a>
                 .
               </li>
@@ -528,7 +528,7 @@ export default function PrivacyPolicy() {
                 <span className="font-mono font-medium">HELP</span> to any
                 message from{" "}
                 <span className="font-mono font-medium">
-                  +1 (573) 879-2529
+                  +1 (866) 251-1599
                 </span>
               </li>
               <li>
@@ -560,7 +560,7 @@ export default function PrivacyPolicy() {
               <div className="flex justify-between border-b border-border pb-2">
                 <span className="text-muted-foreground">Phone Number</span>
                 <span className="font-mono font-medium text-foreground">
-                  +1 (573) 879-2529
+                  +1 (866) 251-1599
                 </span>
               </div>
               <div className="flex justify-between border-b border-border pb-2">

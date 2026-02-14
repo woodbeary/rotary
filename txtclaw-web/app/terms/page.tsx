@@ -35,12 +35,12 @@ export default function TermsOfService() {
             </h2>
             <p>
               By texting the TXT CLAW phone number{" "}
-              <span className="font-mono font-medium">+1 (573) 879-2529</span>{" "}
+              <span className="font-mono font-medium">+1 (866) 251-1599</span>{" "}
               or using the TXT CLAW website (collectively, the
               &quot;Service&quot;), you agree to be bound by these Terms of
               Service (&quot;Terms&quot;). If you do not agree, do not use the
               Service. These Terms constitute a legally binding agreement between
-              you and Jacob Lopez d/b/a TXT CLAW (&quot;we,&quot; &quot;us,&quot;
+              you and The Interpreting App, LLC (&quot;we,&quot; &quot;us,&quot;
               or &quot;our&quot;).
             </p>
           </section>
@@ -131,7 +131,7 @@ export default function TermsOfService() {
             </h2>
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                Paid plans are billed monthly in advance through Stripe.
+                Paid plans are billed monthly in advance through Square.
               </li>
               <li>
                 Your subscription renews automatically each month until
@@ -251,7 +251,7 @@ export default function TermsOfService() {
             </h2>
             <p>
               To the maximum extent permitted by law, TXT CLAW and its
-              operator, Jacob Lopez, shall not be liable for any indirect,
+              operator, The Interpreting App, LLC, shall not be liable for any indirect,
               incidental, special, consequential, or punitive damages arising
               from your use of (or inability to use) the Service. Our total
               liability for any claim related to the Service shall not exceed the
@@ -341,7 +341,7 @@ export default function TermsOfService() {
                 <strong>SMS:</strong> Reply{" "}
                 <span className="font-mono font-medium">HELP</span> to{" "}
                 <span className="font-mono font-medium">
-                  +1 (573) 879-2529
+                  +1 (866) 251-1599
                 </span>
               </li>
             </ul>

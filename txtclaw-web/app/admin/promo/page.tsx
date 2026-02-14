@@ -2,6 +2,7 @@ import Link from "next/link"
 import { auth } from "@clerk/nextjs/server"
 import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
+import { redirect } from "next/navigation"
 import { AdminPromoGenerator } from "@/components/admin-promo-generator"
 import {
   canUserGeneratePromoCodes,
@@ -31,7 +32,10 @@ export default async function AdminPromoPage() {
   const { userId } = await auth()
   const isAdmin = canUserGeneratePromoCodes(userId)
 
-  if (!userId || !isAdmin) notFound()
+  if (!userId) {
+    redirect("/sign-in?redirect_url=/admin/promo")
+  }
+  if (!isAdmin) notFound()
 
   const campaignId = getPromoCampaignId()
   const grantCents = getPromoGrantCents()
