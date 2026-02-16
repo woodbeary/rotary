@@ -10,6 +10,12 @@ SMS/iMessage are optional lanes. The **runtime API works without Twilio**.
 pnpm dlx txtclaw@latest init
 ```
 
+Alias (same CLI):
+
+```bash
+pnpm dlx textclaw@latest init
+```
+
 ## Links
 
 - OpenAPI: `https://www.txtclaw.com/openapi.yaml`
