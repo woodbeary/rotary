@@ -83,6 +83,12 @@ export function Footer() {
 
             <div className="flex items-center gap-5 text-sm text-muted-foreground">
               <a
+                href="/developers"
+                className="transition-colors hover:text-foreground"
+              >
+                Developers
+              </a>
+              <a
                 href="/api-reference"
                 className="transition-colors hover:text-foreground"
               >

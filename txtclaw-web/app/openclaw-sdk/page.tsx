@@ -1,0 +1,127 @@
+import type { Metadata } from "next"
+import Link from "next/link"
+import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
+
+export const metadata: Metadata = {
+  title: "OpenClaw SDK (Node/JS) — TXT CLAW",
+  description:
+    "TXT CLAW ships a tiny Node/JavaScript SDK for an OpenClaw-powered agent runtime API. Create an agent, send messages over HTTPS, and optionally add SMS later.",
+  alternates: {
+    canonical: "/openclaw-sdk",
+  },
+}
+
+export default function OpenClawSdkPage() {
+  return (
+    <div className="min-h-screen">
+      <Navbar />
+      <main className="mx-auto max-w-4xl px-6 py-16 md:py-24">
+        <div className="space-y-10">
+          <header className="space-y-4">
+            <div className="inline-flex items-center rounded-full border border-border/70 bg-muted/30 px-3 py-1 font-mono text-[11px] text-muted-foreground">
+              SEO: OpenClaw SDK
+            </div>
+            <h1 className="text-balance font-mono text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+              OpenClaw SDK (Node/JavaScript)
+            </h1>
+            <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
+              TXT CLAW provides a tiny JS client for the developer API so you can
+              wrap OpenClaw-powered agents into your own product quickly.
+            </p>
+          </header>
+
+          <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+            <h2 className="text-lg font-semibold text-foreground">
+              Quickstart (1 line)
+            </h2>
+            <pre className="mt-3 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
+              {`pnpm dlx txtclaw@latest init`}
+            </pre>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Agent docs:{" "}
+              <a
+                className="font-mono text-foreground underline underline-offset-4"
+                href="/agents.md"
+              >
+                /agents.md
+              </a>
+              {" · "}
+              <a
+                className="font-mono text-foreground underline underline-offset-4"
+                href="/openapi.yaml"
+              >
+                /openapi.yaml
+              </a>
+            </p>
+          </section>
+
+          <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+            <h2 className="text-lg font-semibold text-foreground">SDK Example</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              (Published as the <span className="font-mono text-foreground">txtclaw</span>{" "}
+              package once npm publishing is enabled.)
+            </p>
+
+            <pre className="mt-4 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
+{`pnpm add txtclaw`}
+            </pre>
+            <pre className="mt-3 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
+{`import { createTxtclawClient } from "txtclaw"
+
+const client = createTxtclawClient({
+  apiKey: process.env.TXTCLAW_API_KEY,
+  baseUrl: process.env.TXTCLAW_API_BASE_URL, // optional
+})
+
+const { agent_id } = await client.createAgent({
+  systemPrompt: "You are a helpful assistant. Keep replies concise.",
+})
+
+const { reply_text } = await client.sendMessage(agent_id, {
+  text: "Draft a polite text asking my landlord to fix a leak.",
+})
+
+console.log(reply_text)`}
+            </pre>
+          </section>
+
+          <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+            <h2 className="text-lg font-semibold text-foreground">Links</h2>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li>
+                Developers overview:{" "}
+                <Link
+                  href="/developers"
+                  className="font-mono text-foreground underline underline-offset-4"
+                >
+                  /developers
+                </Link>
+              </li>
+              <li>
+                OpenClaw API overview:{" "}
+                <Link
+                  href="/openclaw-api"
+                  className="font-mono text-foreground underline underline-offset-4"
+                >
+                  /openclaw-api
+                </Link>
+              </li>
+              <li>
+                API reference:{" "}
+                <Link
+                  href="/api-reference"
+                  className="font-mono text-foreground underline underline-offset-4"
+                >
+                  /api-reference
+                </Link>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+

@@ -1,0 +1,357 @@
+openapi: 3.1.0
+info:
+  title: TXT CLAW API
+  version: v1
+  description: |
+    TXT CLAW developer API (private preview).
+
+    Create a dedicated OpenClaw agent and talk to it over HTTPS.
+    SMS provisioning is a separate/optional lane.
+servers:
+  - url: https://txtclaw-sms-e2e.lopez731.workers.dev
+    description: Preview (Workers)
+  - url: https://api.txtclaw.com
+    description: Custom domain (coming soon)
+security:
+  - bearerAuth: []
+paths:
+  /v1/status:
+    get:
+      summary: Status
+      operationId: getStatus
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/agents:
+    post:
+      summary: Create agent
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgentRequest"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateAgentResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limited
+          headers:
+            Retry-After:
+              description: Seconds until retry is allowed.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/agents/{agent_id}:
+    get:
+      summary: Get agent
+      operationId: getAgent
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAgentResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limited
+          headers:
+            Retry-After:
+              description: Seconds until retry is allowed.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/agents/{agent_id}/messages:
+    post:
+      summary: Send message
+      operationId: sendMessage
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limited
+          headers:
+            Retry-After:
+              description: Seconds until retry is allowed.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/agents/{agent_id}/channels/sms:
+    post:
+      summary: Enable SMS (scaffold)
+      operationId: enableSms
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnableSmsRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnableSmsResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limited
+          headers:
+            Retry-After:
+              description: Seconds until retry is allowed.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: TXTCLAW_API_KEY
+  schemas:
+    ErrorResponse:
+      type: object
+      description: Error response. Always include `trace_id` when reporting issues.
+      additionalProperties: true
+      properties:
+        error: { type: string }
+        trace_id: { type: string }
+        limit_key: { type: string }
+        reason: { type: string }
+      required: [error]
+
+    StatusResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        ok: { type: boolean }
+        service: { type: string }
+        version: { type: string }
+        mode: { type: string }
+        trace_id: { type: string }
+      required: [ok, service, version, mode, trace_id]
+
+    CreateAgentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        system_prompt:
+          type: string
+          description: System prompt applied to the agent.
+          maxLength: 2000
+        customer_ref:
+          type: string
+          description: Your internal customer identifier (optional).
+          maxLength: 200
+        metadata:
+          type: object
+          description: Opaque metadata (optional). JSON string length is capped in preview.
+          additionalProperties: true
+        sms:
+          type: object
+          additionalProperties: false
+          properties:
+            mode:
+              type: string
+              enum: [none, sandbox, managed, byo_twilio]
+          required: [mode]
+      required: []
+
+    CreateAgentResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        agent_id: { type: string }
+        status: { type: string, enum: [active] }
+        sms:
+          type: object
+          additionalProperties: false
+          properties:
+            status:
+              type: string
+              enum: [disabled, needs_compliance, pending, active, needs_setup]
+          required: [status]
+        trace_id: { type: string }
+      required: [agent_id, status, trace_id]
+
+    GetAgentResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        agent_id: { type: string }
+        status: { type: string }
+        created_at: { type: string }
+        updated_at: { type: string }
+        sms:
+          type: object
+          additionalProperties: false
+          properties:
+            status: { type: string }
+            phone_number: { type: string }
+          required: [status]
+        trace_id: { type: string }
+      required: [agent_id, status, created_at, updated_at, trace_id]
+
+    SendMessageRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        text:
+          type: string
+          maxLength: 4000
+        user_ref:
+          type: string
+          description: Optional user identifier (reserved for future multi-user routing).
+      required: [text]
+
+    SendMessageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        reply_text: { type: string }
+        warnings:
+          type: array
+          items: { type: string }
+        trace_id: { type: string }
+      required: [reply_text, trace_id]
+
+    EnableSmsRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        mode:
+          type: string
+          enum: [sandbox, managed, byo_twilio]
+      required: [mode]
+
+    EnableSmsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum: [disabled, needs_compliance, pending, active, needs_setup]
+        trace_id: { type: string }
+      required: [status, trace_id]

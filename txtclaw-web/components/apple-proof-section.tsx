@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { KeyRound } from "lucide-react"
 import { StreamText } from "@/components/stream-text"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
@@ -122,17 +122,23 @@ function MockupCard({
 }) {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const imgRef = useRef<HTMLImageElement | null>(null)
+
+  // If the image loads before hydration attaches the onLoad handler, ensure we
+  // still flip the fade-in state.
+  useEffect(() => {
+    if (imgRef.current?.complete) setIsLoaded(true)
+  }, [])
 
   return (
     <figure className="w-full rounded-2xl border border-border/60 bg-card/80 p-2 shadow-sm sm:p-3">
       <div className="relative flex h-[220px] items-end justify-center sm:h-[250px] lg:h-[280px] xl:h-[300px]">
-        <div
-          className="relative aspect-[9/19] h-full overflow-hidden rounded-[1rem] bg-black/40"
-        >
+        <div className="relative aspect-[9/19] h-full overflow-hidden rounded-[1rem] bg-black/40">
           {!isLoaded && !hasError ? (
             <div className="absolute inset-0 animate-pulse bg-muted/35" />
           ) : null}
           <Image
+            ref={imgRef}
             src={mock.src}
             alt={mock.alt}
             width={mock.width}

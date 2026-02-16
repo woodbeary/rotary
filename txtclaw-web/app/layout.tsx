@@ -45,9 +45,24 @@ const geistPixelGrid = localFont({
   ],
 })
 
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "") ||
-  "https://www.txtclaw.com"
+function normalizeAppUrl(raw: string | undefined): string {
+  const value = String(raw || "").trim().replace(/\/+$/, "")
+  const fallback = "https://www.txtclaw.com"
+  if (!value) return fallback
+
+  try {
+    const url = new URL(value.startsWith("http") ? value : `https://${value}`)
+    // Avoid X preview issues when apex redirects are flaky for bots.
+    if (url.hostname === "txtclaw.com") {
+      url.hostname = "www.txtclaw.com"
+    }
+    return url.toString().replace(/\/+$/, "")
+  } catch {
+    return fallback
+  }
+}
+
+const appUrl = normalizeAppUrl(process.env.NEXT_PUBLIC_APP_URL)
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
