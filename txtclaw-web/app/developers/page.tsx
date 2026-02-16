@@ -25,8 +25,9 @@ export default function DevelopersPage() {
               TXT CLAW for Developers
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Create a dedicated OpenClaw agent (memory + tools) and talk to it
-              over HTTPS. SMS provisioning is a separate, optional lane.
+              Create a dedicated OpenClaw agent (memory + configuration) and
+              talk to it over HTTPS. SMS provisioning is a separate, optional
+              lane.
             </p>
           </header>
 

@@ -1,6 +1,6 @@
 # TXT CLAW Developer API (Preview)
 
-TXT CLAW lets you create a dedicated OpenClaw agent (memory + tools) and talk to it over HTTPS.
+TXT CLAW lets you create a dedicated OpenClaw agent (memory + configuration) and talk to it over HTTPS.
 
 SMS/iMessage are optional lanes. The **runtime API works without Twilio**.
 
