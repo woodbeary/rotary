@@ -1,5 +1,6 @@
 import { isAdminUserId } from "@/lib/admin"
 import { CLERK_ENABLED } from "@/lib/clerk-config"
+import { getConsoleBaseUrl as getConsoleBaseUrlFromEnv } from "@/lib/txtclaw-urls"
 import { auth, clerkClient } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 
@@ -21,9 +22,7 @@ export function jsonError(message: string, status: number) {
 }
 
 export function getConsoleBaseUrl(): string {
-  return (
-    process.env.TXTCLAW_CONSOLE_BASE_URL?.trim() || "https://txtclaw-sms-e2e.lopez731.workers.dev"
-  )
+  return getConsoleBaseUrlFromEnv()
 }
 
 export function getConsoleServiceToken(): string | null {

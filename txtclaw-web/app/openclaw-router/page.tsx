@@ -41,15 +41,15 @@ export default function OpenClawRouterPage() {
           <h2 className="text-lg font-semibold text-foreground">Docs</h2>
           <p className="mt-2 text-sm text-muted-foreground">Paste these into Cursor/Codex:</p>
           <p className="mt-4 text-sm">
-            <a className="font-mono underline underline-offset-4" href="/routing.md">
+            <a className="font-mono underline underline-offset-4" href="/developers/docs/routing">
               /routing.md
             </a>
             {" · "}
-            <a className="font-mono underline underline-offset-4" href="/byok.md">
+            <a className="font-mono underline underline-offset-4" href="/developers/docs/byok">
               /byok.md
             </a>
             {" · "}
-            <a className="font-mono underline underline-offset-4" href="/openapi.yaml">
+            <a className="font-mono underline underline-offset-4" href="/developers/docs/openapi">
               /openapi.yaml
             </a>
           </p>

@@ -218,13 +218,13 @@ export function DevApiBilling() {
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
-            href="/pricing.md"
+            href="/developers/docs/pricing"
             className="inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground hover:bg-accent"
           >
             View pricing
           </Link>
           <Link
-            href="/rate-limits.md"
+            href="/developers/docs/rate-limits"
             className="inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground hover:bg-accent"
           >
             View rate limits

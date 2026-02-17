@@ -4,6 +4,7 @@ import { CodeBlock } from "@/components/code-block"
 import { CopyButton } from "@/components/copy-button"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { getPublicApiBaseUrl } from "@/lib/txtclaw-urls"
 import { cn } from "@/lib/utils"
 import { ChevronDown } from "lucide-react"
 import { useMemo } from "react"
@@ -11,9 +12,7 @@ import { toast } from "sonner"
 
 export function DeveloperCopyPrompt() {
   const prompt = useMemo(() => {
-    const apiBaseUrl =
-      String(process.env.NEXT_PUBLIC_TXTCLAW_API_BASE_URL || "").trim() ||
-      "https://txtclaw-sms-e2e.lopez731.workers.dev"
+    const apiBaseUrl = getPublicApiBaseUrl()
 
     return [
       "# Add TXT CLAW (OpenClaw agent runtime API)",
@@ -76,7 +75,7 @@ export function DeveloperCopyPrompt() {
         <div className="flex flex-wrap gap-2">
           <CopyButton text={prompt} label="Copy prompt" variant="secondary" />
           <Button variant="outline" asChild>
-            <a href="/quickstart.md">Open quickstart</a>
+            <a href="/developers/docs/quickstart">Open quickstart</a>
           </Button>
         </div>
       </div>

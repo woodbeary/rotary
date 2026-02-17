@@ -4,6 +4,9 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -14,34 +17,57 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { CLERK_ENABLED } from "@/lib/clerk-config"
+import { DEV_DOCS, getRenderedDevDocHref } from "@/lib/dev-docs"
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs"
 import {
   BookOpen,
+  CreditCard,
   KeyRound,
   Rocket,
   Route,
   ScrollText,
   Shield,
-  Sparkles,
   Terminal,
 } from "lucide-react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
 
-const NAV = [
+type NavItem = {
+  href: string
+  label: string
+  icon: ReactNode
+}
+
+const DOCS_NAV: NavItem[] = [
   { href: "/developers", label: "Overview", icon: <BookOpen className="h-4 w-4" /> },
   { href: "/api-reference", label: "API Reference", icon: <ScrollText className="h-4 w-4" /> },
-  { href: "/dashboard/api-keys", label: "API Keys", icon: <KeyRound className="h-4 w-4" /> },
-  { href: "/dashboard/billing", label: "Billing", icon: <Sparkles className="h-4 w-4" /> },
-  { href: "/quickstart.md", label: "Quickstart.md", icon: <Rocket className="h-4 w-4" /> },
-  { href: "/agents.md", label: "Agents.md", icon: <Terminal className="h-4 w-4" /> },
-  { href: "/openapi.yaml", label: "OpenAPI.yaml", icon: <Terminal className="h-4 w-4" /> },
   { href: "/openclaw-router", label: "Router", icon: <Route className="h-4 w-4" /> },
   { href: "/byok", label: "BYOK", icon: <Shield className="h-4 w-4" /> },
   { href: "/openclaw-mcp", label: "MCP", icon: <Terminal className="h-4 w-4" /> },
   { href: "/openclaw-sdk", label: "SDK", icon: <Terminal className="h-4 w-4" /> },
-  { href: "/security.md", label: "Security.md", icon: <Shield className="h-4 w-4" /> },
 ] as const
+
+const CONSOLE_NAV: NavItem[] = [
+  { href: "/dashboard/api-keys", label: "API Keys", icon: <KeyRound className="h-4 w-4" /> },
+  { href: "/dashboard/billing", label: "Billing", icon: <CreditCard className="h-4 w-4" /> },
+] as const
+
+const PASTEABLE_NAV: NavItem[] = DEV_DOCS.map((doc) => {
+  const href = getRenderedDevDocHref(doc.slug)
+  const icon =
+    doc.slug === "quickstart" ? (
+      <Rocket className="h-4 w-4" />
+    ) : doc.slug === "api-keys" ? (
+      <KeyRound className="h-4 w-4" />
+    ) : doc.slug === "security" ? (
+      <Shield className="h-4 w-4" />
+    ) : (
+      <Terminal className="h-4 w-4" />
+    )
+
+  return { href, label: doc.title, icon }
+})
 
 export function DevDocsShell({
   title = "Developers",
@@ -50,6 +76,8 @@ export function DevDocsShell({
   title?: string
   children: ReactNode
 }) {
+  const pathname = usePathname()
+
   return (
     <SidebarProvider defaultOpen>
       <Sidebar variant="inset" collapsible="offcanvas">
@@ -61,18 +89,69 @@ export function DevDocsShell({
         </SidebarHeader>
         <SidebarSeparator />
         <SidebarContent>
-          <SidebarMenu>
-            {NAV.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton asChild tooltip={item.label}>
-                  <Link href={item.href}>
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+          <SidebarGroup>
+            <SidebarGroupLabel>Docs</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {DOCS_NAV.map((item) => {
+                  const active = pathname === item.href
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+                        <Link href={item.href}>
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarSeparator className="my-2" />
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Console</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {CONSOLE_NAV.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton asChild tooltip={item.label}>
+                      <Link href={item.href}>
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarSeparator className="my-2" />
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Pasteable Docs</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {PASTEABLE_NAV.map((item) => {
+                  const active = pathname === item.href
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+                        <Link href={item.href}>
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         </SidebarContent>
         <SidebarFooter className="px-2 py-2">
           <div className="rounded-md border border-sidebar-border bg-sidebar-accent/40 px-2 py-2 text-[11px] leading-relaxed text-sidebar-foreground/70">

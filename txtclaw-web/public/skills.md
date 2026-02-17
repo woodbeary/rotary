@@ -4,7 +4,7 @@ TXT CLAW is designed to be easy for coding agents to discover and use:
 
 - Agent-ingest docs: `https://www.txtclaw.com/quickstart.md`
 - OpenAPI: `https://www.txtclaw.com/openapi.yaml`
-- MCP server: coming soon (HTTP API works today).
+- MCP server: `pnpm -s dlx txtclaw-mcp@latest`
 
 Related:
 
@@ -22,16 +22,16 @@ You can ask OpenClaw to set this up for you:
 
 ## MCP Config Snippet
 
-This snippet is intended to be copy/pasted into MCP-compatible clients once `txtclaw-mcp` is published:
+This snippet is intended to be copy/pasted into MCP-compatible clients:
 
 ```json
 {
   "mcpServers": {
     "txtclaw": {
       "command": "pnpm",
-      "args": ["dlx", "-s", "txtclaw-mcp@latest"],
+      "args": ["-s", "dlx", "txtclaw-mcp@latest"],
       "env": {
-        "TXTCLAW_API_BASE_URL": "https://txtclaw-sms-e2e.lopez731.workers.dev",
+        "TXTCLAW_API_BASE_URL": "https://api.txtclaw.com",
         "TXTCLAW_API_KEY": "vck_REPLACE_ME"
       }
     }
@@ -41,8 +41,8 @@ This snippet is intended to be copy/pasted into MCP-compatible clients once `txt
 
 Notes:
 
-- If you’re using the preview base URL, set `TXTCLAW_API_BASE_URL` to the preview Worker domain instead.
-- `-s` is required to keep `pnpm dlx` quiet so it won’t corrupt MCP stdio output.
+- If you’re testing/staging, set `TXTCLAW_API_BASE_URL` to the preview Worker domain instead.
+- `-s` keeps `pnpm dlx` quiet so it won’t corrupt MCP stdio output.
 
 ## Tools Provided
 

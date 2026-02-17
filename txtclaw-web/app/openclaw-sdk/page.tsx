@@ -41,13 +41,16 @@ export default function OpenClawSdkPage() {
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             Agent docs:{" "}
-            <a className="font-mono text-foreground underline underline-offset-4" href="/agents.md">
+            <a
+              className="font-mono text-foreground underline underline-offset-4"
+              href="/developers/docs/agents"
+            >
               /agents.md
             </a>
             {" · "}
             <a
               className="font-mono text-foreground underline underline-offset-4"
-              href="/openapi.yaml"
+              href="/developers/docs/openapi"
             >
               /openapi.yaml
             </a>
@@ -57,8 +60,7 @@ export default function OpenClawSdkPage() {
         <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">SDK Example</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Published as the <span className="font-mono text-foreground">txtclaw</span> package once
-            npm publishing is enabled.
+            Published as the <span className="font-mono text-foreground">txtclaw</span> package.
           </p>
           <div className="mt-4 space-y-3">
             <CodeBlock title="Install" language="bash" code={`pnpm add txtclaw`} copyLabel="Copy" />

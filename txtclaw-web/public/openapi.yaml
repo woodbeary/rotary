@@ -11,7 +11,7 @@ servers:
   - url: https://txtclaw-sms-e2e.lopez731.workers.dev
     description: Preview (Workers)
   - url: https://api.txtclaw.com
-    description: Custom domain (coming soon)
+    description: Production (api.txtclaw.com)
 security:
   - bearerAuth: []
 paths:

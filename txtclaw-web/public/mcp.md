@@ -4,7 +4,7 @@ MCP is an optional lane for coding agents that want tools and structured operati
 
 Today:
 - Use the TXT CLAW HTTP API (OpenAPI + agent-friendly Markdown).
-- MCP server is coming soon (HTTP API works today).
+- Or run the MCP server for tool-based workflows.
 
 ```bash
 pnpm dlx txtclaw@latest init --mcp
@@ -16,12 +16,10 @@ Docs to paste into agents:
 
 ## MCP server
 
-MCP server package publishing is in progress. Until then, use the HTTP API.
-
-When published, it will run like this (no global install):
+Run the MCP server (no global install):
 
 ```bash
-pnpm dlx -s txtclaw-mcp@latest
+pnpm -s dlx txtclaw-mcp@latest
 ```
 
 Environment:

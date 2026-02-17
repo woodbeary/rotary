@@ -1,3 +1,4 @@
+import { DEV_DOCS } from "@/lib/dev-docs"
 import type { MetadataRoute } from "next"
 
 function getBaseUrl(): string {
@@ -51,8 +52,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/llms.txt",
   ]
 
+  const renderedDocs = DEV_DOCS.map((doc) => `/developers/docs/${doc.slug}`)
+
   return [
     ...paths.map((path) => ({
+      url: `${baseUrl}${path}`,
+      lastModified: now,
+    })),
+    ...renderedDocs.map((path) => ({
       url: `${baseUrl}${path}`,
       lastModified: now,
     })),

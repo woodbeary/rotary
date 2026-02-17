@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { getPublicApiBaseUrl } from "@/lib/txtclaw-urls"
 import { BookOpen, KeyRound, Shield, Terminal, Zap } from "lucide-react"
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -158,9 +159,7 @@ export function ApiKeysDashboard() {
 
   const envSnippet = useMemo(() => {
     if (!newKey) return null
-    const baseUrl =
-      String(process.env.NEXT_PUBLIC_TXTCLAW_API_BASE_URL || "").trim() ||
-      "https://txtclaw-sms-e2e.lopez731.workers.dev"
+    const baseUrl = getPublicApiBaseUrl()
     return `export TXTCLAW_API_BASE_URL="${baseUrl}"\nexport TXTCLAW_API_KEY="${newKey}"`
   }, [newKey])
 
@@ -394,7 +393,7 @@ export function ApiKeysDashboard() {
                     language="bash"
                     code={
                       envSnippetDisplay ||
-                      `export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"\nexport TXTCLAW_API_KEY="vck_REPLACE_ME"`
+                      `export TXTCLAW_API_BASE_URL="${getPublicApiBaseUrl()}"\nexport TXTCLAW_API_KEY="vck_REPLACE_ME"`
                     }
                     copyLabel="Copy snippet"
                   />
@@ -422,7 +421,7 @@ export function ApiKeysDashboard() {
                   <div className="flex flex-wrap gap-2">
                     <CopyButton text={quickstartUrl} label="Copy docs URL" variant="secondary" />
                     <Button variant="outline" size="sm" asChild>
-                      <a href="/quickstart.md">Open /quickstart.md</a>
+                      <a href="/developers/docs/quickstart">Open quickstart</a>
                     </Button>
                   </div>
                 </div>
@@ -466,23 +465,32 @@ export function ApiKeysDashboard() {
               Docs
             </div>
             <div className="mt-2 space-y-2 text-sm">
-              <a className="font-mono underline underline-offset-4" href="/quickstart.md">
+              <a
+                className="font-mono underline underline-offset-4"
+                href="/developers/docs/quickstart"
+              >
                 /quickstart.md
               </a>
               <div className="text-sm text-muted-foreground">
                 Designed for bots. Paste it into Cursor/Codex.
               </div>
               <Separator className="my-3" />
-              <a className="font-mono underline underline-offset-4" href="/agents.md">
+              <a className="font-mono underline underline-offset-4" href="/developers/docs/agents">
                 /agents.md
               </a>
-              <a className="font-mono underline underline-offset-4" href="/openapi.yaml">
+              <a className="font-mono underline underline-offset-4" href="/developers/docs/openapi">
                 /openapi.yaml
               </a>
-              <a className="font-mono underline underline-offset-4" href="/rate-limits.md">
+              <a
+                className="font-mono underline underline-offset-4"
+                href="/developers/docs/rate-limits"
+              >
                 /rate-limits.md
               </a>
-              <a className="font-mono underline underline-offset-4" href="/security.md">
+              <a
+                className="font-mono underline underline-offset-4"
+                href="/developers/docs/security"
+              >
                 /security.md
               </a>
             </div>
@@ -675,13 +683,16 @@ export function ApiKeysDashboard() {
             /api-reference
           </Link>
           {" · "}
-          <a className="font-mono text-foreground underline underline-offset-4" href="/agents.md">
+          <a
+            className="font-mono text-foreground underline underline-offset-4"
+            href="/developers/docs/agents"
+          >
             /agents.md
           </a>
           {" · "}
           <a
             className="font-mono text-foreground underline underline-offset-4"
-            href="/openapi.yaml"
+            href="/developers/docs/openapi"
           >
             /openapi.yaml
           </a>

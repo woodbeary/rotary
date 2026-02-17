@@ -17,11 +17,11 @@ BYOK lets you run TXT CLAW agents using **your own** model provider key (OpenAI,
 ## Example (curl)
 
 ```bash
-# Recommended (custom domain):
-# export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"
+# Recommended (production):
+export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"
 #
-# Preview base URL (today):
-export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
+# Preview (if you're testing / staging):
+# export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
 export TXTCLAW_API_KEY="vck_REPLACE_ME"
 
 curl -sS "$TXTCLAW_API_BASE_URL/v1/byok" \

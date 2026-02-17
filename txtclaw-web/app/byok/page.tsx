@@ -36,15 +36,18 @@ export default function ByokPage() {
           <div className="mt-5 space-y-3">
             <p className="text-sm text-muted-foreground">Docs (agent-friendly Markdown):</p>
             <p className="text-sm">
-              <a className="font-mono underline underline-offset-4" href="/byok.md">
+              <a className="font-mono underline underline-offset-4" href="/developers/docs/byok">
                 /byok.md
               </a>
               {" · "}
-              <a className="font-mono underline underline-offset-4" href="/security.md">
+              <a
+                className="font-mono underline underline-offset-4"
+                href="/developers/docs/security"
+              >
                 /security.md
               </a>
               {" · "}
-              <a className="font-mono underline underline-offset-4" href="/routing.md">
+              <a className="font-mono underline underline-offset-4" href="/developers/docs/routing">
                 /routing.md
               </a>
             </p>

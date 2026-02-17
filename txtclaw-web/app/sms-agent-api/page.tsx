@@ -47,7 +47,7 @@ export default function SmsAgentApiPage() {
               or the agent-ingest docs at{" "}
               <a
                 className="font-mono text-foreground underline underline-offset-4"
-                href="/agents.md"
+                href="/developers/docs/agents"
               >
                 /agents.md
               </a>
@@ -82,7 +82,7 @@ export default function SmsAgentApiPage() {
                 OpenAPI:{" "}
                 <a
                   className="font-mono text-foreground underline underline-offset-4"
-                  href="/openapi.yaml"
+                  href="/developers/docs/openapi"
                 >
                   /openapi.yaml
                 </a>

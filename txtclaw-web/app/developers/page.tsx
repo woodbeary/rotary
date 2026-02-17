@@ -2,6 +2,7 @@ import { CodeBlock } from "@/components/code-block"
 import { DevDocsShell } from "@/components/dev-docs-shell"
 import { DeveloperCopyPrompt } from "@/components/developer-copy-prompt"
 import { CLERK_ENABLED } from "@/lib/clerk-config"
+import { getPublicApiBaseUrl } from "@/lib/txtclaw-urls"
 import type { Metadata } from "next"
 import Link from "next/link"
 
@@ -11,11 +12,8 @@ export const metadata: Metadata = {
     "Set up OpenClaw agents via API. TXT CLAW developer docs: agent-friendly Markdown + OpenAPI. Create an agent and talk to it over HTTPS. SMS is an optional lane.",
 }
 
-const DEFAULT_BASE_URL = "https://txtclaw-sms-e2e.lopez731.workers.dev"
-
 export default function DevelopersPage() {
-  const apiBaseUrl =
-    String(process.env.NEXT_PUBLIC_TXTCLAW_API_BASE_URL || "").trim() || DEFAULT_BASE_URL
+  const apiBaseUrl = getPublicApiBaseUrl()
 
   return (
     <DevDocsShell title="Developers">

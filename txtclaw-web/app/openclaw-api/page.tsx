@@ -1,5 +1,6 @@
 import { CodeBlock } from "@/components/code-block"
 import { DevDocsShell } from "@/components/dev-docs-shell"
+import { getPublicApiBaseUrl } from "@/lib/txtclaw-urls"
 import type { Metadata } from "next"
 import Link from "next/link"
 
@@ -12,11 +13,8 @@ export const metadata: Metadata = {
   },
 }
 
-const DEFAULT_BASE_URL = "https://txtclaw-sms-e2e.lopez731.workers.dev"
-
 export default function OpenClawApiPage() {
-  const apiBaseUrl =
-    String(process.env.NEXT_PUBLIC_TXTCLAW_API_BASE_URL || "").trim() || DEFAULT_BASE_URL
+  const apiBaseUrl = getPublicApiBaseUrl()
 
   return (
     <DevDocsShell title="OpenClaw API">
@@ -47,13 +45,16 @@ export default function OpenClawApiPage() {
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             Docs for coding agents:{" "}
-            <a className="font-mono text-foreground underline underline-offset-4" href="/agents.md">
+            <a
+              className="font-mono text-foreground underline underline-offset-4"
+              href="/developers/docs/agents"
+            >
               /agents.md
             </a>
             {" · "}
             <a
               className="font-mono text-foreground underline underline-offset-4"
-              href="/openapi.yaml"
+              href="/developers/docs/openapi"
             >
               /openapi.yaml
             </a>
@@ -95,7 +96,7 @@ export default function OpenClawApiPage() {
             For the full spec, see{" "}
             <a
               className="font-mono text-foreground underline underline-offset-4"
-              href="/openapi.yaml"
+              href="/developers/docs/openapi"
             >
               /openapi.yaml
             </a>{" "}

@@ -15,11 +15,11 @@ Note: email verification is required before you can generate keys.
 ## Use a key
 
 ```bash
-# Recommended (custom domain):
-# export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"
+# Recommended (production):
+export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"
 #
-# Preview base URL (today):
-export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
+# Preview (if you're testing / staging):
+# export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
 export TXTCLAW_API_KEY="vck_REPLACE_ME"
 ```
 
