@@ -1,9 +1,9 @@
 "use client"
 
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import { SignIn } from "@clerk/nextjs"
 import { CLERK_ENABLED } from "@/lib/clerk-config"
+import { SignIn } from "@clerk/nextjs"
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 export default function SignInPage() {
   if (!CLERK_ENABLED) {
@@ -43,12 +43,11 @@ export default function SignInPage() {
           <SignIn
             routing="path"
             path="/sign-in"
-            signUpUrl="/waitlist"
-            afterSignInUrl="/admin/promo"
+            signUpUrl="/sign-up"
+            afterSignInUrl="/dashboard/api-keys"
           />
         </div>
       </div>
     </main>
   )
 }
-

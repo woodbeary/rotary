@@ -20,8 +20,7 @@ type GitHubRelease = {
   created_at: string
 }
 
-const OPENCLAW_RELEASES_API =
-  "https://api.github.com/repos/openclaw/openclaw/releases"
+const OPENCLAW_RELEASES_API = "https://api.github.com/repos/openclaw/openclaw/releases"
 
 function toExcerpt(body: string | null, maxChars = 420) {
   if (!body) return null
@@ -67,9 +66,7 @@ export async function fetchOpenClawChangelog(limit = 12) {
       }
     }
 
-    const items = (data as GitHubRelease[])
-      .filter((release) => !release.draft)
-      .map(mapRelease)
+    const items = (data as GitHubRelease[]).filter((release) => !release.draft).map(mapRelease)
 
     return { items, error: null as string | null }
   } catch (error) {

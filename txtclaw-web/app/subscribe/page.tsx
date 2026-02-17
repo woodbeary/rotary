@@ -1,10 +1,10 @@
-import Link from "next/link"
+import { SubscribePanel } from "@/components/subscribe-panel"
+import { getUserBetaState, getUserOfferCode } from "@/lib/billing"
+import { CLERK_ENABLED } from "@/lib/clerk-config"
+import { getPromotionsMetadata } from "@/lib/promo-metadata"
 import { auth, clerkClient } from "@clerk/nextjs/server"
 import { ArrowLeft } from "lucide-react"
-import { SubscribePanel } from "@/components/subscribe-panel"
-import { CLERK_ENABLED } from "@/lib/clerk-config"
-import { getUserBetaState, getUserOfferCode } from "@/lib/billing"
-import { getPromotionsMetadata } from "@/lib/promo-metadata"
+import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
@@ -72,13 +72,17 @@ export default async function SubscribePage() {
   const user = await client.users.getUser(userId)
 
   const primaryEmail =
-    (user as unknown as {
-      primaryEmailAddress?: { emailAddress?: string | null } | null
-      emailAddresses?: Array<{ emailAddress?: string | null }> | null
-    }).primaryEmailAddress?.emailAddress ||
-    (user as unknown as {
-      emailAddresses?: Array<{ emailAddress?: string | null }> | null
-    }).emailAddresses?.[0]?.emailAddress ||
+    (
+      user as unknown as {
+        primaryEmailAddress?: { emailAddress?: string | null } | null
+        emailAddresses?: Array<{ emailAddress?: string | null }> | null
+      }
+    ).primaryEmailAddress?.emailAddress ||
+    (
+      user as unknown as {
+        emailAddresses?: Array<{ emailAddress?: string | null }> | null
+      }
+    ).emailAddresses?.[0]?.emailAddress ||
     undefined
 
   const betaState = getUserBetaState(user)

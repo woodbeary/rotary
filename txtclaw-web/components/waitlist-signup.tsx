@@ -1,7 +1,7 @@
 "use client"
 
-import { Waitlist } from "@clerk/nextjs"
 import { getWaitlistSuccessRedirectUrl } from "@/lib/waitlist"
+import { Waitlist } from "@clerk/nextjs"
 
 export function WaitlistSignUp() {
   const successRedirectUrl = getWaitlistSuccessRedirectUrl()
@@ -20,8 +20,7 @@ export function WaitlistSignUp() {
             headerSubtitle: "text-muted-foreground",
             socialButtonsBlockButton:
               "border border-border bg-background text-foreground hover:bg-accent",
-            formButtonPrimary:
-              "bg-primary text-primary-foreground hover:bg-primary/90",
+            formButtonPrimary: "bg-primary text-primary-foreground hover:bg-primary/90",
             footerActionText: "text-muted-foreground",
             footerActionLink: "text-foreground",
           },

@@ -1,10 +1,10 @@
 "use client"
 
-import { BellRing, Languages, MessageSquareText } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { StreamText } from "@/components/stream-text"
+import { Badge } from "@/components/ui/badge"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { cn } from "@/lib/utils"
+import { BellRing, Languages, MessageSquareText } from "lucide-react"
 
 const highlights = [
   {
@@ -34,15 +34,8 @@ export function LifestyleHighlights() {
   return (
     <section ref={ref} className="relative px-6 py-18 md:py-24">
       <div className="mx-auto max-w-6xl">
-        <div
-          className={cn(
-            "mb-10 max-w-2xl opacity-0",
-            isVisible && "animate-fade-up"
-          )}
-        >
-          <p className="mb-3 font-mono text-sm text-muted-foreground">
-            Built for real life
-          </p>
+        <div className={cn("mb-10 max-w-2xl opacity-0", isVisible && "animate-fade-up")}>
+          <p className="mb-3 font-mono text-sm text-muted-foreground">Built for real life</p>
           <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Text is the interface everyone already knows.
           </h2>
@@ -59,7 +52,7 @@ export function LifestyleHighlights() {
               key={item.title}
               className={cn(
                 "relative rounded-2xl border border-border bg-card p-6 opacity-0",
-                isVisible && "animate-fade-up"
+                isVisible && "animate-fade-up",
               )}
               style={{ animationDelay: `${index * 90 + 100}ms` }}
             >

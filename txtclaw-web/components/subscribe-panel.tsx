@@ -1,12 +1,12 @@
 "use client"
 
-import { type FormEvent, useEffect, useMemo, useState } from "react"
-import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
+import { type FormEvent, useEffect, useMemo, useState } from "react"
 
 type SubscribePanelProps = {
   email?: string
@@ -70,9 +70,7 @@ export function SubscribePanel({
   const [error, setError] = useState<string | null>(null)
   const [promoCodeInput, setPromoCodeInput] = useState("")
   const [promoBalance, setPromoBalance] = useState(Math.max(promoBalanceCents, 0))
-  const [promoTotalGranted, setPromoTotalGranted] = useState(
-    Math.max(promoTotalGrantedCents, 0)
-  )
+  const [promoTotalGranted, setPromoTotalGranted] = useState(Math.max(promoTotalGrantedCents, 0))
   const [promoLoading, setPromoLoading] = useState(false)
   const [promoError, setPromoError] = useState<string | null>(null)
   const [promoNotice, setPromoNotice] = useState<string | null>(null)
@@ -87,9 +85,7 @@ export function SubscribePanel({
           method: "GET",
           cache: "no-store",
         })
-        const payload = (await response.json().catch(() => null)) as
-          | LaunchStatsPayload
-          | null
+        const payload = (await response.json().catch(() => null)) as LaunchStatsPayload | null
 
         if (cancelled) return
         if (!response.ok || !payload?.ok) {
@@ -107,13 +103,8 @@ export function SubscribePanel({
               ? payload.earlyBirdCap
               : DEFAULT_STATS.earlyBirdCap,
           ltdClaimed:
-            typeof payload.ltdClaimed === "number"
-              ? payload.ltdClaimed
-              : DEFAULT_STATS.ltdClaimed,
-          ltdCap:
-            typeof payload.ltdCap === "number"
-              ? payload.ltdCap
-              : DEFAULT_STATS.ltdCap,
+            typeof payload.ltdClaimed === "number" ? payload.ltdClaimed : DEFAULT_STATS.ltdClaimed,
+          ltdCap: typeof payload.ltdCap === "number" ? payload.ltdCap : DEFAULT_STATS.ltdCap,
           waitlistCount:
             typeof payload.waitlistCount === "number"
               ? payload.waitlistCount
@@ -144,13 +135,9 @@ export function SubscribePanel({
   const monthlyTag = earlyBirdRemaining > 0 ? "Early bird" : "Standard"
   const normalizedPromoCode = promoCodeInput.trim().toUpperCase()
   const promoBalanceLabel = useMemo(() => toUsd(promoBalance), [promoBalance])
-  const promoTotalGrantedLabel = useMemo(
-    () => toUsd(promoTotalGranted),
-    [promoTotalGranted]
-  )
+  const promoTotalGrantedLabel = useMemo(() => toUsd(promoTotalGranted), [promoTotalGranted])
 
-  const alreadyPaid =
-    betaState === "paid_waiting_apple_invite" || betaState === "apple_invited"
+  const alreadyPaid = betaState === "paid_waiting_apple_invite" || betaState === "apple_invited"
 
   const statusLabel = useMemo(() => {
     if (betaState === "apple_invited") return "Apple invite sent"
@@ -176,9 +163,7 @@ export function SubscribePanel({
         body: JSON.stringify({ offerType }),
       })
 
-      const payload = (await response.json().catch(() => null)) as
-        | CheckoutResponse
-        | null
+      const payload = (await response.json().catch(() => null)) as CheckoutResponse | null
 
       if (!response.ok || !payload?.ok || !payload.checkoutUrl) {
         throw new Error(payload?.error || "Unable to start checkout.")
@@ -186,11 +171,7 @@ export function SubscribePanel({
 
       window.location.assign(payload.checkoutUrl)
     } catch (checkoutError) {
-      setError(
-        checkoutError instanceof Error
-          ? checkoutError.message
-          : "Unable to start checkout."
-      )
+      setError(checkoutError instanceof Error ? checkoutError.message : "Unable to start checkout.")
     } finally {
       setLoadingType(null)
     }
@@ -215,9 +196,7 @@ export function SubscribePanel({
         }),
       })
 
-      const payload = (await response.json().catch(() => null)) as
-        | PromoRedeemResponse
-        | null
+      const payload = (await response.json().catch(() => null)) as PromoRedeemResponse | null
 
       if (!response.ok || !payload?.ok) {
         throw new Error(payload?.error || "Unable to redeem code.")
@@ -241,11 +220,7 @@ export function SubscribePanel({
 
       setPromoCodeInput("")
     } catch (redeemError) {
-      setPromoError(
-        redeemError instanceof Error
-          ? redeemError.message
-          : "Unable to redeem code."
-      )
+      setPromoError(redeemError instanceof Error ? redeemError.message : "Unable to redeem code.")
     } finally {
       setPromoLoading(false)
     }
@@ -258,10 +233,7 @@ export function SubscribePanel({
           <Badge variant="secondary" className="font-mono text-[11px]">
             Apple beta billing
           </Badge>
-          <Badge
-            variant="outline"
-            className="font-mono text-[11px] text-muted-foreground"
-          >
+          <Badge variant="outline" className="font-mono text-[11px] text-muted-foreground">
             {statusLabel}
           </Badge>
         </div>
@@ -269,8 +241,8 @@ export function SubscribePanel({
           Complete subscription
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-          Fixed launch pricing. No negotiation. After successful payment,
-          you&apos;ll receive Apple invite instructions. Usually within 24h.
+          Fixed launch pricing. No negotiation. After successful payment, you&apos;ll receive Apple
+          invite instructions. Usually within 24h.
         </p>
         {email ? (
           <p className="mt-3 text-xs text-muted-foreground">
@@ -321,9 +293,7 @@ export function SubscribePanel({
               )}
             </Button>
           </form>
-          {promoNotice ? (
-            <p className="text-sm text-emerald-300">{promoNotice}</p>
-          ) : null}
+          {promoNotice ? <p className="text-sm text-emerald-300">{promoNotice}</p> : null}
           {promoError ? <p className="text-sm text-red-400">{promoError}</p> : null}
         </CardContent>
       </Card>
@@ -416,9 +386,7 @@ export function SubscribePanel({
             <CheckCircle2 className="h-4 w-4" />
             Payment already confirmed.
           </div>
-          <p className="mt-1 text-emerald-200/90">
-            Your Apple invite instructions are on the way.
-          </p>
+          <p className="mt-1 text-emerald-200/90">Your Apple invite instructions are on the way.</p>
         </div>
       ) : null}
 

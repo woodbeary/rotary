@@ -1,8 +1,5 @@
 "use client"
 
-import { useTheme } from "next-themes"
-import { useEffect, useMemo, useState } from "react"
-import { Monitor, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,6 +8,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Monitor, Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
+import { useEffect, useMemo, useState } from "react"
 
 type ThemeOption = "light" | "dark" | "system"
 
@@ -24,8 +24,8 @@ export function ThemeToggle() {
   useEffect(() => setMounted(true), [])
 
   const selectedTheme = useMemo<ThemeOption>(() => {
-    const candidate = forcedTheme ?? theme
-    return isThemeOption(candidate ?? "") ? candidate : "system"
+    const candidate = String(forcedTheme ?? theme ?? "")
+    return isThemeOption(candidate) ? candidate : "system"
   }, [forcedTheme, theme])
 
   const effectiveTheme = resolvedTheme === "dark" ? "dark" : "light"

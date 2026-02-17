@@ -1,12 +1,12 @@
 "use client"
 
-import { ArrowRight, ShieldCheck } from "lucide-react"
+import { StreamText } from "@/components/stream-text"
 import { Button } from "@/components/ui/button"
 import { WaitlistModalButton } from "@/components/waitlist-modal-button"
-import { StreamText } from "@/components/stream-text"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { SMS_GATEWAY_LIVE, SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
 import { cn } from "@/lib/utils"
+import { ArrowRight } from "lucide-react"
 
 export function CTA() {
   const { ref, isVisible } = useAnimateOnScroll()
@@ -14,47 +14,10 @@ export function CTA() {
   return (
     <section ref={ref} className="px-6 py-24 md:py-32">
       <div className="mx-auto grid max-w-4xl gap-4">
-        {!SMS_GATEWAY_LIVE ? (
-          <article
-            className={cn(
-              "rounded-2xl border border-border bg-card p-7 opacity-0 md:p-8",
-              isVisible && "animate-fade-up"
-            )}
-          >
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-medium text-foreground/90">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Why Apple first
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              We start on Apple to keep onboarding simple while we harden
-              reliability and support before broader rollout.
-            </p>
-            <details className="mt-4 rounded-xl border border-border/70 bg-muted/20 p-4 text-sm">
-              <summary className="cursor-pointer font-medium text-foreground">
-                Security &amp; privacy details
-              </summary>
-              <div className="mt-3 space-y-2 text-muted-foreground">
-                <p>
-                  Each approved account is routed through its own dedicated
-                  conversation channel in the TXT CLAW runtime.
-                </p>
-                <p>
-                  Messages run over Apple&apos;s messaging infrastructure and follow
-                  Apple account-level protections.
-                </p>
-                <p>
-                  Works anywhere Messages works, including Wi-Fi-only Apple
-                  devices.
-                </p>
-              </div>
-            </details>
-          </article>
-        ) : null}
-
         <article
           className={cn(
             "relative overflow-hidden rounded-2xl border border-border bg-card opacity-0",
-            isVisible && "animate-scale-in"
+            isVisible && "animate-scale-in",
           )}
         >
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-foreground/[0.02] to-transparent" />

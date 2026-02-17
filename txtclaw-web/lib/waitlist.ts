@@ -13,9 +13,7 @@ export function getWaitlistSuccessRedirectUrl() {
   }
 
   const normalizedAppUrl =
-    appUrl.startsWith("http://") || appUrl.startsWith("https://")
-      ? appUrl
-      : `https://${appUrl}`
+    appUrl.startsWith("http://") || appUrl.startsWith("https://") ? appUrl : `https://${appUrl}`
 
   try {
     const url = new URL(normalizedAppUrl)

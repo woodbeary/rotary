@@ -1,6 +1,6 @@
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 import { clerkClient } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -35,12 +35,9 @@ export async function POST(request: NextRequest) {
       {
         status: 429,
         headers: {
-          "Retry-After": Math.max(
-            1,
-            Math.ceil((rate.resetAt - Date.now()) / 1000)
-          ).toString(),
+          "Retry-After": Math.max(1, Math.ceil((rate.resetAt - Date.now()) / 1000)).toString(),
         },
-      }
+      },
     )
   }
 
@@ -49,17 +46,14 @@ export async function POST(request: NextRequest) {
   try {
     payload = (await request.json()) as JoinPayload
   } catch {
-    return NextResponse.json(
-      { ok: false, error: "Invalid JSON body." },
-      { status: 400 }
-    )
+    return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 })
   }
 
   const email = normalizeEmail(payload.email || "")
   if (!email || !isValidEmail(email)) {
     return NextResponse.json(
       { ok: false, error: "Please enter a valid email address." },
-      { status: 400 }
+      { status: 400 },
     )
   }
 
@@ -77,7 +71,7 @@ export async function POST(request: NextRequest) {
         status: entry.status,
         source: payload.source || "unknown",
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     // Duplicate-safe fallback: treat existing pending/invited entries as success.
@@ -87,9 +81,7 @@ export async function POST(request: NextRequest) {
         query: email,
         limit: 5,
       })
-      const matched = existing.data.find(
-        (entry) => normalizeEmail(entry.emailAddress) === email
-      )
+      const matched = existing.data.find((entry) => normalizeEmail(entry.emailAddress) === email)
       if (matched) {
         return NextResponse.json(
           {
@@ -99,7 +91,7 @@ export async function POST(request: NextRequest) {
             status: matched.status,
             source: payload.source || "unknown",
           },
-          { status: 200 }
+          { status: 200 },
         )
       }
     } catch {
@@ -109,12 +101,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Could not join waitlist right now.",
+        error: error instanceof Error ? error.message : "Could not join waitlist right now.",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

@@ -1,7 +1,7 @@
+import { WaitlistSuccessFlag } from "@/components/waitlist-success-flag"
+import { ArrowRight, CheckCircle2 } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, CheckCircle2 } from "lucide-react"
-import { WaitlistSuccessFlag } from "@/components/waitlist-success-flag"
 
 export const metadata: Metadata = {
   title: "You're on the waitlist — TXT CLAW",
@@ -23,8 +23,8 @@ export default function WaitlistSuccessPage() {
             You&apos;re on the list
           </h1>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            You&apos;re on the Apple beta waitlist. We&apos;ll send updates as new
-            invite batches open.
+            You&apos;re on the Apple beta waitlist. We&apos;ll send updates as new invite batches
+            open.
           </p>
 
           <div className="mt-8 space-y-3 rounded-xl border border-border/60 bg-muted/20 p-5 text-sm">

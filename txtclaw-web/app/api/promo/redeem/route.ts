@@ -1,20 +1,14 @@
-import { auth, clerkClient, type User } from "@clerk/nextjs/server"
-import { NextRequest, NextResponse } from "next/server"
 import { getUserPrivateMetadata } from "@/lib/billing"
-import {
-  getPromoCampaignId,
-  getPromoGrantCents,
-  isPromoRedeemEnabled,
-} from "@/lib/promo-config"
-import {
-  verifyPromoCode,
-} from "@/lib/promo-codes"
+import { verifyPromoCode } from "@/lib/promo-codes"
+import { getPromoCampaignId, getPromoGrantCents, isPromoRedeemEnabled } from "@/lib/promo-config"
 import {
   applyPromotionGrant,
   getCampaignClaimCodeId,
   getPromotionsMetadata,
   hasCodeBeenRedeemed,
 } from "@/lib/promo-metadata"
+import { type User, auth, clerkClient } from "@clerk/nextjs/server"
+import { NextRequest, NextResponse } from "next/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -27,7 +21,7 @@ type RedeemPayload = {
 }
 
 async function listUsersForPromoScan(
-  client: Awaited<ReturnType<typeof clerkClient>>
+  client: Awaited<ReturnType<typeof clerkClient>>,
 ): Promise<User[]> {
   const users: User[] = []
   let offset = 0
@@ -66,16 +60,13 @@ function jsonError(message: string, status: number) {
       ok: false,
       error: message,
     },
-    { status }
+    { status },
   )
 }
 
 export async function POST(request: NextRequest) {
   if (!isPromoRedeemEnabled()) {
-    return jsonError(
-      "Promo code redemption is currently disabled. Try again later.",
-      503
-    )
+    return jsonError("Promo code redemption is currently disabled. Try again later.", 503)
   }
 
   const { userId } = await auth()
@@ -85,10 +76,7 @@ export async function POST(request: NextRequest) {
 
   const promoCodeSecret = process.env.PROMO_CODE_SECRET?.trim()
   if (!promoCodeSecret) {
-    return jsonError(
-      "Promo redemption is not configured. Missing PROMO_CODE_SECRET.",
-      500
-    )
+    return jsonError("Promo redemption is not configured. Missing PROMO_CODE_SECRET.", 500)
   }
 
   const campaignId = getPromoCampaignId()
@@ -119,10 +107,7 @@ export async function POST(request: NextRequest) {
     const campaignClaimCodeId = getCampaignClaimCodeId(currentPromotions, campaignId)
 
     if (campaignClaimCodeId && campaignClaimCodeId !== verification.codeId) {
-      return jsonError(
-        "This account already redeemed a code for this campaign.",
-        409
-      )
+      return jsonError("This account already redeemed a code for this campaign.", 409)
     }
 
     if (
@@ -141,7 +126,7 @@ export async function POST(request: NextRequest) {
           balanceCents: currentPromotions.balanceCents,
           message: "Code already redeemed on this account.",
         },
-        { status: 200 }
+        { status: 200 },
       )
     }
 
@@ -165,7 +150,7 @@ export async function POST(request: NextRequest) {
           balanceCents: currentPromotions.balanceCents,
           message: "Code already redeemed on this account.",
         },
-        { status: 200 }
+        { status: 200 },
       )
     }
 
@@ -189,7 +174,7 @@ export async function POST(request: NextRequest) {
           balanceCents: grant.promotions.balanceCents,
           message: "Code already redeemed on this account.",
         },
-        { status: 200 }
+        { status: 200 },
       )
     }
 
@@ -213,12 +198,12 @@ export async function POST(request: NextRequest) {
         balanceCents: grant.promotions.balanceCents,
         message: "Code redeemed successfully.",
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     return jsonError(
       error instanceof Error ? error.message : "Unable to redeem code right now.",
-      500
+      500,
     )
   }
 }

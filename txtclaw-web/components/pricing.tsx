@@ -1,10 +1,8 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { ArrowRight, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { StreamText } from "@/components/stream-text"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -16,6 +14,8 @@ import {
 import { WaitlistModalButton } from "@/components/waitlist-modal-button"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { cn } from "@/lib/utils"
+import { ArrowRight, Check } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 
 type LaunchStatsPayload = {
   ok?: boolean
@@ -51,9 +51,7 @@ export function Pricing() {
           method: "GET",
           cache: "no-store",
         })
-        const payload = (await response.json().catch(() => null)) as
-          | LaunchStatsPayload
-          | null
+        const payload = (await response.json().catch(() => null)) as LaunchStatsPayload | null
 
         if (cancelled || !response.ok || !payload?.ok) {
           return
@@ -69,13 +67,8 @@ export function Pricing() {
               ? payload.earlyBirdCap
               : DEFAULT_STATS.earlyBirdCap,
           ltdClaimed:
-            typeof payload.ltdClaimed === "number"
-              ? payload.ltdClaimed
-              : DEFAULT_STATS.ltdClaimed,
-          ltdCap:
-            typeof payload.ltdCap === "number"
-              ? payload.ltdCap
-              : DEFAULT_STATS.ltdCap,
+            typeof payload.ltdClaimed === "number" ? payload.ltdClaimed : DEFAULT_STATS.ltdClaimed,
+          ltdCap: typeof payload.ltdCap === "number" ? payload.ltdCap : DEFAULT_STATS.ltdCap,
           waitlistCount:
             typeof payload.waitlistCount === "number"
               ? payload.waitlistCount
@@ -135,12 +128,7 @@ export function Pricing() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
       <div className="mx-auto max-w-6xl">
-        <div
-          className={cn(
-            "mb-14 max-w-2xl opacity-0",
-            isVisible && "animate-fade-up"
-          )}
-        >
+        <div className={cn("mb-14 max-w-2xl opacity-0", isVisible && "animate-fade-up")}>
           <p className="mb-3 font-mono text-sm text-muted-foreground">Pricing</p>
           <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Fixed launch pricing.
@@ -156,7 +144,7 @@ export function Pricing() {
           <Card
             className={cn(
               "relative flex flex-col opacity-0 transition-all duration-300 hover:shadow-lg hover:shadow-foreground/[0.02]",
-              isVisible && "animate-fade-up"
+              isVisible && "animate-fade-up",
             )}
             style={{ animationDelay: "100ms" }}
           >
@@ -172,9 +160,7 @@ export function Pricing() {
                 </span>
                 <span className="text-sm text-muted-foreground">{monthly.period}</span>
               </div>
-              <CardDescription>
-                First 100 paid seats are $16/mo, then $19/mo.
-              </CardDescription>
+              <CardDescription>First 100 paid seats are $16/mo, then $19/mo.</CardDescription>
             </CardHeader>
 
             <CardContent className="flex-1 space-y-3">
@@ -222,7 +208,7 @@ export function Pricing() {
           <Card
             className={cn(
               "relative flex flex-col opacity-0 transition-all duration-300 hover:shadow-lg hover:shadow-foreground/[0.02]",
-              isVisible && "animate-fade-up"
+              isVisible && "animate-fade-up",
             )}
             style={{ animationDelay: "180ms" }}
           >
@@ -233,14 +219,10 @@ export function Pricing() {
             <CardHeader className="pb-4">
               <CardTitle className="font-mono text-lg">BYOK lifetime</CardTitle>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight text-foreground">
-                  $299
-                </span>
+                <span className="text-4xl font-bold tracking-tight text-foreground">$299</span>
                 <span className="text-sm text-muted-foreground">one-time</span>
               </div>
-              <CardDescription>
-                10 seats total. First-come, first-served.
-              </CardDescription>
+              <CardDescription>10 seats total. First-come, first-served.</CardDescription>
             </CardHeader>
 
             <CardContent className="flex-1 space-y-3">
@@ -261,9 +243,7 @@ export function Pricing() {
                 ))}
               </ul>
               <p className="text-xs text-muted-foreground">
-                {ltdRemaining > 0
-                  ? `${ltdRemaining} seats remaining.`
-                  : "Sold out."}
+                {ltdRemaining > 0 ? `${ltdRemaining} seats remaining.` : "Sold out."}
               </p>
             </CardContent>
 
@@ -293,17 +273,15 @@ export function Pricing() {
         </div>
 
         {loading ? (
-          <p className="mt-6 text-xs text-muted-foreground">
-            Loading live counters…
-          </p>
+          <p className="mt-6 text-xs text-muted-foreground">Loading live counters…</p>
         ) : null}
         {stats.recentPaid.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
             {stats.recentPaid.slice(0, 10).map((entry, index) => {
-              const dateLabel = new Date(entry.timestamp).toLocaleDateString(
-                "en-US",
-                { month: "short", day: "numeric" }
-              )
+              const dateLabel = new Date(entry.timestamp).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })
 
               return (
                 <span

@@ -1,16 +1,12 @@
-import Link from "next/link"
-import type { Metadata } from "next"
-import { ArrowLeft, MessageCircle, ShieldCheck } from "lucide-react"
-import {
-  CLERK_DISABLED_FOR_LOCAL_LIVE_KEY,
-  CLERK_ENABLED,
-} from "@/lib/clerk-config"
 import { WaitlistSignUp } from "@/components/waitlist-signup"
+import { CLERK_DISABLED_FOR_LOCAL_LIVE_KEY, CLERK_ENABLED } from "@/lib/clerk-config"
+import { ArrowLeft, MessageCircle, ShieldCheck } from "lucide-react"
+import type { Metadata } from "next"
+import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Waitlist — TXT CLAW",
-  description:
-    "Join the TXT CLAW Apple beta waitlist for invite-only access.",
+  description: "Join the TXT CLAW Apple beta waitlist for invite-only access.",
 }
 
 export const dynamic = "force-dynamic"
@@ -40,7 +36,8 @@ export default async function WaitlistPage() {
               Join the Apple Beta Waitlist
             </h1>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              TXT CLAW is invite-only during Apple beta. Use the same email address as your Apple ID / iCloud account so we can match your invite correctly when you&apos;re approved.
+              TXT CLAW is invite-only during Apple beta. Use the same email address as your Apple ID
+              / iCloud account so we can match your invite correctly when you&apos;re approved.
             </p>
 
             <div className="mt-8 space-y-4 rounded-xl border border-border/60 bg-muted/20 p-5 text-sm text-foreground/90">
@@ -59,9 +56,7 @@ export default async function WaitlistPage() {
               <WaitlistSignUp />
             ) : (
               <div className="rounded-xl border border-border/60 bg-muted/20 p-5">
-                <p className="text-sm font-medium text-foreground">
-                  Waitlist is being configured.
-                </p>
+                <p className="text-sm font-medium text-foreground">Waitlist is being configured.</p>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {CLERK_DISABLED_FOR_LOCAL_LIVE_KEY
                     ? "Local development is using a live Clerk key scoped to the production domain. Use a Clerk test key locally, or run from an allowed production domain/subdomain."

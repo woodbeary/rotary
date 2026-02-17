@@ -32,8 +32,7 @@ function getRequestBearerToken(request: NextRequest) {
 }
 
 function isAuthorizedCronRequest(request: NextRequest) {
-  const expectedSecret =
-    process.env.WAITLIST_CRON_SECRET?.trim() || process.env.CRON_SECRET?.trim()
+  const expectedSecret = process.env.WAITLIST_CRON_SECRET?.trim() || process.env.CRON_SECRET?.trim()
 
   if (!expectedSecret) return false
 
@@ -69,7 +68,7 @@ async function runWaitlistInviteBatch(request: NextRequest) {
         selectedCount: entries.length,
         selectedEntryIds: entries.map((entry) => entry.id),
       },
-      { status: 200 }
+      { status: 200 },
     )
   }
 
@@ -103,7 +102,7 @@ async function runWaitlistInviteBatch(request: NextRequest) {
       failedCount: failed.length,
       failures: failed,
     },
-    { status }
+    { status },
   )
 }
 
@@ -114,7 +113,7 @@ function getMissingSecretResponse() {
       error:
         "Missing waitlist cron secret. Set WAITLIST_CRON_SECRET or CRON_SECRET in environment variables.",
     },
-    { status: 500 }
+    { status: 500 },
   )
 }
 
@@ -124,14 +123,13 @@ function getUnauthorizedResponse() {
       ok: false,
       error: "Unauthorized cron request.",
     },
-    { status: 401 }
+    { status: 401 },
   )
 }
 
 export async function GET(request: NextRequest) {
   const hasConfiguredSecret =
-    Boolean(process.env.WAITLIST_CRON_SECRET?.trim()) ||
-    Boolean(process.env.CRON_SECRET?.trim())
+    Boolean(process.env.WAITLIST_CRON_SECRET?.trim()) || Boolean(process.env.CRON_SECRET?.trim())
 
   if (!hasConfiguredSecret) return getMissingSecretResponse()
   if (!isAuthorizedCronRequest(request)) return getUnauthorizedResponse()
@@ -145,15 +143,14 @@ export async function GET(request: NextRequest) {
         error: "Failed to process waitlist invite batch.",
         detail: toErrorMessage(error),
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
 
 export async function POST(request: NextRequest) {
   const hasConfiguredSecret =
-    Boolean(process.env.WAITLIST_CRON_SECRET?.trim()) ||
-    Boolean(process.env.CRON_SECRET?.trim())
+    Boolean(process.env.WAITLIST_CRON_SECRET?.trim()) || Boolean(process.env.CRON_SECRET?.trim())
 
   if (!hasConfiguredSecret) return getMissingSecretResponse()
   if (!isAuthorizedCronRequest(request)) return getUnauthorizedResponse()
@@ -167,7 +164,7 @@ export async function POST(request: NextRequest) {
         error: "Failed to process waitlist invite batch.",
         detail: toErrorMessage(error),
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

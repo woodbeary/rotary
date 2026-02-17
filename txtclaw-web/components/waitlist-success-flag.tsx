@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect } from "react"
 import { markWaitlistJoinedInBrowser } from "@/lib/waitlist"
+import { useEffect } from "react"
 
 export function WaitlistSuccessFlag() {
   useEffect(() => {

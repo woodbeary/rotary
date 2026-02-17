@@ -1,17 +1,14 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import type { ComponentProps, MouseEvent } from "react"
-import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { isWaitlistMarkedJoinedInBrowser } from "@/lib/waitlist"
+import { ArrowRight } from "lucide-react"
+import { useEffect, useState } from "react"
+import type { ComponentProps, MouseEvent } from "react"
 
 const WAITLIST_FORM_ID = "waitlist-form"
 
-type WaitlistModalButtonProps = Omit<
-  ComponentProps<typeof Button>,
-  "children" | "asChild"
-> & {
+type WaitlistModalButtonProps = Omit<ComponentProps<typeof Button>, "children" | "asChild"> & {
   label?: string
   signedInLabel?: string
   source?: string
@@ -85,11 +82,7 @@ export function WaitlistModalButton({
 
   return (
     <Button asChild {...buttonProps}>
-      <a
-        href={`/#${WAITLIST_FORM_ID}`}
-        data-waitlist-source={source}
-        onClick={handleClick}
-      >
+      <a href={`/#${WAITLIST_FORM_ID}`} data-waitlist-source={source} onClick={handleClick}>
         {renderContent(label, showIcon)}
       </a>
     </Button>

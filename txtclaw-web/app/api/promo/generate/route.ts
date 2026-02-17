@@ -1,11 +1,11 @@
-import { auth } from "@clerk/nextjs/server"
-import { NextRequest, NextResponse } from "next/server"
+import { createPromoCode } from "@/lib/promo-codes"
 import {
   canUserGeneratePromoCodes,
   getPromoCampaignId,
   getPromoGrantCents,
 } from "@/lib/promo-config"
-import { createPromoCode } from "@/lib/promo-codes"
+import { auth } from "@clerk/nextjs/server"
+import { NextRequest, NextResponse } from "next/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -38,7 +38,7 @@ function jsonError(message: string, status: number) {
       ok: false,
       error: message,
     },
-    { status }
+    { status },
   )
 }
 
@@ -54,10 +54,7 @@ export async function POST(request: NextRequest) {
 
   const promoCodeSecret = process.env.PROMO_CODE_SECRET?.trim()
   if (!promoCodeSecret) {
-    return jsonError(
-      "Promo generation is not configured. Missing PROMO_CODE_SECRET.",
-      500
-    )
+    return jsonError("Promo generation is not configured. Missing PROMO_CODE_SECRET.", 500)
   }
 
   let payload: GeneratePayload = {}
@@ -95,6 +92,6 @@ export async function POST(request: NextRequest) {
       codes,
       generatedAt: new Date().toISOString(),
     },
-    { status: 200 }
+    { status: 200 },
   )
 }

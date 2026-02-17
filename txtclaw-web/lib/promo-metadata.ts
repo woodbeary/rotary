@@ -116,14 +116,13 @@ export function getPromotionsMetadata(user: User): PromotionsMetadata {
       .map((value) => normalizeCodeId(value))
       .filter((value): value is string => typeof value === "string")
       .concat(grants.map((grant) => grant.codeId))
-      .concat(Object.values(campaignClaims))
+      .concat(Object.values(campaignClaims)),
   )
 
   const derivedTotalGranted = grants.reduce((sum, grant) => sum + grant.amountCents, 0)
   const totalGrantedCents =
     asNonNegativeInteger(promotionsRecord.totalGrantedCents) ?? derivedTotalGranted
-  const balanceCents =
-    asNonNegativeInteger(promotionsRecord.balanceCents) ?? totalGrantedCents
+  const balanceCents = asNonNegativeInteger(promotionsRecord.balanceCents) ?? totalGrantedCents
 
   return {
     grants,
@@ -134,10 +133,7 @@ export function getPromotionsMetadata(user: User): PromotionsMetadata {
   }
 }
 
-export function hasCodeBeenRedeemed(
-  promotions: PromotionsMetadata,
-  codeIdRaw: string
-): boolean {
+export function hasCodeBeenRedeemed(promotions: PromotionsMetadata, codeIdRaw: string): boolean {
   const codeId = normalizeCodeId(codeIdRaw)
   if (!codeId) return false
 
@@ -148,7 +144,7 @@ export function hasCodeBeenRedeemed(
 
 export function getCampaignClaimCodeId(
   promotions: PromotionsMetadata,
-  campaignIdRaw: string
+  campaignIdRaw: string,
 ): string | undefined {
   const campaignId = normalizeCampaignId(campaignIdRaw)
   if (!campaignId) return undefined

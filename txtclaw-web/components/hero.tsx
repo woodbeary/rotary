@@ -1,19 +1,15 @@
 "use client"
 
-import { MessageCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { SmsDemo } from "@/components/sms-demo"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { WaitlistInlineForm } from "@/components/waitlist-inline-form"
-import {
-  SMS_GATEWAY_LIVE,
-  SMS_PHONE_DISPLAY,
-  SMS_PHONE_HREF,
-} from "@/lib/launch"
+import { SMS_GATEWAY_LIVE, SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
+import { MessageCircle } from "lucide-react"
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden px-5 pb-20 pt-4 sm:px-6 md:pb-32 md:pt-10">
+    <section className="relative min-h-[100svh] overflow-hidden px-5 pb-20 pt-4 sm:px-6 md:pb-32 md:pt-10">
       {/* Subtle radial glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground/[0.03] blur-3xl" />
@@ -31,9 +27,7 @@ export function Hero() {
             ) : (
               <span className="h-2 w-2 rounded-full bg-amber-400" />
             )}
-            {SMS_GATEWAY_LIVE
-              ? "Live — try it right now"
-              : "Apple beta — invite required"}
+            {SMS_GATEWAY_LIVE ? "Live — try it right now" : "Apple beta — invite required"}
           </Badge>
 
           <h1 className="text-balance text-[2.5rem] font-bold leading-[1.1] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
@@ -66,17 +60,9 @@ export function Hero() {
               id="waitlist-form"
               className="flex w-full max-w-xl scroll-mt-28 flex-col items-center"
             >
-              <WaitlistInlineForm
-                source="hero_inline"
-                prominent
-                className="sm:max-w-xl"
-              />
+              <WaitlistInlineForm source="hero_inline" prominent className="sm:max-w-xl" />
             </div>
           )}
-
-          <div className="w-full lg:hidden">
-            <SmsDemo />
-          </div>
 
           {SMS_GATEWAY_LIVE && (
             <p className="mt-1 font-mono text-xs text-muted-foreground/70">
