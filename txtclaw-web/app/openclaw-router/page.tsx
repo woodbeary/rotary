@@ -1,5 +1,5 @@
-import { Footer } from "@/components/footer"
-import { Navbar } from "@/components/navbar"
+import { CodeBlock } from "@/components/code-block"
+import { DevDocsShell } from "@/components/dev-docs-shell"
 import type { Metadata } from "next"
 import Link from "next/link"
 
@@ -11,9 +11,8 @@ export const metadata: Metadata = {
 
 export default function OpenClawRouterPage() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="mx-auto max-w-4xl px-6 py-16 md:py-24">
+    <DevDocsShell title="Router">
+      <div className="space-y-10">
         <header className="space-y-4">
           <div className="inline-flex items-center rounded-full border border-border/70 bg-muted/30 px-3 py-1 font-mono text-[11px] text-muted-foreground">
             OpenClaw Router
@@ -28,19 +27,17 @@ export default function OpenClawRouterPage() {
           </p>
         </header>
 
-        <section className="mt-10 rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+        <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">What you get</h2>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-            <li>
-              Hosted router: fast default model, optional fallback if the first attempt fails.
-            </li>
+            <li>Hosted router: fast default model, optional fallback on upstream failure.</li>
             <li>Traceability: every response includes `trace_id` + `x-txtclaw-trace-id`.</li>
             <li>Stable docs endpoints for bots: `*.md` + OpenAPI.</li>
             <li>BYOK: store provider keys encrypted and apply them to your agents.</li>
           </ul>
         </section>
 
-        <section className="mt-6 rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+        <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">Docs</h2>
           <p className="mt-2 text-sm text-muted-foreground">Paste these into Cursor/Codex:</p>
           <p className="mt-4 text-sm">
@@ -58,22 +55,26 @@ export default function OpenClawRouterPage() {
           </p>
         </section>
 
-        <section className="mt-6 rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+        <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">Start in 60 seconds</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Generate an API key, then use the CLI doctor to prove it works end-to-end:
           </p>
-          <pre className="mt-4 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-            {`pnpm dlx txtclaw@latest init\npnpm dlx txtclaw@latest doctor`}
-          </pre>
+          <div className="mt-4">
+            <CodeBlock
+              title="Commands"
+              language="bash"
+              code={`pnpm dlx txtclaw@latest init\npnpm dlx txtclaw@latest doctor`}
+              copyLabel="Copy"
+            />
+          </div>
           <p className="mt-4 text-sm">
             <Link className="font-mono underline underline-offset-4" href="/dashboard/api-keys">
               /dashboard/api-keys
             </Link>
           </p>
         </section>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </DevDocsShell>
   )
 }

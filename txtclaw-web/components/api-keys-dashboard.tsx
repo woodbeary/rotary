@@ -1,5 +1,9 @@
 "use client"
 
+import { CodeBlock } from "@/components/code-block"
+import { ConsolePageHeader } from "@/components/console-page-header"
+import { CopyButton } from "@/components/copy-button"
+import { DeveloperCopyPrompt } from "@/components/developer-copy-prompt"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { BookOpen, Copy, KeyRound, Terminal } from "lucide-react"
+import { BookOpen, KeyRound, Shield, Terminal, Zap } from "lucide-react"
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -263,125 +267,228 @@ export function ApiKeysDashboard() {
   }, [byokOpenKeyId, byokSaving, loadKeys])
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-3">
-        <div className="inline-flex items-center rounded-full border border-border/70 bg-muted/30 px-3 py-1 font-mono text-[11px] text-muted-foreground">
-          Developer Console
-        </div>
-        <h1 className="text-balance font-mono text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-          API Keys
-        </h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          Generate an API key, copy it once, and you’re ready to call{" "}
-          <span className="font-mono text-foreground">/v1/*</span>.
-        </p>
-      </header>
+    <div className="space-y-10">
+      <ConsolePageHeader
+        badge={
+          <div className="inline-flex items-center rounded-full border border-border/70 bg-muted/30 px-3 py-1 font-mono text-[11px] text-muted-foreground">
+            Developer Console
+          </div>
+        }
+        title="API Keys"
+        subtitle={
+          <>
+            One key per app is enough. Keys are shown once, stored hashed, and enforced with Worker
+            rate limits.
+          </>
+        }
+        right={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/developers"
+              className="inline-flex items-center rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
+            >
+              <BookOpen className="mr-2 h-4 w-4" />
+              Docs
+            </Link>
+            <Link
+              href="/dashboard/billing"
+              className="inline-flex items-center rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
+            >
+              Upgrade limits
+            </Link>
+          </div>
+        }
+      />
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-2xl border-border/60">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="font-mono text-[11px] text-muted-foreground">Step 1</div>
-              <KeyRound className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <CardTitle className="text-base">Generate a key</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Input
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="Label (optional)"
-            />
-            <Button onClick={handleCreate} disabled={creating} className="w-full">
-              {creating ? "Generating…" : "Generate key"}
-            </Button>
-            <div className="text-xs text-muted-foreground">
-              Active keys: <span className="font-mono text-foreground">{activeCount}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl border-border/60">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="font-mono text-[11px] text-muted-foreground">Step 2</div>
-              <Copy className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <CardTitle className="text-base">Copy env snippet</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {newKey ? (
-              <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-                <div className="text-xs font-medium text-foreground">Key (shown once)</div>
-                <div className="mt-2 break-all font-mono text-xs text-foreground">
-                  {revealKey ? newKey : maskKey(newKey)}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <section className="lg:col-span-7">
+          <div className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Setup
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Button variant="secondary" size="sm" onClick={() => copy(newKey)}>
-                    <Copy className="mr-2 h-4 w-4" />
-                    Copy key
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setRevealKey((prev) => !prev)}>
-                    {revealKey ? "Hide" : "Reveal"}
-                  </Button>
-                </div>
+                <h2 className="mt-1 text-lg font-semibold text-foreground">
+                  1 minute to first reply
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Follow these steps exactly. You should end with a real agent reply and a trace id.
+                </p>
               </div>
-            ) : (
-              <div className="rounded-xl border border-border/60 bg-muted/10 p-3 text-xs text-muted-foreground">
-                Generate a key to reveal it once.
-              </div>
-            )}
-
-            <div className="rounded-xl border border-border/60 bg-background p-3">
-              <div className="text-xs font-medium text-foreground">Environment</div>
-              <pre className="mt-2 overflow-x-auto text-xs text-foreground">
-                {envSnippetDisplay ||
-                  `export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"\nexport TXTCLAW_API_KEY="vck_REPLACE_ME"`}
-              </pre>
-              {envSnippet ? (
-                <div className="mt-3">
-                  <Button variant="secondary" size="sm" onClick={() => copy(envSnippet)}>
-                    <Copy className="mr-2 h-4 w-4" />
-                    Copy snippet
-                  </Button>
-                </div>
-              ) : null}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl border-border/60">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="font-mono text-[11px] text-muted-foreground">Step 3</div>
-              <Terminal className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <CardTitle className="text-base">Verify end-to-end</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="rounded-xl border border-border/60 bg-background p-3">
-              <pre className="overflow-x-auto text-xs text-foreground">{doctorCommands}</pre>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button variant="secondary" size="sm" onClick={() => copy(doctorCommands)}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy commands
-                </Button>
-                <Button variant="secondary" size="sm" onClick={() => copy(quickstartUrl)}>
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  Copy docs URL
-                </Button>
+              <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
+                <Shield className="h-4 w-4" />
+                Keys never re-shown
               </div>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Paste{" "}
+
+            <div className="mt-6 space-y-4">
+              <div className="rounded-xl border border-border/60 bg-background p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-mono text-[11px] text-muted-foreground">Step 1</div>
+                    <div className="text-sm font-medium text-foreground">Generate a key</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Active keys: <span className="font-mono text-foreground">{activeCount}</span>
+                    </div>
+                  </div>
+                  <KeyRound className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-12">
+                  <div className="md:col-span-7">
+                    <Input
+                      value={label}
+                      onChange={(e) => setLabel(e.target.value)}
+                      placeholder="Label (optional) e.g. prod-api"
+                    />
+                  </div>
+                  <div className="md:col-span-5">
+                    <Button onClick={handleCreate} disabled={creating} className="w-full">
+                      {creating ? "Generating…" : "Generate key"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border/60 bg-background p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-mono text-[11px] text-muted-foreground">Step 2</div>
+                    <div className="text-sm font-medium text-foreground">Copy env snippet</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Keep this server-side only. Never commit it.
+                    </div>
+                  </div>
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                </div>
+
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-xl border border-border/60 bg-muted/15 p-3">
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-foreground">Key (shown once)</div>
+                        <div className="mt-1 break-all font-mono text-xs text-foreground">
+                          {newKey
+                            ? revealKey
+                              ? newKey
+                              : maskKey(newKey)
+                            : "Generate a key first."}
+                        </div>
+                      </div>
+                      {newKey ? (
+                        <div className="flex flex-wrap gap-2">
+                          <CopyButton text={newKey} label="Copy key" variant="secondary" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setRevealKey((prev) => !prev)}
+                          >
+                            {revealKey ? "Hide" : "Reveal"}
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <CodeBlock
+                    title="Environment"
+                    language="bash"
+                    code={
+                      envSnippetDisplay ||
+                      `export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"\nexport TXTCLAW_API_KEY="vck_REPLACE_ME"`
+                    }
+                    copyLabel="Copy snippet"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border/60 bg-background p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-mono text-[11px] text-muted-foreground">Step 3</div>
+                    <div className="text-sm font-medium text-foreground">Verify end-to-end</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      You should see a 200 status and a non-empty reply.
+                    </div>
+                  </div>
+                  <Terminal className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="mt-3 space-y-3">
+                  <CodeBlock
+                    title="Commands"
+                    language="bash"
+                    code={doctorCommands}
+                    copyLabel="Copy commands"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <CopyButton text={quickstartUrl} label="Copy docs URL" variant="secondary" />
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="/quickstart.md">Open /quickstart.md</a>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <DeveloperCopyPrompt />
+          </div>
+        </section>
+
+        <aside className="lg:col-span-5 space-y-4">
+          <div className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Pro tip
+                </div>
+                <div className="mt-1 text-sm font-medium text-foreground">
+                  Warm up before demoing
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  First call can be cold. The doctor runs a warmup path.
+                </p>
+              </div>
+              <Zap className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="mt-4">
+              <CodeBlock
+                title="Status"
+                language="bash"
+                code={`curl -sS "$TXTCLAW_API_BASE_URL/v1/status" \\\n  -H "Authorization: Bearer $TXTCLAW_API_KEY"`}
+                copyLabel="Copy curl"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Docs
+            </div>
+            <div className="mt-2 space-y-2 text-sm">
               <a className="font-mono underline underline-offset-4" href="/quickstart.md">
                 /quickstart.md
-              </a>{" "}
-              into Cursor/Codex.
+              </a>
+              <div className="text-sm text-muted-foreground">
+                Designed for bots. Paste it into Cursor/Codex.
+              </div>
+              <Separator className="my-3" />
+              <a className="font-mono underline underline-offset-4" href="/agents.md">
+                /agents.md
+              </a>
+              <a className="font-mono underline underline-offset-4" href="/openapi.yaml">
+                /openapi.yaml
+              </a>
+              <a className="font-mono underline underline-offset-4" href="/rate-limits.md">
+                /rate-limits.md
+              </a>
+              <a className="font-mono underline underline-offset-4" href="/security.md">
+                /security.md
+              </a>
             </div>
-          </CardContent>
-        </Card>
-      </section>
+          </div>
+        </aside>
+      </div>
 
       <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
         <div className="flex items-center justify-between gap-4">

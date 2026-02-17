@@ -31,7 +31,7 @@ test("developers page is mobile-friendly and links to key/dashboard + docs", asy
 
   await expect(page.getByRole("heading", { name: "TXT CLAW for Developers" })).toBeVisible()
   await expect(page.getByText("Pasteable Docs Links")).toBeVisible()
-  await expect(page.locator('a[href="/quickstart.md"]')).toBeVisible()
+  await expect(page.getByRole("link", { name: "/quickstart.md" })).toBeVisible()
 
   const hasHorizontalScroll = await page.evaluate(() => {
     const root = document.documentElement

@@ -21,18 +21,24 @@ export async function GET() {
   if (!token) return jsonError("Missing TXTCLAW_CONSOLE_SERVICE_TOKEN.", 500)
 
   const baseUrl = getConsoleBaseUrl()
-  const res = await fetch(
-    `${baseUrl.replace(/\/+$/, "")}/console/v1/api-keys?user_id=${encodeURIComponent(verified.userId)}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    },
-  )
+  const url = `${baseUrl.replace(/\/+$/, "")}/console/v1/api-keys?user_id=${encodeURIComponent(
+    verified.userId,
+  )}`
 
-  const text = await res.text()
+  const init: RequestInit = {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  }
+
+  let res = await fetch(url, init)
+  let text = await res.text()
+  // Cloudflare DO cold start / transient errors happen in practice. One retry keeps console UX stable.
+  if (!res.ok && res.status >= 500) {
+    await new Promise((r) => setTimeout(r, 150))
+    res = await fetch(url, init)
+    text = await res.text()
+  }
   if (!res.ok) {
     return jsonError(`Console error (${res.status}): ${text}`, 502)
   }
@@ -61,19 +67,28 @@ export async function POST(request: NextRequest) {
   }
 
   const baseUrl = getConsoleBaseUrl()
-  const res = await fetch(`${baseUrl.replace(/\/+$/, "")}/console/v1/api-keys`, {
+  const url = `${baseUrl.replace(/\/+$/, "")}/console/v1/api-keys`
+  const body = JSON.stringify({
+    user_id: verified.userId,
+    label: payload.label,
+  })
+
+  const init: RequestInit = {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      user_id: verified.userId,
-      label: payload.label,
-    }),
-  })
+    body,
+  }
 
-  const text = await res.text()
+  let res = await fetch(url, init)
+  let text = await res.text()
+  if (!res.ok && res.status >= 500) {
+    await new Promise((r) => setTimeout(r, 150))
+    res = await fetch(url, init)
+    text = await res.text()
+  }
   if (!res.ok) {
     return jsonError(`Console error (${res.status}): ${text}`, 502)
   }

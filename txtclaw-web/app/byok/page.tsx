@@ -1,5 +1,4 @@
-import { Footer } from "@/components/footer"
-import { Navbar } from "@/components/navbar"
+import { DevDocsShell } from "@/components/dev-docs-shell"
 import type { Metadata } from "next"
 import Link from "next/link"
 
@@ -11,9 +10,8 @@ export const metadata: Metadata = {
 
 export default function ByokPage() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="mx-auto max-w-4xl px-6 py-16 md:py-24">
+    <DevDocsShell title="BYOK">
+      <div className="space-y-10">
         <header className="space-y-4">
           <div className="inline-flex items-center rounded-full border border-border/70 bg-muted/30 px-3 py-1 font-mono text-[11px] text-muted-foreground">
             OpenClaw BYOK
@@ -27,12 +25,12 @@ export default function ByokPage() {
           </p>
         </header>
 
-        <section className="mt-10 rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+        <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">How it works</h2>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
             <li>1. Generate a TXT CLAW API key.</li>
             <li>2. Call `PUT /v1/byok` once to store your provider key encrypted.</li>
-            <li>3. Create agents with `llm.mode="byok"` (or set it per-agent later).</li>
+            <li>3. Create agents with `llm.mode=\"byok\"`.</li>
           </ul>
 
           <div className="mt-5 space-y-3">
@@ -53,7 +51,7 @@ export default function ByokPage() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+        <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">Get started</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Create an API key and configure BYOK in the console:
@@ -67,8 +65,7 @@ export default function ByokPage() {
             BYOK keys are stored encrypted and are never shown again after saving.
           </p>
         </section>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </DevDocsShell>
   )
 }

@@ -1,6 +1,11 @@
 "use client"
 
+import { CodeBlock } from "@/components/code-block"
+import { CopyButton } from "@/components/copy-button"
 import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { cn } from "@/lib/utils"
+import { ChevronDown } from "lucide-react"
 import { useMemo } from "react"
 import { toast } from "sonner"
 
@@ -55,22 +60,47 @@ export function DeveloperCopyPrompt() {
   }
 
   return (
-    <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+    <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Copy Prompt (For Coding Agents)</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Paste this into Codex/Cursor when someone asks “how do I set up OpenClaw agents via
-            API?”
+        <div className="min-w-0">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            For coding agents
+          </div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">
+            Copy a setup prompt (Clerk-style)
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Paste into Codex/Cursor so it installs the SDK/CLI correctly and follows the guardrails.
           </p>
         </div>
-        <Button variant="secondary" onClick={copy}>
-          Copy prompt
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <CopyButton text={prompt} label="Copy prompt" variant="secondary" />
+          <Button variant="outline" asChild>
+            <a href="/quickstart.md">Open quickstart</a>
+          </Button>
+        </div>
       </div>
-      <pre className="mt-4 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground whitespace-pre-wrap">
-        {prompt}
-      </pre>
+
+      <Collapsible>
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm font-medium text-foreground">Prompt contents</div>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-2">
+              <span>Show</span>
+              <ChevronDown className={cn("h-4 w-4")} />
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+        <CollapsibleContent className="mt-3">
+          <CodeBlock
+            code={prompt}
+            title="TXT CLAW setup prompt"
+            language="Markdown"
+            wrap
+            copyLabel="Copy prompt"
+          />
+        </CollapsibleContent>
+      </Collapsible>
     </section>
   )
 }
