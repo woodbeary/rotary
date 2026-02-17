@@ -1,15 +1,15 @@
-import Link from "next/link"
-import { auth } from "@clerk/nextjs/server"
-import { ArrowLeft } from "lucide-react"
-import { notFound } from "next/navigation"
-import { redirect } from "next/navigation"
 import { AdminPromoGenerator } from "@/components/admin-promo-generator"
+import { CLERK_ENABLED } from "@/lib/clerk-config"
 import {
   canUserGeneratePromoCodes,
   getPromoCampaignId,
   getPromoGrantCents,
 } from "@/lib/promo-config"
-import { CLERK_ENABLED } from "@/lib/clerk-config"
+import { auth } from "@clerk/nextjs/server"
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
+import { notFound } from "next/navigation"
+import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 

@@ -1,10 +1,10 @@
 "use client"
 
-import { type FormEvent, useMemo, useState } from "react"
-import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Loader2 } from "lucide-react"
+import { type FormEvent, useMemo, useState } from "react"
 
 type AdminPromoGeneratorProps = {
   campaignId: string
@@ -25,10 +25,7 @@ function toUsd(cents: number) {
   }).format(cents / 100)
 }
 
-export function AdminPromoGenerator({
-  campaignId,
-  grantCents,
-}: AdminPromoGeneratorProps) {
+export function AdminPromoGenerator({ campaignId, grantCents }: AdminPromoGeneratorProps) {
   const [generateCountInput, setGenerateCountInput] = useState("10")
   const [generatingCodes, setGeneratingCodes] = useState(false)
   const [generatedCodes, setGeneratedCodes] = useState<string[]>([])
@@ -59,9 +56,7 @@ export function AdminPromoGenerator({
         body: JSON.stringify({ count }),
       })
 
-      const payload = (await response.json().catch(() => null)) as
-        | PromoGenerateResponse
-        | null
+      const payload = (await response.json().catch(() => null)) as PromoGenerateResponse | null
 
       if (!response.ok || !payload?.ok || !Array.isArray(payload.codes)) {
         throw new Error(payload?.error || "Unable to generate codes.")
@@ -72,9 +67,7 @@ export function AdminPromoGenerator({
       setGenerateNotice(`Generated ${payload.codes.length} code(s).`)
     } catch (error) {
       setGeneratedCodes([])
-      setGenerateError(
-        error instanceof Error ? error.message : "Unable to generate codes."
-      )
+      setGenerateError(error instanceof Error ? error.message : "Unable to generate codes.")
     } finally {
       setGeneratingCodes(false)
     }
@@ -88,9 +81,7 @@ export function AdminPromoGenerator({
       await navigator.clipboard.writeText(generatedCodes.join("\n"))
       setCopyNotice("Copied codes to clipboard.")
     } catch {
-      setCopyNotice(
-        "Clipboard copy failed on this device. You can still copy from the list below."
-      )
+      setCopyNotice("Clipboard copy failed on this device. You can still copy from the list below.")
     }
   }
 
@@ -106,7 +97,10 @@ export function AdminPromoGenerator({
           Per-code credit: <span className="text-foreground">{grantLabel}</span>
         </p>
 
-        <form className="flex flex-col gap-3 sm:flex-row sm:items-center" onSubmit={generatePromoCodes}>
+        <form
+          className="flex flex-col gap-3 sm:flex-row sm:items-center"
+          onSubmit={generatePromoCodes}
+        >
           <Input
             type="number"
             min={1}
@@ -145,9 +139,7 @@ export function AdminPromoGenerator({
           </div>
         ) : null}
 
-        {generateNotice ? (
-          <p className="text-sm text-emerald-300">{generateNotice}</p>
-        ) : null}
+        {generateNotice ? <p className="text-sm text-emerald-300">{generateNotice}</p> : null}
         {copyNotice ? <p className="text-sm text-emerald-300">{copyNotice}</p> : null}
         {generateError ? <p className="text-sm text-red-400">{generateError}</p> : null}
       </CardContent>

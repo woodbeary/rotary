@@ -21,7 +21,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [
     "/",
     "/developers",
+    "/byok",
     "/openclaw-api",
+    "/openclaw-router",
     "/openclaw-mcp",
     "/openclaw-sdk",
     "/sms-agent-api",
@@ -33,7 +35,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/waitlist",
   ]
 
-  const docs = ["/agents.md", "/openapi.yaml", "/llms.txt"]
+  const docs = [
+    "/quickstart.md",
+    "/agents.md",
+    "/openapi.yaml",
+    "/pricing.md",
+    "/api-keys.md",
+    "/cli.md",
+    "/mcp.md",
+    "/byok.md",
+    "/routing.md",
+    "/skills.md",
+    "/rate-limits.md",
+    "/security.md",
+    "/llms.txt",
+  ]
 
   return [
     ...paths.map((path) => ({

@@ -1,6 +1,6 @@
-import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
+import Image from "next/image"
 
 export function Footer() {
   return (
@@ -81,35 +81,20 @@ export function Footer() {
               </span>
             </div>
 
-            <div className="flex items-center gap-5 text-sm text-muted-foreground">
-              <a
-                href="/developers"
-                className="transition-colors hover:text-foreground"
-              >
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground md:justify-end md:gap-5">
+              <a href="/developers" className="transition-colors hover:text-foreground">
                 Developers
               </a>
-              <a
-                href="/api-reference"
-                className="transition-colors hover:text-foreground"
-              >
+              <a href="/api-reference" className="transition-colors hover:text-foreground">
                 API Docs
               </a>
-              <a
-                href="/changelog"
-                className="transition-colors hover:text-foreground"
-              >
+              <a href="/changelog" className="transition-colors hover:text-foreground">
                 Changelog
               </a>
-              <a
-                href="/privacy"
-                className="transition-colors hover:text-foreground"
-              >
+              <a href="/privacy" className="transition-colors hover:text-foreground">
                 Privacy
               </a>
-              <a
-                href="/terms"
-                className="transition-colors hover:text-foreground"
-              >
+              <a href="/terms" className="transition-colors hover:text-foreground">
                 Terms
               </a>
               <a
@@ -133,12 +118,10 @@ export function Footer() {
             >
               {SMS_PHONE_DISPLAY}
             </a>
-            , you agree to receive conversational AI messages from TXT CLAW.
-            Message and data rates may apply. Reply{" "}
-            <span className="font-mono font-medium text-foreground">STOP</span>{" "}
-            to opt out. Reply{" "}
-            <span className="font-mono font-medium text-foreground">HELP</span>{" "}
-            for help. View our{" "}
+            , you agree to receive conversational AI messages from TXT CLAW. Message and data rates
+            may apply. Reply <span className="font-mono font-medium text-foreground">STOP</span> to
+            opt out. Reply <span className="font-mono font-medium text-foreground">HELP</span> for
+            help. View our{" "}
             <a
               href="/privacy"
               className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"

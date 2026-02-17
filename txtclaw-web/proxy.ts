@@ -1,6 +1,6 @@
+import { CLERK_ENABLED } from "@/lib/clerk-config"
 import type { NextFetchEvent, NextRequest } from "next/server"
 import { NextResponse } from "next/server"
-import { CLERK_ENABLED } from "@/lib/clerk-config"
 
 export default async function middleware(request: NextRequest, event: NextFetchEvent) {
   if (!CLERK_ENABLED) return NextResponse.next()

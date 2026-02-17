@@ -1,7 +1,7 @@
+import { Footer } from "@/components/footer"
+import { Navbar } from "@/components/navbar"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
   title: "OpenClaw SDK (Node/JS) — TXT CLAW",
@@ -26,15 +26,13 @@ export default function OpenClawSdkPage() {
               OpenClaw SDK (Node/JavaScript)
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-              TXT CLAW provides a tiny JS client for the developer API so you can
-              wrap OpenClaw-powered agents into your own product quickly.
+              TXT CLAW provides a tiny JS client for the developer API so you can wrap
+              OpenClaw-powered agents into your own product quickly.
             </p>
           </header>
 
           <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
-            <h2 className="text-lg font-semibold text-foreground">
-              Quickstart (1 line)
-            </h2>
+            <h2 className="text-lg font-semibold text-foreground">Quickstart (1 line)</h2>
             <pre className="mt-3 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
               {`pnpm dlx txtclaw@latest init`}
             </pre>
@@ -59,15 +57,15 @@ export default function OpenClawSdkPage() {
           <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
             <h2 className="text-lg font-semibold text-foreground">SDK Example</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              (Published as the <span className="font-mono text-foreground">txtclaw</span>{" "}
-              package once npm publishing is enabled.)
+              (Published as the <span className="font-mono text-foreground">txtclaw</span> package
+              once npm publishing is enabled.)
             </p>
 
             <pre className="mt-4 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-{`pnpm add txtclaw`}
+              {`pnpm add txtclaw`}
             </pre>
             <pre className="mt-3 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-{`import { createTxtclawClient } from "txtclaw"
+              {`import { createTxtclawClient } from "txtclaw"
 
 const client = createTxtclawClient({
   apiKey: process.env.TXTCLAW_API_KEY,
@@ -124,4 +122,3 @@ console.log(reply_text)`}
     </div>
   )
 }
-

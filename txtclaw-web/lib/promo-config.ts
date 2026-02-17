@@ -27,10 +27,7 @@ export function getPromoCampaignId(): string {
 }
 
 export function getPromoGrantCents(): number {
-  return parsePromoGrantCents(
-    process.env.PROMO_GRANT_CENTS,
-    PROMO_CODE_DEFAULT_GRANT_CENTS
-  )
+  return parsePromoGrantCents(process.env.PROMO_GRANT_CENTS, PROMO_CODE_DEFAULT_GRANT_CENTS)
 }
 
 export function isPromoRedeemEnabled(): boolean {

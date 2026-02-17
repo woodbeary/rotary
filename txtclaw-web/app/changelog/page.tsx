@@ -1,14 +1,13 @@
+import { fetchOpenClawChangelog } from "@/lib/changelog"
+import { ArrowLeft, ExternalLink } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowLeft, ExternalLink } from "lucide-react"
-import { fetchOpenClawChangelog } from "@/lib/changelog"
 
 const OPENCLAW_RELEASES_URL = "https://github.com/openclaw/openclaw/releases"
 
 export const metadata: Metadata = {
   title: "Changelog — TXT CLAW",
-  description:
-    "Track upstream OpenClaw release updates and what is rolling into TXT CLAW.",
+  description: "Track upstream OpenClaw release updates and what is rolling into TXT CLAW.",
 }
 
 export default async function ChangelogPage() {
@@ -30,8 +29,8 @@ export default async function ChangelogPage() {
             Changelog
           </h1>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            This feed mirrors upstream OpenClaw releases. Some updates may appear
-            here before they are fully enabled in TXT CLAW.
+            This feed mirrors upstream OpenClaw releases. Some updates may appear here before they
+            are fully enabled in TXT CLAW.
           </p>
 
           <a
@@ -53,9 +52,7 @@ export default async function ChangelogPage() {
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-lg font-semibold text-foreground">
-                        {item.title}
-                      </h2>
+                      <h2 className="text-lg font-semibold text-foreground">{item.title}</h2>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {item.tag} •{" "}
                         {new Date(item.publishedAt).toLocaleDateString("en-US", {

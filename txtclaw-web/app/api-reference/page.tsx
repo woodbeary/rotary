@@ -1,11 +1,10 @@
+import { ArrowLeft, BookOpen, Rocket } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowLeft, BookOpen, Rocket } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "API Reference — TXT CLAW",
-  description:
-    "TXT CLAW developer API docs (preview). Agent-friendly quickstart + OpenAPI.",
+  description: "TXT CLAW developer API docs (preview). Agent-friendly quickstart + OpenAPI.",
 }
 
 export default function ApiReferencePage() {
@@ -30,20 +29,17 @@ export default function ApiReferencePage() {
             TXT CLAW API
           </h1>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            Create a dedicated OpenClaw agent and talk to it over HTTPS.
-            SMS provisioning is a separate lane and may be async.
+            Create a dedicated OpenClaw agent and talk to it over HTTPS. SMS provisioning is a
+            separate lane and may be async.
           </p>
 
           <div className="mt-6 space-y-3 rounded-xl border border-border/60 bg-muted/20 p-5">
-            <h2 className="text-lg font-semibold text-foreground">
-              Quickstart (1 line)
-            </h2>
+            <h2 className="text-lg font-semibold text-foreground">Quickstart (1 line)</h2>
             <pre className="overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
               {`pnpm dlx txtclaw@latest init`}
             </pre>
             <p className="text-sm text-muted-foreground">
-              Agent-friendly docs:
-              {" "}
+              Agent-friendly docs:{" "}
               <a
                 className="font-mono text-foreground underline underline-offset-4"
                 href="/agents.md"
@@ -61,14 +57,10 @@ export default function ApiReferencePage() {
           </div>
 
           <div className="mt-6 space-y-4 rounded-xl border border-border/60 bg-muted/20 p-5">
-            <h2 className="text-lg font-semibold text-foreground">
-              HTTP (curl)
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Create an agent:
-            </p>
+            <h2 className="text-lg font-semibold text-foreground">HTTP (curl)</h2>
+            <p className="text-sm text-muted-foreground">Create an agent:</p>
             <pre className="overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-{`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents" \\
+              {`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents" \\
   -H "Authorization: Bearer $TXTCLAW_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -77,11 +69,9 @@ export default function ApiReferencePage() {
   }'`}
             </pre>
 
-            <p className="text-sm text-muted-foreground">
-              Send a message:
-            </p>
+            <p className="text-sm text-muted-foreground">Send a message:</p>
             <pre className="overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-{`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents/$AGENT_ID/messages" \\
+              {`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents/$AGENT_ID/messages" \\
   -H "Authorization: Bearer $TXTCLAW_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{ "text": "Draft a polite text asking my landlord to fix a leak." }'`}
@@ -93,8 +83,8 @@ export default function ApiReferencePage() {
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 JS Example
               </p>
-                <pre className="overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-{`const baseUrl =
+              <pre className="overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
+                {`const baseUrl =
   process.env.TXTCLAW_API_BASE_URL ?? "https://txtclaw-sms-e2e.lopez731.workers.dev"
 const apiKey = process.env.TXTCLAW_API_KEY
 
@@ -127,28 +117,19 @@ console.log(await msg.json())`}
                 Notes
               </p>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  Runtime API works immediately (no Twilio required).
-                </li>
+                <li>Runtime API works immediately (no Twilio required).</li>
                 <li>
                   SMS provisioning is preview/async; response may be{" "}
-                  <span className="font-mono text-foreground">
-                    needs_compliance
-                  </span>
-                  .
+                  <span className="font-mono text-foreground">needs_compliance</span>.
                 </li>
                 <li>
                   Every response includes{" "}
-                  <span className="font-mono text-foreground">trace_id</span>{" "}
-                  (and header{" "}
-                  <span className="font-mono text-foreground">
-                    x-txtclaw-trace-id
-                  </span>
+                  <span className="font-mono text-foreground">trace_id</span> (and header{" "}
+                  <span className="font-mono text-foreground">x-txtclaw-trace-id</span>
                   ).
                 </li>
                 <li>
-                  If you get{" "}
-                  <span className="font-mono text-foreground">429</span>, respect{" "}
+                  If you get <span className="font-mono text-foreground">429</span>, respect{" "}
                   <span className="font-mono text-foreground">Retry-After</span>.
                 </li>
                 <li>
@@ -165,7 +146,14 @@ console.log(await msg.json())`}
           </div>
 
           <p className="mt-8 text-sm text-muted-foreground">
-            API access is in private preview. For access, contact us.
+            Generate an API key in{" "}
+            <Link
+              href="/dashboard/api-keys"
+              className="font-mono text-foreground underline underline-offset-4"
+            >
+              /dashboard/api-keys
+            </Link>
+            .
           </p>
         </div>
       </div>

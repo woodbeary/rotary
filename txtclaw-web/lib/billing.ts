@@ -14,10 +14,7 @@ export type BetaState =
   | "paid_waiting_apple_invite"
   | "apple_invited"
 
-export type OfferCode =
-  | "PROMO_CODE_REDACTED"
-  | "PROMO_CODE_REDACTED"
-  | "PROMO_CODE_REDACTED"
+export type OfferCode = "PROMO_CODE_REDACTED" | "PROMO_CODE_REDACTED" | "PROMO_CODE_REDACTED"
 
 export type OfferType = "monthly" | "ltd"
 
@@ -79,11 +76,7 @@ function asString(value: unknown): string | undefined {
 
 function asOfferCode(value: unknown): OfferCode | undefined {
   const raw = asString(value)
-  if (
-    raw === "PROMO_CODE_REDACTED" ||
-    raw === "PROMO_CODE_REDACTED" ||
-    raw === "PROMO_CODE_REDACTED"
-  ) {
+  if (raw === "PROMO_CODE_REDACTED" || raw === "PROMO_CODE_REDACTED" || raw === "PROMO_CODE_REDACTED") {
     return raw
   }
   return undefined
@@ -259,10 +252,7 @@ export function resolveMonthlyOffer(stats: LaunchStats): LaunchOffer {
   }
 }
 
-export function resolveCheckoutOffer(
-  stats: LaunchStats,
-  offerType: OfferType
-): LaunchOffer | null {
+export function resolveCheckoutOffer(stats: LaunchStats, offerType: OfferType): LaunchOffer | null {
   if (offerType === "ltd") {
     if (stats.ltdClaimed >= LTD_CAP) return null
 
@@ -283,7 +273,7 @@ export function mergeBetaState(
   patch: {
     betaState?: BetaState
     offerCode?: OfferCode
-  }
+  },
 ): MetadataRecord {
   const current = getUserPublicMetadata(user)
 
@@ -294,10 +284,7 @@ export function mergeBetaState(
   }
 }
 
-export function mergeSquareMetadata(
-  user: User,
-  patch: Partial<SquareMetadata>
-): MetadataRecord {
+export function mergeSquareMetadata(user: User, patch: Partial<SquareMetadata>): MetadataRecord {
   const privateMetadata = getUserPrivateMetadata(user)
   const currentSquare = asRecord(privateMetadata.square)
 
@@ -319,7 +306,7 @@ export function mergeBillingMetadata(
     checkoutUrl?: string
     lastEventType?: string
     lastEventId?: string
-  }
+  },
 ): MetadataRecord {
   const privateMetadata = getUserPrivateMetadata(user)
   const currentBilling = asRecord(privateMetadata.billing)

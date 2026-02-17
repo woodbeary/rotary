@@ -1,17 +1,22 @@
+import { DeveloperCopyPrompt } from "@/components/developer-copy-prompt"
+import { Footer } from "@/components/footer"
+import { Navbar } from "@/components/navbar"
+import { CLERK_ENABLED } from "@/lib/clerk-config"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
   title: "Developers — TXT CLAW",
   description:
-    "TXT CLAW developer docs: agent-friendly Markdown + OpenAPI. Create an OpenClaw agent and talk to it over HTTPS. SMS is an optional lane.",
+    "Set up OpenClaw agents via API. TXT CLAW developer docs: agent-friendly Markdown + OpenAPI. Create an agent and talk to it over HTTPS. SMS is an optional lane.",
 }
 
 const DEFAULT_BASE_URL = "https://txtclaw-sms-e2e.lopez731.workers.dev"
 
 export default function DevelopersPage() {
+  const apiBaseUrl =
+    String(process.env.NEXT_PUBLIC_TXTCLAW_API_BASE_URL || "").trim() || DEFAULT_BASE_URL
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -25,16 +30,13 @@ export default function DevelopersPage() {
               TXT CLAW for Developers
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Create a dedicated OpenClaw agent (memory + configuration) and
-              talk to it over HTTPS. SMS provisioning is a separate, optional
-              lane.
+              Create a dedicated OpenClaw agent (memory + configuration) and talk to it over HTTPS.
+              SMS provisioning is a separate, optional lane.
             </p>
           </header>
 
           <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
-            <h2 className="text-lg font-semibold text-foreground">
-              Quickstart (1 line)
-            </h2>
+            <h2 className="text-lg font-semibold text-foreground">Quickstart (1 line)</h2>
             <pre className="mt-3 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
               {`pnpm dlx txtclaw@latest init`}
             </pre>
@@ -54,30 +56,44 @@ export default function DevelopersPage() {
                 /openapi.yaml
               </a>
             </p>
+            <p className="mt-3 text-sm text-muted-foreground">
+              {CLERK_ENABLED ? (
+                <>
+                  Get an API key:{" "}
+                  <Link
+                    href="/dashboard/api-keys"
+                    className="font-mono text-foreground underline underline-offset-4"
+                  >
+                    /dashboard/api-keys
+                  </Link>
+                </>
+              ) : (
+                <>API key dashboard requires Clerk auth (not configured here).</>
+              )}
+            </p>
           </section>
+
+          <DeveloperCopyPrompt />
 
           <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
             <h2 className="text-lg font-semibold text-foreground">HTTP API</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Base URL (preview today):{" "}
-              <span className="font-mono text-foreground">{DEFAULT_BASE_URL}</span>
+              Base URL: <span className="break-all font-mono text-foreground">{apiBaseUrl}</span>
             </p>
 
             <div className="mt-5 space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground">Set env vars:</p>
                 <pre className="mt-2 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-{`export TXTCLAW_API_BASE_URL="${DEFAULT_BASE_URL}"
-export TXTCLAW_API_KEY="REPLACE_ME"`}
+                  {`export TXTCLAW_API_BASE_URL="${apiBaseUrl}"
+export TXTCLAW_API_KEY="vck_REPLACE_ME"`}
                 </pre>
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground">
-                  Create an agent:
-                </p>
+                <p className="text-sm text-muted-foreground">Create an agent:</p>
                 <pre className="mt-2 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-{`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents" \\
+                  {`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents" \\
   -H "Authorization: Bearer $TXTCLAW_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{ "system_prompt": "You are a helpful assistant.", "sms": { "mode": "none" } }'`}
@@ -87,7 +103,7 @@ export TXTCLAW_API_KEY="REPLACE_ME"`}
               <div>
                 <p className="text-sm text-muted-foreground">Send a message:</p>
                 <pre className="mt-2 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-{`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents/$AGENT_ID/messages" \\
+                  {`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents/$AGENT_ID/messages" \\
   -H "Authorization: Bearer $TXTCLAW_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{ "text": "Draft a polite text asking my landlord to fix a leak." }'`}
@@ -96,16 +112,48 @@ export TXTCLAW_API_KEY="REPLACE_ME"`}
             </div>
 
             <p className="mt-5 text-sm text-muted-foreground">
-              API keys are in private preview. If you want access, use the
-              contact link on the homepage or DM us on X.
+              Create and revoke API keys in{" "}
+              <Link
+                href="/dashboard/api-keys"
+                className="font-mono text-foreground underline underline-offset-4"
+              >
+                /dashboard/api-keys
+              </Link>
+              .
             </p>
+          </section>
+
+          <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
+            <h2 className="text-lg font-semibold text-foreground">Pasteable Docs Links</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              If you’re pasting URLs into Cursor/Codex, start with{" "}
+              <a
+                className="font-mono text-foreground underline underline-offset-4"
+                href="/quickstart.md"
+              >
+                /quickstart.md
+              </a>
+              .
+            </p>
+            <pre className="mt-4 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
+              {`https://www.txtclaw.com/quickstart.md
+https://www.txtclaw.com/agents.md
+https://www.txtclaw.com/openapi.yaml
+https://www.txtclaw.com/pricing.md
+https://www.txtclaw.com/api-keys.md
+https://www.txtclaw.com/cli.md
+https://www.txtclaw.com/mcp.md
+https://www.txtclaw.com/skills.md
+https://www.txtclaw.com/byok.md
+https://www.txtclaw.com/routing.md
+https://www.txtclaw.com/rate-limits.md
+https://www.txtclaw.com/security.md`}
+            </pre>
           </section>
 
           <section className="grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
-              <h2 className="text-lg font-semibold text-foreground">
-                OpenClaw API
-              </h2>
+              <h2 className="text-lg font-semibold text-foreground">OpenClaw API</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Looking for an &quot;OpenClaw API&quot;? Start here.
               </p>
@@ -120,9 +168,7 @@ export TXTCLAW_API_KEY="REPLACE_ME"`}
             </div>
 
             <div className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
-              <h2 className="text-lg font-semibold text-foreground">
-                SMS Agent API
-              </h2>
+              <h2 className="text-lg font-semibold text-foreground">SMS Agent API</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 SMS provisioning is optional and may require compliance steps.
               </p>

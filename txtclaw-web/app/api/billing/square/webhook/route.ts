@@ -1,18 +1,18 @@
-import { clerkClient, type User } from "@clerk/nextjs/server"
-import { NextRequest, NextResponse } from "next/server"
 import {
+  type OfferCode,
   getUserOfferCode,
   getUserPrivateMetadata,
   mergeBetaState,
   mergeBillingMetadata,
   mergeSquareMetadata,
-  type OfferCode,
 } from "@/lib/billing"
 import {
-  decodeSquareMetadataToken,
   type SquareWebhookEvent,
+  decodeSquareMetadataToken,
   verifySquareWebhookSignature,
 } from "@/lib/square"
+import { type User, clerkClient } from "@clerk/nextjs/server"
+import { NextRequest, NextResponse } from "next/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -136,7 +136,10 @@ function findUserByCustomer(users: User[], customerId: string | undefined): User
   })
 }
 
-function findUserBySubscription(users: User[], subscriptionId: string | undefined): User | undefined {
+function findUserBySubscription(
+  users: User[],
+  subscriptionId: string | undefined,
+): User | undefined {
   if (!subscriptionId) return undefined
 
   return users.find((user) => {
@@ -152,10 +155,7 @@ async function resolveTargetUser(args: {
   payment?: SquarePaymentObject
   subscription?: SquareSubscriptionObject
 }): Promise<{ user: User; tokenOfferCode?: string } | null> {
-  const noteCandidates = [
-    asString(args.payment?.note),
-    asString(args.subscription?.note),
-  ]
+  const noteCandidates = [asString(args.payment?.note), asString(args.subscription?.note)]
 
   for (const note of noteCandidates) {
     const token = decodeSquareMetadataToken(note)
@@ -173,13 +173,11 @@ async function resolveTargetUser(args: {
   const byOrder = findUserByOrder(args.users, orderId)
   if (byOrder) return { user: byOrder }
 
-  const customerId =
-    asString(args.payment?.customer_id) || asString(args.subscription?.customer_id)
+  const customerId = asString(args.payment?.customer_id) || asString(args.subscription?.customer_id)
   const byCustomer = findUserByCustomer(args.users, customerId)
   if (byCustomer) return { user: byCustomer }
 
-  const subscriptionId =
-    asString(args.payment?.subscription_id) || asString(args.subscription?.id)
+  const subscriptionId = asString(args.payment?.subscription_id) || asString(args.subscription?.id)
   const bySubscription = findUserBySubscription(args.users, subscriptionId)
   if (bySubscription) return { user: bySubscription }
 
@@ -196,12 +194,53 @@ function isSuccessSubscription(subscription: SquareSubscriptionObject | undefine
   return status === "ACTIVE"
 }
 
+async function syncDevApiPlanToWorker(args: {
+  userId: string
+  offerCode: OfferCode
+  paidAt: string
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const baseUrl = String(process.env.TXTCLAW_CONSOLE_BASE_URL || "").trim()
+  const token = String(process.env.TXTCLAW_CONSOLE_SERVICE_TOKEN || "").trim()
+
+  if (!baseUrl) return { ok: false, error: "Missing TXTCLAW_CONSOLE_BASE_URL." }
+  if (!token) return { ok: false, error: "Missing TXTCLAW_CONSOLE_SERVICE_TOKEN." }
+
+  try {
+    const res = await fetch(`${baseUrl.replace(/\/+$/, "")}/console/v1/plan/sync`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: args.userId,
+        offer_code: args.offerCode,
+        paid_at: args.paidAt,
+      }),
+    })
+
+    const text = await res.text().catch(() => "")
+    if (!res.ok) {
+      return { ok: false, error: `Worker plan sync failed (${res.status}): ${text}` }
+    }
+
+    const json = text ? (JSON.parse(text) as any) : null
+    if (!json?.ok) {
+      return { ok: false, error: `Worker plan sync rejected: ${text || "invalid JSON"}` }
+    }
+
+    return { ok: true }
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Worker plan sync failed." }
+  }
+}
+
 export async function POST(request: NextRequest) {
   const signatureKey = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY?.trim()
   if (!signatureKey) {
     return NextResponse.json(
       { ok: false, error: "Missing SQUARE_WEBHOOK_SIGNATURE_KEY." },
-      { status: 500 }
+      { status: 500 },
     )
   }
 
@@ -214,36 +253,27 @@ export async function POST(request: NextRequest) {
   })
 
   if (!signatureValid) {
-    return NextResponse.json(
-      { ok: false, error: "Invalid webhook signature." },
-      { status: 401 }
-    )
+    return NextResponse.json({ ok: false, error: "Invalid webhook signature." }, { status: 401 })
   }
 
   let event: SquareWebhookEvent
   try {
     event = JSON.parse(rawBody) as SquareWebhookEvent
   } catch {
-    return NextResponse.json(
-      { ok: false, error: "Invalid JSON payload." },
-      { status: 400 }
-    )
+    return NextResponse.json({ ok: false, error: "Invalid JSON payload." }, { status: 400 })
   }
 
   const eventId = asString(event.event_id)
   const eventType = asString(event.type)
 
   if (!eventId || !eventType) {
-    return NextResponse.json(
-      { ok: false, error: "Invalid event payload." },
-      { status: 400 }
-    )
+    return NextResponse.json({ ok: false, error: "Invalid event payload." }, { status: 400 })
   }
 
-  const payment = (event.data?.object?.payment ||
-    undefined) as SquarePaymentObject | undefined
-  const subscription = (event.data?.object?.subscription ||
-    undefined) as SquareSubscriptionObject | undefined
+  const payment = (event.data?.object?.payment || undefined) as SquarePaymentObject | undefined
+  const subscription = (event.data?.object?.subscription || undefined) as
+    | SquareSubscriptionObject
+    | undefined
 
   const successPayment = isSuccessPayment(payment)
   const successSubscription = isSuccessSubscription(subscription)
@@ -256,7 +286,7 @@ export async function POST(request: NextRequest) {
         reason: "non_success_event",
         eventType,
       },
-      { status: 200 }
+      { status: 200 },
     )
   }
 
@@ -277,7 +307,7 @@ export async function POST(request: NextRequest) {
         reason: "unmatched_user",
         eventType,
       },
-      { status: 200 }
+      { status: 200 },
     )
   }
 
@@ -286,10 +316,8 @@ export async function POST(request: NextRequest) {
 
   const paymentId = asString(payment?.id)
   const orderId = asString(payment?.order_id)
-  const customerId =
-    asString(payment?.customer_id) || asString(subscription?.customer_id)
-  const subscriptionId =
-    asString(payment?.subscription_id) || asString(subscription?.id)
+  const customerId = asString(payment?.customer_id) || asString(subscription?.customer_id)
+  const subscriptionId = asString(payment?.subscription_id) || asString(subscription?.id)
 
   const amountCents = asNumber(payment?.amount_money?.amount)
   const currency = asString(payment?.amount_money?.currency) || "USD"
@@ -315,7 +343,7 @@ export async function POST(request: NextRequest) {
         reason: "unable_to_resolve_offer",
         eventType,
       },
-      { status: 200 }
+      { status: 200 },
     )
   }
 
@@ -356,6 +384,10 @@ export async function POST(request: NextRequest) {
     },
   })
 
+  // Best-effort sync: update the Worker plan caps for this Clerk user.
+  // Never fail the Square webhook because the Worker is unreachable.
+  const workerSync = await syncDevApiPlanToWorker({ userId, offerCode, paidAt })
+
   return NextResponse.json(
     {
       ok: true,
@@ -363,7 +395,9 @@ export async function POST(request: NextRequest) {
       eventType,
       offerCode,
       betaState: "paid_waiting_apple_invite",
+      workerPlanSyncOk: workerSync.ok,
+      workerPlanSyncError: workerSync.ok ? undefined : workerSync.error,
     },
-    { status: 200 }
+    { status: 200 },
   )
 }

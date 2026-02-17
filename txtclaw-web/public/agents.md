@@ -1,6 +1,6 @@
 # TXT CLAW Developer API (Preview)
 
-TXT CLAW lets you create a dedicated OpenClaw agent (memory + configuration) and talk to it over HTTPS.
+TXT CLAW lets you set up OpenClaw agents via API: create a dedicated OpenClaw agent (memory + configuration) and talk to it over HTTPS.
 
 SMS/iMessage are optional lanes. The **runtime API works without Twilio**.
 
@@ -18,8 +18,13 @@ pnpm dlx textclaw@latest init
 
 ## Links
 
+- Quickstart (paste this into bots): `https://www.txtclaw.com/quickstart.md`
 - OpenAPI: `https://www.txtclaw.com/openapi.yaml`
 - Website: `https://www.txtclaw.com/api-reference`
+- API keys: `https://www.txtclaw.com/dashboard/api-keys`
+- BYOK (optional): `https://www.txtclaw.com/byok.md`
+- Routing (hosted router lane): `https://www.txtclaw.com/routing.md`
+- Skills (OpenClaw / skills.sh): `https://www.txtclaw.com/skills.md`
 
 ## Tracing / Debugging
 
@@ -29,12 +34,12 @@ pnpm dlx textclaw@latest init
 ## Environment Variables
 
 ```bash
+# Recommended (custom domain):
+# export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"
+#
 # Preview base URL (today):
 export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
-#
-# Custom domain (coming soon):
-# export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"
-export TXTCLAW_API_KEY="REPLACE_ME"
+export TXTCLAW_API_KEY="vck_REPLACE_ME"
 ```
 
 ## HTTP API
@@ -96,6 +101,17 @@ console.log(reply_text)
 ```bash
 pnpm dlx txtclaw@latest init --mcp
 ```
+
+## BYOK (Bring Your Own Key) (optional)
+
+If you want TXT CLAW to run agents using your own provider key:
+
+1) Configure BYOK once:
+   - `PUT /v1/byok`
+2) Create agents with:
+   - `llm: { "mode": "byok" }`
+
+Docs: `https://www.txtclaw.com/byok.md`
 
 ## SMS Lanes (Preview)
 

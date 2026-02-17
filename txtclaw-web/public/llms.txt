@@ -2,7 +2,22 @@
 
 Documentation for coding agents:
 
+- https://www.txtclaw.com/quickstart.md
 - https://www.txtclaw.com/agents.md
 - https://www.txtclaw.com/openapi.yaml
-- https://www.txtclaw.com/api-reference
+- https://www.txtclaw.com/pricing.md
+- https://www.txtclaw.com/api-keys.md
+- https://www.txtclaw.com/cli.md
+- https://www.txtclaw.com/mcp.md
+- https://www.txtclaw.com/skills.md
+- https://www.txtclaw.com/byok.md
+- https://www.txtclaw.com/routing.md
+- https://www.txtclaw.com/rate-limits.md
+- https://www.txtclaw.com/security.md
 
+SEO landing pages:
+
+- https://www.txtclaw.com/developers
+- https://www.txtclaw.com/byok
+- https://www.txtclaw.com/openclaw-router
+- https://www.txtclaw.com/openclaw-api

@@ -7,7 +7,7 @@ export const PROMO_CODE_DEFAULT_GRANT_CENTS = 10000
 const CODE_ID_HEX_LENGTH = 12
 const SIGNATURE_HEX_LENGTH = 8
 const CODE_PATTERN = new RegExp(
-  `^${PROMO_CODE_PREFIX}-([A-F0-9]{${CODE_ID_HEX_LENGTH}})-([A-F0-9]{${SIGNATURE_HEX_LENGTH}})$`
+  `^${PROMO_CODE_PREFIX}-([A-F0-9]{${CODE_ID_HEX_LENGTH}})-([A-F0-9]{${SIGNATURE_HEX_LENGTH}})$`,
 )
 
 type VerifyPromoCodeErrorReason = "invalid_format" | "signature_mismatch"
@@ -111,7 +111,9 @@ export function formatPromoCode(args: { codeId: string; signature: string }): st
 }
 
 export function generatePromoCodeId(): string {
-  return randomBytes(CODE_ID_HEX_LENGTH / 2).toString("hex").toUpperCase()
+  return randomBytes(CODE_ID_HEX_LENGTH / 2)
+    .toString("hex")
+    .toUpperCase()
 }
 
 export function createPromoCode(args: {
@@ -174,7 +176,7 @@ export function verifyPromoCode(args: {
 
 export function parsePromoGrantCents(
   raw: string | undefined,
-  fallback = PROMO_CODE_DEFAULT_GRANT_CENTS
+  fallback = PROMO_CODE_DEFAULT_GRANT_CENTS,
 ): number {
   if (!raw?.trim()) return fallback
   const value = Number(raw)

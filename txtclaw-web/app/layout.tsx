@@ -1,10 +1,12 @@
-import React from "react"
-import type { Metadata, Viewport } from "next"
-import localFont from "next/font/local"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
+import { CLERK_ENABLED } from "@/lib/clerk-config"
+import { ClerkProvider } from "@clerk/nextjs"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { ThemeProvider } from "@/components/theme-provider"
-import { CLERK_ENABLED } from "@/lib/clerk-config"
+import type { Metadata, Viewport } from "next"
+import localFont from "next/font/local"
+import React from "react"
 import "./globals.css"
 
 const geistPixelSquare = localFont({
@@ -46,7 +48,9 @@ const geistPixelGrid = localFont({
 })
 
 function normalizeAppUrl(raw: string | undefined): string {
-  const value = String(raw || "").trim().replace(/\/+$/, "")
+  const value = String(raw || "")
+    .trim()
+    .replace(/\/+$/, "")
   const fallback = "https://www.txtclaw.com"
   if (!value) return fallback
 
@@ -111,10 +115,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const ClerkProviderPromise = CLERK_ENABLED
-    ? import("@clerk/nextjs").then((mod) => mod.ClerkProvider)
-    : Promise.resolve(null)
-
   const app = (
     <ThemeProvider
       attribute="class"
@@ -125,6 +125,7 @@ export default function RootLayout({
       disableTransitionOnChange
     >
       {children}
+      <Toaster />
       <Analytics />
       <SpeedInsights />
     </ThemeProvider>
@@ -135,31 +136,8 @@ export default function RootLayout({
       <body
         className={`${geistPixelSquare.variable} ${geistPixelGrid.variable} font-sans antialiased`}
       >
-        {/* Avoid importing Clerk when keys are not configured (local builds). */}
-        {CLERK_ENABLED ? (
-          <React.Suspense fallback={app}>
-            <ClerkProviderGate provider={ClerkProviderPromise}>
-              {app}
-            </ClerkProviderGate>
-          </React.Suspense>
-        ) : (
-          app
-        )}
+        {CLERK_ENABLED ? <ClerkProvider>{app}</ClerkProvider> : app}
       </body>
     </html>
   )
-}
-
-async function ClerkProviderGate({
-  provider,
-  children,
-}: {
-  provider: Promise<
-    | (React.ComponentType<React.PropsWithChildren<Record<string, never>>>)
-    | null
-  >
-  children: React.ReactNode
-}) {
-  const ClerkProvider = await provider
-  return ClerkProvider ? <ClerkProvider>{children}</ClerkProvider> : <>{children}</>
 }

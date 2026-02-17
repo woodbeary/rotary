@@ -1,7 +1,7 @@
-import { clerkClient, type User } from "@clerk/nextjs/server"
-import { NextRequest, NextResponse } from "next/server"
 import { collectLaunchStats } from "@/lib/billing"
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
+import { type User, clerkClient } from "@clerk/nextjs/server"
+import { NextRequest, NextResponse } from "next/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -46,7 +46,7 @@ async function listUsers(client: Awaited<ReturnType<typeof clerkClient>>): Promi
 }
 
 async function countWaitlistEntries(
-  client: Awaited<ReturnType<typeof clerkClient>>
+  client: Awaited<ReturnType<typeof clerkClient>>,
 ): Promise<number> {
   const page = await client.waitlistEntries.list({ limit: 1 })
   const withMeta = page as unknown as {
@@ -76,12 +76,9 @@ export async function GET(request: NextRequest) {
         {
           status: 429,
           headers: {
-            "Retry-After": Math.max(
-              1,
-              Math.ceil((rate.resetAt - Date.now()) / 1000)
-            ).toString(),
+            "Retry-After": Math.max(1, Math.ceil((rate.resetAt - Date.now()) / 1000)).toString(),
           },
-        }
+        },
       )
     }
 
@@ -114,25 +111,19 @@ export async function GET(request: NextRequest) {
       expiresAt: Date.now() + STATS_CACHE_TTL_MS,
     }
 
-    return NextResponse.json(
-      payload,
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
-        },
-      }
-    )
+    return NextResponse.json(payload, {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+      },
+    })
   } catch (error) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to load launch stats.",
+        error: error instanceof Error ? error.message : "Failed to load launch stats.",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

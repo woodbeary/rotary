@@ -1,7 +1,7 @@
+import { Footer } from "@/components/footer"
+import { Navbar } from "@/components/navbar"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
   title: "OpenClaw MCP — TXT CLAW",
@@ -26,9 +26,9 @@ export default function OpenClawMcpPage() {
               OpenClaw MCP (Preview)
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-              TXT CLAW is a wrappable agent runtime API built on OpenClaw. MCP
-              support is an optional lane for coding agents that want tools and
-              structured operations, but you can start today with the HTTP API.
+              TXT CLAW is a wrappable agent runtime API built on OpenClaw. MCP support is an
+              optional lane for coding agents that want tools and structured operations, but you can
+              start today with the HTTP API.
             </p>
           </header>
 
@@ -60,12 +60,10 @@ export default function OpenClawMcpPage() {
           </section>
 
           <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
-            <h2 className="text-lg font-semibold text-foreground">
-              What MCP Will Add
-            </h2>
+            <h2 className="text-lg font-semibold text-foreground">What MCP Will Add</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              MCP is planned for operational workflows (logs, traces, and
-              automation). The HTTP API stays the source of truth.
+              MCP is planned for operational workflows (logs, traces, and automation). The HTTP API
+              stays the source of truth.
             </p>
             <p className="mt-4 text-sm text-muted-foreground">
               For the developer entry point, start at{" "}
@@ -84,4 +82,3 @@ export default function OpenClawMcpPage() {
     </div>
   )
 }
-

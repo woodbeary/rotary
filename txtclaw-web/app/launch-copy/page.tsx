@@ -1,11 +1,9 @@
 export default function LaunchCopyPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="mb-2 font-mono text-3xl font-bold text-foreground">
-        TXT CLAW Launch Copy
-      </h1>
+      <h1 className="mb-2 font-mono text-3xl font-bold text-foreground">TXT CLAW Launch Copy</h1>
       <p className="mb-12 text-muted-foreground">
-        Apple-first launch copy with fixed pricing and invite cadence.
+        Private beta launch copy with fixed pricing and invite cadence.
       </p>
 
       <section className="mb-16">
@@ -15,7 +13,7 @@ export default function LaunchCopyPage() {
 
         <div className="flex flex-col gap-6">
           <Tweet number={1}>
-            {`Launching TXT CLAW in Apple beta.
+            {`Launching TXT CLAW in private beta.
 
 No app download. No learning curve.
 You chat in your normal messaging app.
@@ -28,7 +26,7 @@ Invite-only rollout starts now.`}
 1) Join waitlist
 2) Get invite email
 3) Redeem code or continue to payment
-4) Receive Apple invite
+4) Receive invite instructions
 5) Chat instantly on first inbound
 
 Usually within 24h after payment.`}
@@ -44,7 +42,7 @@ No negotiation. First-come, first-served.`}
           </Tweet>
 
           <Tweet number={4}>
-            {`We’re running Apple first for a tighter privacy + reliability baseline, then expanding channels after beta hardening.
+            {`We’re running invite-only first for a tighter privacy + reliability baseline, then expanding after beta hardening.
 
 Join the list: [your-landing-page-url]
 
@@ -61,19 +59,19 @@ Join the list: [your-landing-page-url]
         <div className="rounded-xl border border-border bg-card p-6">
           <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-muted-foreground">
             {`Primary:
-Apple beta is open
+Private beta is open
 
 Subhead:
 No download. No account. No learning curve.
 
 Support copy:
-Join the invite-only Apple beta waitlist. Use your Apple ID email.
+Join the invite-only beta waitlist. We'll email invite instructions as capacity opens.
 
 Pricing strip:
 $16/mo early bird for first 100 paid seats · then $19/mo · BYOK lifetime $299 (10 seats)
 
 Post-payment copy:
-Payment confirmed. Your Apple invite instructions are on the way. Usually within 24h.`}
+Payment confirmed. Your invite instructions are on the way. Usually within 24h.`}
           </pre>
         </div>
       </section>
@@ -88,7 +86,7 @@ Payment confirmed. Your Apple invite instructions are on the way. Usually within
             {`Daily runbook:
 - Invite up to 10 waitlist users to pay
 - Review successful Square payments in Clerk metadata
-- Manually send Apple invites to paid users only
+- Manually send invites to paid users only
 
 Public proof:
 - Counter uses successful payments only
@@ -110,9 +108,7 @@ function Tweet({
 }) {
   return (
     <div className="rounded-xl border border-border bg-card p-5">
-      <span className="mb-2 inline-block font-mono text-xs text-primary">
-        Tweet {number}
-      </span>
+      <span className="mb-2 inline-block font-mono text-xs text-primary">Tweet {number}</span>
       <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
         {children}
       </pre>

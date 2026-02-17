@@ -1,0 +1,53 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Biome
+        run: pnpm run biome:check
+
+      - name: Type check
+        run: pnpm run typecheck
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E
+        env:
+          # Clerk test instance keys (dev) recommended for E2E.
+          CLERK_SECRET_KEY: ${{ secrets.E2E_CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.E2E_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          # Worker console (Next -> Worker server-to-server).
+          TXTCLAW_CONSOLE_BASE_URL: ${{ secrets.E2E_TXTCLAW_CONSOLE_BASE_URL }}
+          TXTCLAW_CONSOLE_SERVICE_TOKEN: ${{ secrets.E2E_TXTCLAW_CONSOLE_SERVICE_TOKEN }}
+          # Runtime API base used for /v1/status assertion.
+          TXTCLAW_E2E_API_BASE_URL: ${{ secrets.E2E_TXTCLAW_API_BASE_URL }}
+        run: pnpm run test:e2e

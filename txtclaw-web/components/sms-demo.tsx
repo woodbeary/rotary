@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
 import { SMS_GATEWAY_LIVE, SMS_PHONE_DISPLAY } from "@/lib/launch"
 import { cn } from "@/lib/utils"
+import { useEffect, useRef, useState } from "react"
 
 const messages = [
   { from: "user" as const, text: "hey, what can you do?" },
@@ -25,7 +25,7 @@ export function SmsDemo() {
     if (visibleCount < messages.length) {
       const timeout = setTimeout(
         () => setVisibleCount((c) => c + 1),
-        visibleCount === 0 ? 600 : 1400
+        visibleCount === 0 ? 600 : 1400,
       )
       return () => clearTimeout(timeout)
     }
@@ -60,9 +60,7 @@ export function SmsDemo() {
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-border px-5 py-3.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground">
-            <span className="font-mono text-xs font-bold text-background">
-              TC
-            </span>
+            <span className="font-mono text-xs font-bold text-background">TC</span>
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">TXT CLAW</p>
@@ -88,10 +86,7 @@ export function SmsDemo() {
             {messages.slice(0, visibleCount).map((msg, i) => (
               <div
                 key={i}
-                className={cn(
-                  "flex",
-                  msg.from === "user" ? "justify-end" : "justify-start"
-                )}
+                className={cn("flex", msg.from === "user" ? "justify-end" : "justify-start")}
                 style={{
                   animation: "fade-up 0.4s ease-out both",
                   animationDelay: "0ms",
@@ -102,7 +97,7 @@ export function SmsDemo() {
                     "max-w-[90%] rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed sm:max-w-[82%]",
                     msg.from === "user"
                       ? "rounded-br-sm bg-foreground text-background"
-                      : "rounded-bl-sm border border-border bg-card text-card-foreground"
+                      : "rounded-bl-sm border border-border bg-card text-card-foreground",
                   )}
                 >
                   {msg.text}

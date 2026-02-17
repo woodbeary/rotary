@@ -1,7 +1,7 @@
+import { Footer } from "@/components/footer"
+import { Navbar } from "@/components/navbar"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
   title: "SMS Agent API — TXT CLAW",
@@ -26,9 +26,9 @@ export default function SmsAgentApiPage() {
               SMS Agent API (Preview)
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-              TXT CLAW is an agent runtime API you can optionally connect to SMS.
-              The runtime works immediately over HTTPS; managed SMS provisioning
-              is a separate lane and may require compliance steps.
+              TXT CLAW is an agent runtime API you can optionally connect to SMS. The runtime works
+              immediately over HTTPS; managed SMS provisioning is a separate lane and may require
+              compliance steps.
             </p>
           </header>
 
@@ -56,27 +56,22 @@ export default function SmsAgentApiPage() {
           </section>
 
           <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
-            <h2 className="text-lg font-semibold text-foreground">
-              SMS Provisioning (Scaffold)
-            </h2>
+            <h2 className="text-lg font-semibold text-foreground">SMS Provisioning (Scaffold)</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              The API includes an endpoint so SDK/docs stay coherent even before
-              managed SMS is fully productized.
+              The API includes an endpoint so SDK/docs stay coherent even before managed SMS is
+              fully productized.
             </p>
             <pre className="mt-4 overflow-x-auto rounded-md border border-border/60 bg-background p-3 text-xs text-foreground">
-{`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents/$AGENT_ID/channels/sms" \\
+              {`curl -sS "$TXTCLAW_API_BASE_URL/v1/agents/$AGENT_ID/channels/sms" \\
   -H "Authorization: Bearer $TXTCLAW_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{ "mode": "managed" }'`}
             </pre>
             <p className="mt-3 text-sm text-muted-foreground">
               Responses today may be{" "}
-              <span className="font-mono text-foreground">needs_compliance</span>{" "}
-              /{" "}
-              <span className="font-mono text-foreground">needs_setup</span>{" "}
-              /{" "}
-              <span className="font-mono text-foreground">disabled</span>{" "}
-              depending on mode.
+              <span className="font-mono text-foreground">needs_compliance</span> /{" "}
+              <span className="font-mono text-foreground">needs_setup</span> /{" "}
+              <span className="font-mono text-foreground">disabled</span> depending on mode.
             </p>
           </section>
 
@@ -118,4 +113,3 @@ export default function SmsAgentApiPage() {
     </div>
   )
 }
-

@@ -1,11 +1,11 @@
 "use client"
 
-import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
-import { KeyRound } from "lucide-react"
 import { StreamText } from "@/components/stream-text"
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { cn } from "@/lib/utils"
+import { KeyRound } from "lucide-react"
+import Image from "next/image"
+import { useEffect, useRef, useState } from "react"
 
 type Mockup = {
   src: string
@@ -131,9 +131,9 @@ function MockupCard({
   }, [])
 
   return (
-    <figure className="w-full rounded-2xl border border-border/60 bg-card/80 p-2 shadow-sm sm:p-3">
+    <figure className="w-full rounded-2xl border border-border/40 bg-transparent p-0 shadow-none">
       <div className="relative flex h-[220px] items-end justify-center sm:h-[250px] lg:h-[280px] xl:h-[300px]">
-        <div className="relative aspect-[9/19] h-full overflow-hidden rounded-[1rem] bg-black/40">
+        <div className="relative aspect-[9/19] h-full overflow-hidden rounded-[1rem] bg-transparent">
           {!isLoaded && !hasError ? (
             <div className="absolute inset-0 animate-pulse bg-muted/35" />
           ) : null}
@@ -149,7 +149,7 @@ function MockupCard({
             onError={() => setHasError(true)}
             className={cn(
               "h-full w-auto object-contain object-top transition-opacity duration-300",
-              isLoaded ? "opacity-100" : "opacity-0"
+              isLoaded ? "opacity-100" : "opacity-0",
             )}
             sizes="(max-width: 640px) 44vw, (max-width: 1024px) 34vw, 17vw"
           />
@@ -160,9 +160,7 @@ function MockupCard({
           ) : null}
         </div>
       </div>
-      {mock.hiddenDescription ? (
-        <span className="sr-only">{mock.hiddenDescription}</span>
-      ) : null}
+      {mock.hiddenDescription ? <span className="sr-only">{mock.hiddenDescription}</span> : null}
     </figure>
   )
 }
@@ -185,15 +183,8 @@ export function AppleProofSection() {
       <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[56rem] -translate-x-1/2 rounded-full bg-foreground/[0.04] blur-3xl" />
 
       <div className="mx-auto max-w-6xl">
-        <div
-          className={cn(
-            "mb-10 max-w-3xl opacity-0",
-            isVisible && "animate-fade-up"
-          )}
-        >
-          <p className="mb-3 font-mono text-sm text-muted-foreground">
-            Apple beta preview
-          </p>
+        <div className={cn("mb-10 max-w-3xl opacity-0", isVisible && "animate-fade-up")}>
+          <p className="mb-3 font-mono text-sm text-muted-foreground">Apple beta preview</p>
           <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Premium iPhone-native flows that make signing up feel effortless.
           </h2>
@@ -210,7 +201,7 @@ export function AppleProofSection() {
               key={feature.title}
               className={cn(
                 "relative h-full overflow-hidden rounded-2xl border border-border/70 bg-card p-5 opacity-0 sm:p-7",
-                isVisible && "animate-fade-up"
+                isVisible && "animate-fade-up",
               )}
               style={{ animationDelay: `${index * 80 + 100}ms` }}
             >
@@ -250,7 +241,7 @@ export function AppleProofSection() {
                   </ul>
                 </div>
 
-                <div className="mt-auto rounded-2xl border border-border/60 bg-gradient-to-b from-[#f5f5f7] to-[#ececf0] p-3 dark:from-zinc-900/60 dark:to-zinc-900/20 sm:p-4">
+                <div className="mt-auto rounded-2xl border border-border/40 bg-transparent p-3 sm:p-4">
                   {phonePair(feature.primary, feature.secondary, index === 0)}
                 </div>
               </div>
@@ -266,7 +257,7 @@ export function AppleProofSection() {
                 key={`${feature.title}-desktop`}
                 className={cn(
                   "relative overflow-hidden rounded-3xl border border-border/70 bg-card p-8 opacity-0 xl:p-10",
-                  isVisible && "animate-fade-up"
+                  isVisible && "animate-fade-up",
                 )}
                 style={{ animationDelay: `${index * 90 + 120}ms` }}
               >
@@ -275,7 +266,7 @@ export function AppleProofSection() {
                     "grid items-center gap-10",
                     reverse
                       ? "grid-cols-[minmax(340px,460px)_minmax(0,1fr)]"
-                      : "grid-cols-[minmax(0,1fr)_minmax(340px,460px)]"
+                      : "grid-cols-[minmax(0,1fr)_minmax(340px,460px)]",
                   )}
                 >
                   <div className={cn(reverse && "order-2")}>
@@ -314,7 +305,7 @@ export function AppleProofSection() {
                   </div>
 
                   <div className={cn(reverse && "order-1")}>
-                    <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-[#f5f5f7] to-[#ececf0] p-4 dark:from-zinc-900/60 dark:to-zinc-900/20">
+                    <div className="rounded-2xl border border-border/40 bg-transparent p-4">
                       {phonePair(feature.primary, feature.secondary, index === 0)}
                     </div>
                   </div>

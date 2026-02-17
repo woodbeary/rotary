@@ -1,6 +1,5 @@
-import { auth, clerkClient, type User } from "@clerk/nextjs/server"
-import { NextRequest, NextResponse } from "next/server"
 import {
+  type OfferCode,
   collectLaunchStats,
   getUserPrivateMetadata,
   mergeBetaState,
@@ -8,13 +7,14 @@ import {
   mergeSquareMetadata,
   parseOfferType,
   resolveCheckoutOffer,
-  type OfferCode,
 } from "@/lib/billing"
 import {
   createSquareCheckoutLink,
   encodeSquareMetadataToken,
   resolveSquareEnvironment,
 } from "@/lib/square"
+import { type User, auth, clerkClient } from "@clerk/nextjs/server"
+import { NextRequest, NextResponse } from "next/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -77,7 +77,9 @@ function getUserPrimaryEmail(user: User): string | undefined {
   )
 }
 
-async function listUsersForLaunchStats(client: Awaited<ReturnType<typeof clerkClient>>): Promise<User[]> {
+async function listUsersForLaunchStats(
+  client: Awaited<ReturnType<typeof clerkClient>>,
+): Promise<User[]> {
   const users: User[] = []
   let offset = 0
 
@@ -101,18 +103,12 @@ async function listUsersForLaunchStats(client: Awaited<ReturnType<typeof clerkCl
 export async function POST(request: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
-    return NextResponse.json(
-      { ok: false, error: "Authentication required." },
-      { status: 401 }
-    )
+    return NextResponse.json({ ok: false, error: "Authentication required." }, { status: 401 })
   }
 
   const squareAccessToken = process.env.SQUARE_ACCESS_TOKEN?.trim()
   if (!squareAccessToken) {
-    return NextResponse.json(
-      { ok: false, error: "Square is not configured." },
-      { status: 500 }
-    )
+    return NextResponse.json({ ok: false, error: "Square is not configured." }, { status: 500 })
   }
 
   const client = await clerkClient()
@@ -136,7 +132,7 @@ export async function POST(request: NextRequest) {
         ok: false,
         error: "That offer is sold out.",
       },
-      { status: 409 }
+      { status: 409 },
     )
   }
 
@@ -150,7 +146,7 @@ export async function POST(request: NextRequest) {
         ok: false,
         error: "Missing SQUARE_LOCATION_ID for one-time checkout.",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 
@@ -160,7 +156,7 @@ export async function POST(request: NextRequest) {
         ok: false,
         error: "Missing Square plan or location configuration for monthly checkout.",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 
@@ -186,9 +182,7 @@ export async function POST(request: NextRequest) {
       amountCents: offer.amountCents,
       currency: offer.currency,
       quickPayName:
-        offer.interval === "monthly"
-          ? "TXTCLAW Apple Beta Monthly"
-          : "TXTCLAW BYOK Lifetime",
+        offer.interval === "monthly" ? "TXT CLAW Dev API Pro" : "TXT CLAW BYOK Lifetime",
       subscriptionPlanId: offer.interval === "monthly" ? monthlyPlanId : undefined,
     })
 
@@ -245,18 +239,15 @@ export async function POST(request: NextRequest) {
           ltdCap: stats.ltdCap,
         },
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to create checkout right now.",
+        error: error instanceof Error ? error.message : "Unable to create checkout right now.",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

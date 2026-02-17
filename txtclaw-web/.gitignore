@@ -8,8 +8,13 @@ instrumentation-client.ts
 # Common ignores
 node_modules/
 .next/
+*.tsbuildinfo
 .env*.local
+.tmp.vercel*.env
 .DS_Store
 .vercel
 .playwright-cli/
+test-results/
+playwright-report/
 output/
+tmp/
