@@ -34,11 +34,7 @@ pnpm dlx textclaw@latest init
 ## Environment Variables
 
 ```bash
-# Recommended (production):
-export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"
-#
-# Preview (if you're testing / staging):
-# export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
+export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
 export TXTCLAW_API_KEY="vck_REPLACE_ME"
 ```
 

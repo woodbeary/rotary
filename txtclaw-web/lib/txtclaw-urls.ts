@@ -1,5 +1,6 @@
-export const DEFAULT_PROD_API_BASE_URL = "https://api.txtclaw.com"
-export const DEFAULT_PREVIEW_API_BASE_URL = "https://txtclaw-sms-e2e.lopez731.workers.dev"
+// Until a dedicated custom domain exists, the Worker domain is the canonical base URL.
+export const DEFAULT_PUBLIC_API_BASE_URL = "https://txtclaw-sms-e2e.lopez731.workers.dev"
+export const DEFAULT_CONSOLE_API_BASE_URL = "https://txtclaw-sms-e2e.lopez731.workers.dev"
 
 function normalizeBaseUrl(raw: string | undefined, fallback: string): string {
   const value = String(raw || "")
@@ -28,13 +29,13 @@ export function getPublicAppUrl(): string {
 }
 
 export function getPublicApiBaseUrl(): string {
-  return normalizeBaseUrl(process.env.NEXT_PUBLIC_TXTCLAW_API_BASE_URL, DEFAULT_PROD_API_BASE_URL)
+  return normalizeBaseUrl(process.env.NEXT_PUBLIC_TXTCLAW_API_BASE_URL, DEFAULT_PUBLIC_API_BASE_URL)
 }
 
 export function getConsoleBaseUrl(): string {
   // Server-side base URL for console endpoints (service-to-service). Keep the preview fallback so
   // local/dev environments work even without explicit configuration.
-  return normalizeBaseUrl(process.env.TXTCLAW_CONSOLE_BASE_URL, DEFAULT_PREVIEW_API_BASE_URL)
+  return normalizeBaseUrl(process.env.TXTCLAW_CONSOLE_BASE_URL, DEFAULT_CONSOLE_API_BASE_URL)
 }
 
 export function joinUrl(baseUrl: string, pathname: string): string {

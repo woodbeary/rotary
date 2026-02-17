@@ -25,11 +25,7 @@ How it works (conceptually):
 ## Create An Agent With Hosted Router
 
 ```bash
-# Recommended (production):
-export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"
-#
-# Preview (if you're testing / staging):
-# export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
+export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
 export TXTCLAW_API_KEY="vck_REPLACE_ME"
 
 curl -sS "$TXTCLAW_API_BASE_URL/v1/agents" \

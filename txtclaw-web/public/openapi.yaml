@@ -10,8 +10,6 @@ info:
 servers:
   - url: https://txtclaw-sms-e2e.lopez731.workers.dev
     description: Preview (Workers)
-  - url: https://api.txtclaw.com
-    description: Production (api.txtclaw.com)
 security:
   - bearerAuth: []
 paths:

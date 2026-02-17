@@ -31,7 +31,7 @@ This snippet is intended to be copy/pasted into MCP-compatible clients:
       "command": "pnpm",
       "args": ["-s", "dlx", "txtclaw-mcp@latest"],
       "env": {
-        "TXTCLAW_API_BASE_URL": "https://api.txtclaw.com",
+        "TXTCLAW_API_BASE_URL": "https://txtclaw-sms-e2e.lopez731.workers.dev",
         "TXTCLAW_API_KEY": "vck_REPLACE_ME"
       }
     }
@@ -41,7 +41,6 @@ This snippet is intended to be copy/pasted into MCP-compatible clients:
 
 Notes:
 
-- If you’re testing/staging, set `TXTCLAW_API_BASE_URL` to the preview Worker domain instead.
 - `-s` keeps `pnpm dlx` quiet so it won’t corrupt MCP stdio output.
 
 ## Tools Provided

@@ -12,11 +12,7 @@ Your key is shown once. Store it in an environment variable.
 ## 2) Set env vars
 
 ```bash
-# Recommended (production):
-export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"
-#
-# Preview (if you're testing / staging):
-# export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
+export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
 export TXTCLAW_API_KEY="vck_REPLACE_ME"
 ```
 
@@ -65,7 +61,7 @@ You are setting up TXT CLAW (an OpenClaw-powered agent runtime API).
    - Keys look like: vck_...
 
 2) Set server-side env vars:
-   export TXTCLAW_API_BASE_URL="https://api.txtclaw.com"  (or the preview base URL)
+   export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
    export TXTCLAW_API_KEY="vck_REPLACE_ME"
 
 3) Verify:
