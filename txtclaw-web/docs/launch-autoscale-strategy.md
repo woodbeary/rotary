@@ -41,6 +41,11 @@ Launch implication:
 - Build and fully test now.
 - Public production launch sequencing depends on toll-free/A2P approval states.
 
+Operational hardening references for this launch plan:
+- `/docs/anti-abuse-compliance-readiness-matrix-10dlc.md`
+- `/docs/anti-abuse-instrumentation-specification.md`
+- `/docs/anti-abuse-kyc-and-escalation-playbook.md`
+
 ## 3) Architecture (Final)
 
 ### 3.1 Control Plane

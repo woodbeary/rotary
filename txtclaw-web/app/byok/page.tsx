@@ -28,9 +28,10 @@ export default function ByokPage() {
         <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">How it works</h2>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-            <li>1. Generate a TXT CLAW API key.</li>
-            <li>2. Call `PUT /v1/byok` once to store your provider key encrypted.</li>
-            <li>3. Create agents with `llm.mode=\"byok\"`.</li>
+            <li>1. Activate Dev API (subscription or promo).</li>
+            <li>2. Generate a TXT CLAW API key.</li>
+            <li>3. Call `PUT /v1/byok` once to store your provider key encrypted.</li>
+            <li>4. Create agents with `llm.mode=\"byok\"`.</li>
           </ul>
 
           <div className="mt-5 space-y-3">
@@ -57,9 +58,13 @@ export default function ByokPage() {
         <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">Get started</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Create an API key and configure BYOK in the console:
+            Activate Dev API, then create an API key and configure BYOK in the console:
           </p>
           <p className="mt-4 text-sm">
+            <Link className="font-mono underline underline-offset-4" href="/dashboard/billing">
+              /dashboard/billing
+            </Link>
+            {" · "}
             <Link className="font-mono underline underline-offset-4" href="/dashboard/api-keys">
               /dashboard/api-keys
             </Link>

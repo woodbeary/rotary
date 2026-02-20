@@ -67,16 +67,21 @@ function normalizeAppUrl(raw: string | undefined): string {
 }
 
 const appUrl = normalizeAppUrl(process.env.NEXT_PUBLIC_APP_URL)
+const smsGatewayLive = process.env.NEXT_PUBLIC_SMS_GATEWAY_LIVE === "true"
+const siteTitle = smsGatewayLive
+  ? "TXT CLAW — AI agent on a real phone number"
+  : "TXT CLAW — Apple beta waitlist"
+const siteDescription = smsGatewayLive
+  ? "Text a real phone number. Get an AI that texts back. No app, no login. Your own dedicated AI agent over SMS."
+  : "Join the TXT CLAW Apple beta waitlist for invite-only access while SMS onboarding is temporarily paused."
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  title: "TXT CLAW — AI agent on a real phone number",
-  description:
-    "Text a real phone number. Get an AI that texts back. No app, no login. Your own dedicated AI agent over SMS.",
+  title: siteTitle,
+  description: siteDescription,
   openGraph: {
-    title: "TXT CLAW — AI agent on a real phone number",
-    description:
-      "Text a real phone number. Get an AI that texts back. No app, no login. Your own dedicated AI agent over SMS.",
+    title: siteTitle,
+    description: siteDescription,
     type: "website",
     url: appUrl,
     siteName: "TXT CLAW",
@@ -91,9 +96,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TXT CLAW — AI agent on a real phone number",
-    description:
-      "Text a real phone number. Get an AI that texts back. No app, no login. Your own dedicated AI agent over SMS.",
+    title: siteTitle,
+    description: siteDescription,
     images: ["/opengraph.png"],
   },
   icons: {

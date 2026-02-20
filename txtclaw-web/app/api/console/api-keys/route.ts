@@ -3,6 +3,7 @@ import {
   getConsoleBaseUrl,
   getConsoleServiceToken,
   jsonError,
+  requirePaidDevApiUserId,
   requireVerifiedUserId,
 } from "@/app/api/console/_shared"
 import { NextRequest, NextResponse } from "next/server"
@@ -53,8 +54,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const verified = await requireVerifiedUserId()
-  if (!verified.ok) return verified.response
+  const paid = await requirePaidDevApiUserId()
+  if (!paid.ok) return paid.response
 
   const token = getConsoleServiceToken()
   if (!token) return jsonError("Missing TXTCLAW_CONSOLE_SERVICE_TOKEN.", 500)
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
   const baseUrl = getConsoleBaseUrl()
   const url = `${baseUrl.replace(/\/+$/, "")}/console/v1/api-keys`
   const body = JSON.stringify({
-    user_id: verified.userId,
+    user_id: paid.userId,
     label: payload.label,
   })
 

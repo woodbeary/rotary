@@ -74,6 +74,7 @@ function inferOfferCode(args: {
   if (
     tokenOffer === "PROMO_CODE_REDACTED" ||
     tokenOffer === "PROMO_CODE_REDACTED" ||
+    tokenOffer === "PROMO_CODE_REDACTED" ||
     tokenOffer === "PROMO_CODE_REDACTED"
   ) {
     return tokenOffer

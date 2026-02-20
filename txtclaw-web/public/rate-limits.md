@@ -2,6 +2,8 @@
 
 If you receive HTTP `429`, you are rate limited.
 
+Note: API keys require an active Dev API plan (subscription or promo). Free accounts cannot create keys.
+
 ## Defaults (preview)
 
 These defaults may change, but are the current intended starting point:
@@ -19,7 +21,7 @@ These are the default plan-based overrides (if enabled in the Worker):
 
 | Plan | req/min per key | req/min per IP | req/day per key |
 | --- | ---: | ---: | ---: |
-| Free | 60 | 120 | 1,000 |
+| Free (inactive) | 60 | 120 | 1,000 |
 | Pro | 300 | 500 | 10,000 |
 | BYOK | 600 | 1,000 | 50,000 |
 

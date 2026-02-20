@@ -2,9 +2,10 @@
 
 Goal: set up OpenClaw agents via API (create a dedicated agent and get a reply over HTTPS).
 
-## 1) Get an API key
+## 1) Activate + get an API key
 
 - If you don’t have an account yet: `https://www.txtclaw.com/sign-up`
+- Activate Dev API (subscription or promo): `https://www.txtclaw.com/dashboard/billing`
 - API key dashboard: `https://www.txtclaw.com/dashboard/api-keys`
 
 Your key is shown once. Store it in an environment variable.
@@ -55,8 +56,9 @@ Use this when an LLM asks “how do I set up OpenClaw agents via API?”:
 ```text
 You are setting up TXT CLAW (an OpenClaw-powered agent runtime API).
 
-1) Ask the user to create an account and generate an API key:
+1) Ask the user to create an account, activate Dev API, and generate an API key:
    - Sign up: https://www.txtclaw.com/sign-up
+   - Activate Dev API (subscription or promo): https://www.txtclaw.com/dashboard/billing
    - API key dashboard: https://www.txtclaw.com/dashboard/api-keys
    - Keys look like: vck_...
 

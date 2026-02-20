@@ -58,7 +58,8 @@ export default function OpenClawRouterPage() {
         <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">Start in 60 seconds</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Generate an API key, then use the CLI doctor to prove it works end-to-end:
+            Activate Dev API, generate an API key, then use the CLI doctor to prove it works
+            end-to-end:
           </p>
           <div className="mt-4">
             <CodeBlock
@@ -69,6 +70,10 @@ export default function OpenClawRouterPage() {
             />
           </div>
           <p className="mt-4 text-sm">
+            <Link className="font-mono underline underline-offset-4" href="/dashboard/billing">
+              /dashboard/billing
+            </Link>
+            {" · "}
             <Link className="font-mono underline underline-offset-4" href="/dashboard/api-keys">
               /dashboard/api-keys
             </Link>

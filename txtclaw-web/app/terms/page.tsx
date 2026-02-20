@@ -1,3 +1,4 @@
+import { SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
 import { ArrowLeft } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -22,7 +23,7 @@ export default function TermsOfService() {
         <h1 className="text-balance font-mono text-3xl font-bold tracking-tight text-foreground md:text-4xl">
           Terms of Service
         </h1>
-        <p className="mt-3 text-sm text-muted-foreground">Last updated: February 5, 2026</p>
+        <p className="mt-3 text-sm text-muted-foreground">Last updated: February 18, 2026</p>
 
         <div className="mt-12 space-y-10 text-[15px] leading-relaxed text-foreground/90">
           {/* 1 */}
@@ -30,11 +31,16 @@ export default function TermsOfService() {
             <h2 className="mb-3 text-lg font-semibold text-foreground">1. Acceptance of Terms</h2>
             <p>
               By texting the TXT CLAW phone number{" "}
-              <span className="font-mono font-medium">+1 (866) 251-1599</span> or using the TXT CLAW
-              website (collectively, the &quot;Service&quot;), you agree to be bound by these Terms
-              of Service (&quot;Terms&quot;). If you do not agree, do not use the Service. These
-              Terms constitute a legally binding agreement between you and The Interpreting App, LLC
-              (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).
+              <a
+                href={SMS_PHONE_HREF}
+                className="font-mono font-medium underline underline-offset-4"
+              >
+                {SMS_PHONE_DISPLAY}
+              </a>{" "}
+              or using the TXT CLAW website (collectively, the &quot;Service&quot;), you agree to be
+              bound by these Terms of Service (&quot;Terms&quot;). If you do not agree, do not use
+              the Service. These Terms constitute a legally binding agreement between you and The
+              Interpreting App, LLC (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).
             </p>
           </section>
 
@@ -53,9 +59,14 @@ export default function TermsOfService() {
                 conversational turns.
               </li>
               <li>
-                Paid subscription plans that provision a dedicated US phone number routed to a
-                private, persistent AI agent with memory, tools, browser automation, code execution,
-                custom prompts, and bring-your-own-key (BYOK) model support.
+                Paid subscription plans that activate your account on our shared gateway number for
+                ongoing conversations with a private, persistent AI agent with memory, tools,
+                browser automation, code execution, custom prompts, and bring-your-own-key (BYOK)
+                model support.
+              </li>
+              <li>
+                Optional local dedicated numbers may be offered as a paid add-on once carrier
+                approvals (A2P/10DLC) are available.
               </li>
             </ul>
           </section>
@@ -81,6 +92,10 @@ export default function TermsOfService() {
               <li>
                 <strong>User-initiated only.</strong> All conversations are initiated by you. We
                 will never send unsolicited messages.
+              </li>
+              <li>
+                <strong>No third-party list messaging.</strong> We do not send TXT CLAW messages to
+                purchased leads, scraped numbers, or users who did not directly text us first.
               </li>
               <li>
                 <strong>Message and data rates may apply.</strong> Your wireless carrier may charge
@@ -279,7 +294,12 @@ export default function TermsOfService() {
               </li>
               <li>
                 <strong>SMS:</strong> Reply <span className="font-mono font-medium">HELP</span> to{" "}
-                <span className="font-mono font-medium">+1 (866) 251-1599</span>
+                <a
+                  href={SMS_PHONE_HREF}
+                  className="font-mono font-medium underline underline-offset-4"
+                >
+                  {SMS_PHONE_DISPLAY}
+                </a>
               </li>
             </ul>
           </section>

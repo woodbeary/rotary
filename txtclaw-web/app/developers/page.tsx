@@ -46,12 +46,19 @@ export default function DevelopersPage() {
                 <div className="rounded-xl border border-border/60 bg-background p-4">
                   <div className="font-mono text-[11px] text-muted-foreground">Step 1</div>
                   <div className="mt-1 text-sm font-medium text-foreground">
-                    Generate an API key
+                    Activate + generate
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">
                     {CLERK_ENABLED ? (
                       <>
-                        Open{" "}
+                        First activate Dev API in{" "}
+                        <Link
+                          href="/dashboard/billing"
+                          className="font-mono text-foreground underline underline-offset-4"
+                        >
+                          /dashboard/billing
+                        </Link>
+                        , then open{" "}
                         <Link
                           href="/dashboard/api-keys"
                           className="font-mono text-foreground underline underline-offset-4"
@@ -61,7 +68,7 @@ export default function DevelopersPage() {
                         and click “Generate key”.
                       </>
                     ) : (
-                      <>API key dashboard requires Clerk auth (not configured here).</>
+                      <>Dashboard requires Clerk auth (not configured here).</>
                     )}
                   </div>
                 </div>

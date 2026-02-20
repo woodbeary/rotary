@@ -4,9 +4,10 @@ BYOK lets you run TXT CLAW agents using **your own** model provider key (OpenAI,
 
 ## Recommended Flow
 
-1. Create a TXT CLAW API key: `https://www.txtclaw.com/dashboard/api-keys`
-2. Set BYOK once for that TXT CLAW key: `PUT /v1/byok`
-3. Create agents with: `llm: { "mode": "byok" }`
+1. Activate Dev API: `https://www.txtclaw.com/dashboard/billing`
+2. Create a TXT CLAW API key: `https://www.txtclaw.com/dashboard/api-keys`
+3. Set BYOK once for that TXT CLAW key: `PUT /v1/byok`
+4. Create agents with: `llm: { "mode": "byok" }`
 
 ## Endpoints
 

@@ -1,3 +1,4 @@
+import { SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
 import { ArrowLeft } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -23,7 +24,7 @@ export default function PrivacyPolicy() {
         <h1 className="text-balance font-mono text-3xl font-bold tracking-tight text-foreground md:text-4xl">
           Privacy Policy
         </h1>
-        <p className="mt-3 text-sm text-muted-foreground">Last updated: February 5, 2026</p>
+        <p className="mt-3 text-sm text-muted-foreground">Last updated: February 18, 2026</p>
 
         <div className="mt-12 space-y-10 text-[15px] leading-relaxed text-foreground/90">
           {/* 1 */}
@@ -34,9 +35,14 @@ export default function PrivacyPolicy() {
               service operated by The Interpreting App, LLC (&quot;Operator&quot;). This Privacy
               Policy explains how we collect, use, disclose, and safeguard your personal information
               when you interact with our service by sending text messages (SMS) to our phone number{" "}
-              <span className="font-mono font-medium">+1 (866) 251-1599</span> or by visiting our
-              website at <span className="font-medium">txtclaw.com</span> (collectively, the
-              &quot;Service&quot;).
+              <a
+                href={SMS_PHONE_HREF}
+                className="font-mono font-medium underline underline-offset-4"
+              >
+                {SMS_PHONE_DISPLAY}
+              </a>{" "}
+              or by visiting our website at <span className="font-medium">txtclaw.com</span>{" "}
+              (collectively, the &quot;Service&quot;).
             </p>
             <p className="mt-3">
               By texting our number or using our website, you agree to the collection and use of
@@ -114,7 +120,8 @@ export default function PrivacyPolicy() {
             <ul className="mt-3 list-disc space-y-2 pl-5">
               <li>
                 <strong>Provide the Service.</strong> Deliver AI-powered SMS responses, maintain
-                conversation history, and provision dedicated phone numbers for paid subscribers.
+                conversation history, and (when available) provision optional local dedicated phone
+                numbers for users who purchase that add-on.
               </li>
               <li>
                 <strong>Process payments.</strong> Complete subscription transactions and manage
@@ -153,14 +160,25 @@ export default function PrivacyPolicy() {
             <p>
               TXT CLAW is a <strong>user-initiated, two-way SMS service</strong>. You opt in to our
               service by texting our gateway number{" "}
-              <span className="font-mono font-medium">+1 (866) 251-1599</span> first. We will never
-              send you unsolicited messages. Every conversation is started by you.
+              <a
+                href={SMS_PHONE_HREF}
+                className="font-mono font-medium underline underline-offset-4"
+              >
+                {SMS_PHONE_DISPLAY}
+              </a>{" "}
+              first. We will never send you unsolicited messages. Every conversation is started by
+              you.
             </p>
             <p className="mt-3">
               By texting our number, you expressly consent to receive AI-generated SMS responses
               from TXT CLAW in reply to your messages. If you subscribe to a paid plan, you also
               consent to receive transactional messages related to your account (e.g., payment
               confirmations, plan changes, service notifications).
+            </p>
+            <p className="mt-3">
+              Consent to receive TXT CLAW SMS messages is not a condition of purchasing goods or
+              services. We only message users who text us first; we do not use purchased lead lists,
+              scraped numbers, or third-party marketing databases.
             </p>
 
             <h3 className="mb-2 mt-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -470,7 +488,13 @@ export default function PrivacyPolicy() {
               </li>
               <li>
                 <strong>SMS:</strong> Reply <span className="font-mono font-medium">HELP</span> to
-                any message from <span className="font-mono font-medium">+1 (866) 251-1599</span>
+                any message from{" "}
+                <a
+                  href={SMS_PHONE_HREF}
+                  className="font-mono font-medium underline underline-offset-4"
+                >
+                  {SMS_PHONE_DISPLAY}
+                </a>
               </li>
               <li>
                 <strong>X (Twitter):</strong>{" "}
@@ -496,7 +520,12 @@ export default function PrivacyPolicy() {
               </div>
               <div className="flex justify-between border-b border-border pb-2">
                 <span className="text-muted-foreground">Phone Number</span>
-                <span className="font-mono font-medium text-foreground">+1 (866) 251-1599</span>
+                <a
+                  href={SMS_PHONE_HREF}
+                  className="font-mono font-medium text-foreground underline underline-offset-4"
+                >
+                  {SMS_PHONE_DISPLAY}
+                </a>
               </div>
               <div className="flex justify-between border-b border-border pb-2">
                 <span className="text-muted-foreground">Message Type</span>

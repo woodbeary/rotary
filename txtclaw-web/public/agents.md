@@ -21,6 +21,7 @@ pnpm dlx textclaw@latest init
 - Quickstart (paste this into bots): `https://www.txtclaw.com/quickstart.md`
 - OpenAPI: `https://www.txtclaw.com/openapi.yaml`
 - Website: `https://www.txtclaw.com/api-reference`
+- Activate Dev API (subscription or promo): `https://www.txtclaw.com/dashboard/billing`
 - API keys: `https://www.txtclaw.com/dashboard/api-keys`
 - BYOK (optional): `https://www.txtclaw.com/byok.md`
 - Routing (hosted router lane): `https://www.txtclaw.com/routing.md`

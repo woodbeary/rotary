@@ -6,7 +6,7 @@ import Link from "next/link"
 export const metadata: Metadata = {
   title: "SMS Consent / Opt-In Proof — TXT CLAW",
   description:
-    "Proof of consumer opt-in for TXT CLAW messaging. How users consent to receive messages by texting our toll-free number.",
+    "Proof of consumer opt-in for TXT CLAW messaging, including explicit consent language and STOP/HELP/START behavior.",
 }
 
 export default function SmsConsentPage() {
@@ -25,7 +25,8 @@ export default function SmsConsentPage() {
           SMS Consent / Opt-In Proof
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          This page documents how a user opts in to receive messages from TXT CLAW.
+          This page documents our SMS consent workflow and message compliance language for toll-free
+          verification.
         </p>
 
         <div className="mt-12 space-y-10 text-[15px] leading-relaxed text-foreground/90">
@@ -35,13 +36,13 @@ export default function SmsConsentPage() {
               TXT CLAW is a product of The Interpreting App, LLC.
             </p>
             <p className="mt-3 text-sm text-muted-foreground">
-              Exact disclosure shown on our public website footer:
+              Public disclosure language used for SMS consent:
             </p>
             <p className="mt-2 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
               “TXT CLAW is a product of The Interpreting App, LLC. By texting {SMS_PHONE_DISPLAY},
               you agree to receive conversational AI messages from TXT CLAW. Message and data rates
-              may apply. Reply STOP to opt out. Reply HELP for help. View our Privacy Policy and
-              Terms.”
+              may apply. Reply STOP to opt out. Reply HELP for help. Consent is not a condition of
+              purchase. View our Privacy Policy and Terms.”
             </p>
             <p className="mt-3 text-sm text-muted-foreground">
               Text us here:{" "}
@@ -52,41 +53,71 @@ export default function SmsConsentPage() {
                 {SMS_PHONE_DISPLAY}
               </a>
             </p>
+            <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+              <li>Program type: User-initiated, conversational two-way SMS.</li>
+              <li>Message category: Account support and transactional AI responses.</li>
+              <li>No unsolicited marketing campaigns or purchased lead lists.</li>
+            </ul>
           </section>
 
           <section>
             <h2 className="mb-3 text-lg font-semibold text-foreground">
-              1. Where the user sees the disclosure
+              1. How consent is collected
             </h2>
-            <p>
-              Users locate our toll-free number in the footer of our public website (
-              <span className="font-medium">txtclaw.com</span>). The footer includes a clear
-              disclosure stating that texting the number constitutes consent to receive
-              conversational AI messages, along with opt-out and help instructions and links to our
-              policies.
-            </p>
+            <ol className="list-decimal space-y-2 pl-5">
+              <li>
+                The user sees our SMS disclosure and policy links on our website, including this
+                page.
+              </li>
+              <li>
+                The user opts in by sending the first SMS from their handset to{" "}
+                <a
+                  href={SMS_PHONE_HREF}
+                  className="font-mono font-medium text-foreground underline underline-offset-4"
+                >
+                  {SMS_PHONE_DISPLAY}
+                </a>
+                .
+              </li>
+              <li>
+                TXT CLAW sends a branded confirmation response that includes message-rate and
+                keyword instructions.
+              </li>
+            </ol>
           </section>
 
           <section>
             <h2 className="mb-3 text-lg font-semibold text-foreground">
-              2. Handset-initiated opt-in
+              2. Sample messages used for compliance
             </h2>
-            <p>
-              The user opts in by sending an SMS from their handset to our toll-free number:{" "}
-              <a
-                href={SMS_PHONE_HREF}
-                className="font-mono font-medium text-foreground underline underline-offset-4"
-              >
-                {SMS_PHONE_DISPLAY}
-              </a>
-              . This is a user-initiated, two-way messaging service: the user starts the
-              conversation, and TXT CLAW replies in response to the user’s messages.
-            </p>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Opt-In Confirmation Message</p>
+                <p className="mt-1 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
+                  TXT CLAW: You are now connected to TXT CLAW AI. Msg &amp; data rates may apply.
+                  Reply HELP for help, STOP to cancel.
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Help Message Sample</p>
+                <p className="mt-1 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
+                  TXT CLAW Help: For support, email support@txtclaw.com or visit
+                  https://www.txtclaw.com. Reply STOP to cancel.
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Opt-Out Confirmation</p>
+                <p className="mt-1 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
+                  TXT CLAW: You have been unsubscribed and will no longer receive messages. Reply
+                  START to re-subscribe.
+                </p>
+              </div>
+            </div>
           </section>
 
           <section>
             <h2 className="mb-3 text-lg font-semibold text-foreground">
-              3. Opt-out, help, and re-subscribe
+              3. STOP / HELP / START keyword behavior
             </h2>
             <ul className="list-disc space-y-2 pl-5">
               <li>
@@ -108,7 +139,18 @@ export default function SmsConsentPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-lg font-semibold text-foreground">4. Policies</h2>
+            <h2 className="mb-3 text-lg font-semibold text-foreground">4. Consent boundaries</h2>
+            <ul className="list-disc space-y-2 pl-5">
+              <li>Consent is specific to TXT CLAW messaging and can be revoked at any time.</li>
+              <li>Consent is not a condition of purchasing any goods or services.</li>
+              <li>We do not transfer, sell, or share opt-in data for third-party marketing.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-lg font-semibold text-foreground">
+              5. Policies and proof URLs
+            </h2>
             <p>
               For more details, see our{" "}
               <Link
@@ -126,6 +168,20 @@ export default function SmsConsentPage() {
               </Link>
               .
             </p>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">
+              <li>
+                <span className="font-medium">Proof page:</span>{" "}
+                <span className="font-mono">https://www.txtclaw.com/sms-consent</span>
+              </li>
+              <li>
+                <span className="font-medium">Privacy:</span>{" "}
+                <span className="font-mono">https://www.txtclaw.com/privacy</span>
+              </li>
+              <li>
+                <span className="font-medium">Terms:</span>{" "}
+                <span className="font-mono">https://www.txtclaw.com/terms</span>
+              </li>
+            </ul>
           </section>
         </div>
       </div>

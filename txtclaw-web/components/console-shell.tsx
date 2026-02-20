@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { SignedIn, UserButton } from "@clerk/nextjs"
-import { Activity, BookOpen, CreditCard, KeyRound, Sparkles } from "lucide-react"
+import { Activity, BookOpen, CreditCard, KeyRound, ShieldAlert, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
@@ -34,6 +34,12 @@ const NAV: NavItem[] = [
     href: "/admin/traces",
     label: "Traces",
     icon: <Activity className="h-4 w-4" />,
+    adminOnly: true,
+  },
+  {
+    href: "/admin/compliance",
+    label: "Compliance",
+    icon: <ShieldAlert className="h-4 w-4" />,
     adminOnly: true,
   },
   {

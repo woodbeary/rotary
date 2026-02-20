@@ -14,7 +14,11 @@ export type BetaState =
   | "paid_waiting_apple_invite"
   | "apple_invited"
 
-export type OfferCode = "PROMO_CODE_REDACTED" | "PROMO_CODE_REDACTED" | "PROMO_CODE_REDACTED"
+export type OfferCode =
+  | "PROMO_CODE_REDACTED"
+  | "PROMO_CODE_REDACTED"
+  | "PROMO_CODE_REDACTED"
+  | "PROMO_CODE_REDACTED"
 
 export type OfferType = "monthly" | "ltd"
 
@@ -48,6 +52,10 @@ type BillingMetadata = {
   purchaseType?: "subscription" | "lifetime"
   invitedToPayAt?: string
   inviteExpiresAt?: string
+  checkoutOfferOverride?: OfferCode | null
+  checkoutOfferOverrideCodeId?: string | null
+  checkoutOfferOverrideSetAt?: string | null
+  checkoutOfferOverrideExpiresAt?: string | null
 }
 
 type SquareMetadata = {
@@ -76,7 +84,12 @@ function asString(value: unknown): string | undefined {
 
 function asOfferCode(value: unknown): OfferCode | undefined {
   const raw = asString(value)
-  if (raw === "PROMO_CODE_REDACTED" || raw === "PROMO_CODE_REDACTED" || raw === "PROMO_CODE_REDACTED") {
+  if (
+    raw === "PROMO_CODE_REDACTED" ||
+    raw === "PROMO_CODE_REDACTED" ||
+    raw === "PROMO_CODE_REDACTED" ||
+    raw === "PROMO_CODE_REDACTED"
+  ) {
     return raw
   }
   return undefined
@@ -134,6 +147,20 @@ export function getBillingMetadata(user: User): BillingMetadata {
     purchaseTypeRaw === "subscription" || purchaseTypeRaw === "lifetime"
       ? purchaseTypeRaw
       : undefined
+  const checkoutOfferOverride =
+    billing.checkoutOfferOverride === null ? null : asOfferCode(billing.checkoutOfferOverride)
+  const checkoutOfferOverrideCodeId =
+    billing.checkoutOfferOverrideCodeId === null
+      ? null
+      : asString(billing.checkoutOfferOverrideCodeId)
+  const checkoutOfferOverrideSetAt =
+    billing.checkoutOfferOverrideSetAt === null
+      ? null
+      : asString(billing.checkoutOfferOverrideSetAt)
+  const checkoutOfferOverrideExpiresAt =
+    billing.checkoutOfferOverrideExpiresAt === null
+      ? null
+      : asString(billing.checkoutOfferOverrideExpiresAt)
 
   return {
     paidAt,
@@ -142,6 +169,10 @@ export function getBillingMetadata(user: User): BillingMetadata {
     purchaseType,
     invitedToPayAt,
     inviteExpiresAt,
+    checkoutOfferOverride,
+    checkoutOfferOverrideCodeId,
+    checkoutOfferOverrideSetAt,
+    checkoutOfferOverrideExpiresAt,
   }
 }
 

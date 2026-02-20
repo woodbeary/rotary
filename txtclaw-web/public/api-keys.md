@@ -6,11 +6,15 @@ API keys authenticate requests to the TXT CLAW HTTP API.
 
 1. Create an account: `https://www.txtclaw.com/sign-up`
 2. Sign in: `https://www.txtclaw.com/sign-in`
-3. Generate a key: `https://www.txtclaw.com/dashboard/api-keys`
+3. Activate Dev API (subscription or promo): `https://www.txtclaw.com/dashboard/billing`
+4. Generate a key: `https://www.txtclaw.com/dashboard/api-keys`
 
 Keys are shown **once**. Store it somewhere safe.
 
-Note: email verification is required before you can generate keys.
+Notes:
+
+- Email verification is required before you can generate keys.
+- A Dev API plan is required (Free accounts cannot create keys).
 
 ## Use a key
 

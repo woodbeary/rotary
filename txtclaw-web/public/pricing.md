@@ -6,12 +6,8 @@ Checkout: `https://www.txtclaw.com/dashboard/billing` (requires sign-in).
 
 ## Free (default)
 
-- Self-serve API keys
-- Hosted lane (`llm.mode="hosted"`)
-- Default preview caps:
-  - `60 req/min` per key
-  - `120 req/min` per IP
-  - `1,000 req/day` per key
+- Browse docs + dashboard
+- No API keys (subscription or promo required)
 
 ## Pro (monthly)
 

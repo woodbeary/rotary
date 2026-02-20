@@ -1,6 +1,7 @@
 import {
   type OfferCode,
   collectLaunchStats,
+  getBillingMetadata,
   getUserPrivateMetadata,
   mergeBetaState,
   mergeBillingMetadata,
@@ -8,6 +9,7 @@ import {
   parseOfferType,
   resolveCheckoutOffer,
 } from "@/lib/billing"
+import { getBillingCostPromoCents } from "@/lib/promo-config"
 import {
   createSquareCheckoutLink,
   encodeSquareMetadataToken,
@@ -57,6 +59,14 @@ function getMonthlyPlanId(offerCode: OfferCode): string | undefined {
     return (
       process.env.SQUARE_PLAN_ID_STANDARD?.trim() ||
       process.env.SQUARE_MONTHLY_PLAN_ID_STANDARD?.trim() ||
+      undefined
+    )
+  }
+
+  if (offerCode === "PROMO_CODE_REDACTED") {
+    return (
+      process.env.SQUARE_PLAN_ID_COST?.trim() ||
+      process.env.SQUARE_MONTHLY_PLAN_ID_COST?.trim() ||
       undefined
     )
   }
@@ -124,7 +134,35 @@ export async function POST(request: NextRequest) {
   const offerType = parseOfferType(payload.offerType)
   const users = await listUsersForLaunchStats(client)
   const stats = collectLaunchStats(users)
-  const offer = resolveCheckoutOffer(stats, offerType)
+  let offer = resolveCheckoutOffer(stats, offerType)
+
+  const billing = getBillingMetadata(user)
+  const override = billing.checkoutOfferOverride
+  const overrideExpiresAt = billing.checkoutOfferOverrideExpiresAt || undefined
+  const overrideExpiresAtMs = overrideExpiresAt ? Date.parse(overrideExpiresAt) : undefined
+  const overrideValid =
+    override === "PROMO_CODE_REDACTED" &&
+    (!overrideExpiresAt ||
+      (typeof overrideExpiresAtMs === "number" &&
+        Number.isFinite(overrideExpiresAtMs) &&
+        overrideExpiresAtMs > Date.now()))
+
+  if (overrideValid && offerType === "monthly") {
+    const costCents = getBillingCostPromoCents()
+    if (!costCents) {
+      return NextResponse.json(
+        { ok: false, error: "Billing cost promo is not configured (PROMO_BILLING_COST_CENTS)." },
+        { status: 500 },
+      )
+    }
+    offer = {
+      code: "PROMO_CODE_REDACTED",
+      amountCents: costCents,
+      currency: "USD",
+      interval: "monthly",
+      label: `$${(costCents / 100).toFixed(2)}/mo cost`,
+    }
+  }
 
   if (!offer) {
     return NextResponse.json(
@@ -140,21 +178,21 @@ export async function POST(request: NextRequest) {
   const locationId = process.env.SQUARE_LOCATION_ID?.trim()
   const monthlyPlanId = getMonthlyPlanId(offer.code)
 
-  if (offer.interval === "one_time" && !locationId) {
+  if (!locationId) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Missing SQUARE_LOCATION_ID for one-time checkout.",
+        error: "Missing SQUARE_LOCATION_ID for checkout.",
       },
       { status: 500 },
     )
   }
 
-  if (offer.interval === "monthly" && !monthlyPlanId && !locationId) {
+  if (offer.interval === "monthly" && !monthlyPlanId) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Missing Square plan or location configuration for monthly checkout.",
+        error: "Missing Square subscription plan id for monthly checkout.",
       },
       { status: 500 },
     )
@@ -182,7 +220,11 @@ export async function POST(request: NextRequest) {
       amountCents: offer.amountCents,
       currency: offer.currency,
       quickPayName:
-        offer.interval === "monthly" ? "TXT CLAW Dev API Pro" : "TXT CLAW BYOK Lifetime",
+        offer.interval === "monthly"
+          ? offer.code === "PROMO_CODE_REDACTED"
+            ? "TXT CLAW Dev API Cost"
+            : "TXT CLAW Dev API Pro"
+          : "TXT CLAW BYOK Lifetime",
       subscriptionPlanId: offer.interval === "monthly" ? monthlyPlanId : undefined,
     })
 

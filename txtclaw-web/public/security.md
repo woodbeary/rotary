@@ -14,7 +14,19 @@
 ## Logging / tracing
 
 - Every API response includes `trace_id` and sets `x-txtclaw-trace-id`.
-- Do not paste API keys into support tickets; include `trace_id` instead.
+- Every SMS outbound attempt is logged with trace lineage and actor/state correlation fields planned in the anti-abuse schema.
+- Do not log `Authorization` headers.
+- Do not log message plaintext.
+
+## SMS compliance controls (now enabled for admin workflows)
+
+- Trace IDs are the primary evidence chain for all compliance actions.
+- Actor-level abuse controls are reversible by default:
+  - `warn_actor`
+  - `pause_actor_egress`
+  - `disable_actor_numbers`
+  - `unfreeze_actor`
+- Operator actions must include a reason and event evidence (trace IDs) for auditability.
 
 ## What to avoid
 

@@ -124,7 +124,14 @@ export default function ApiReferencePage() {
                 </li>
               </ul>
               <p className="mt-4 text-sm text-muted-foreground">
-                Generate an API key in{" "}
+                Activate Dev API in{" "}
+                <Link
+                  href="/dashboard/billing"
+                  className="font-mono text-foreground underline underline-offset-4"
+                >
+                  /dashboard/billing
+                </Link>
+                , then generate an API key in{" "}
                 <Link
                   href="/dashboard/api-keys"
                   className="font-mono text-foreground underline underline-offset-4"

@@ -69,7 +69,14 @@ export default function OpenClawApiPage() {
 
           <div className="mt-5 space-y-3">
             <p className="text-sm text-muted-foreground">
-              Get a TXT CLAW API key:{" "}
+              Activate Dev API, then get a TXT CLAW API key:{" "}
+              <Link
+                href="/dashboard/billing"
+                className="font-mono text-foreground underline underline-offset-4"
+              >
+                /dashboard/billing
+              </Link>
+              {" · "}
               <Link
                 href="/dashboard/api-keys"
                 className="font-mono text-foreground underline underline-offset-4"

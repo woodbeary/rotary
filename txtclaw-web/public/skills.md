@@ -16,9 +16,10 @@ Related:
 
 You can ask OpenClaw to set this up for you:
 
-1. Create a TXT CLAW API key: `https://www.txtclaw.com/dashboard/api-keys`
-2. Paste `https://www.txtclaw.com/quickstart.md` and `https://www.txtclaw.com/openapi.yaml` into your agent
-3. Ask it to create an agent and send a test message
+1. Activate Dev API: `https://www.txtclaw.com/dashboard/billing`
+2. Create a TXT CLAW API key: `https://www.txtclaw.com/dashboard/api-keys`
+3. Paste `https://www.txtclaw.com/quickstart.md` and `https://www.txtclaw.com/openapi.yaml` into your agent
+4. Ask it to create an agent and send a test message
 
 ## MCP Config Snippet
 

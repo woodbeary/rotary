@@ -4,6 +4,7 @@ import { CodeBlock } from "@/components/code-block"
 import { ConsolePageHeader } from "@/components/console-page-header"
 import { CopyButton } from "@/components/copy-button"
 import { DeveloperCopyPrompt } from "@/components/developer-copy-prompt"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { getPublicApiBaseUrl } from "@/lib/txtclaw-urls"
-import { BookOpen, KeyRound, Shield, Terminal, Zap } from "lucide-react"
+import { BookOpen, CreditCard, KeyRound, Shield, Terminal, Zap } from "lucide-react"
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -42,6 +43,15 @@ type CreateResponse =
 
 type RevokeResponse = { ok: true; record: ApiKeyRecord } | { ok: false; error: string }
 
+type ApiUserPlan = {
+  userId: string
+  plan: "free" | "pro" | "max" | "byok"
+  provider?: "square" | "manual"
+  offerCode?: string
+  paidAt?: string
+  updatedAt: string
+}
+
 function formatIso(iso: string | undefined) {
   if (!iso) return "—"
   try {
@@ -61,6 +71,8 @@ function maskKey(key: string): string {
 export function ApiKeysDashboard() {
   const [loading, setLoading] = useState(true)
   const [keys, setKeys] = useState<ApiKeyRecord[]>([])
+  const [loadingPlan, setLoadingPlan] = useState(true)
+  const [plan, setPlan] = useState<ApiUserPlan | null>(null)
   const [label, setLabel] = useState("")
   const [creating, setCreating] = useState(false)
   const [revoking, setRevoking] = useState<string | null>(null)
@@ -77,6 +89,27 @@ export function ApiKeysDashboard() {
   const [byokSaving, setByokSaving] = useState(false)
 
   const activeCount = useMemo(() => keys.filter((k) => !k.revokedAt).length, [keys])
+
+  const loadPlan = useCallback(async () => {
+    setLoadingPlan(true)
+    try {
+      const res = await fetch("/api/console/plan", { method: "GET", cache: "no-store" })
+      const data = (await res.json().catch(() => null)) as
+        | { ok: true; plan: ApiUserPlan }
+        | { ok: false; error: string }
+        | null
+
+      if (!res.ok || !data || !("ok" in data) || !data.ok) {
+        throw new Error((data as any)?.error || "Failed to load plan.")
+      }
+      setPlan(data.plan)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to load plan.")
+      setPlan(null)
+    } finally {
+      setLoadingPlan(false)
+    }
+  }, [])
 
   const loadKeys = useCallback(async () => {
     setLoading(true)
@@ -95,8 +128,9 @@ export function ApiKeysDashboard() {
   }, [])
 
   useEffect(() => {
+    void loadPlan()
     void loadKeys()
-  }, [loadKeys])
+  }, [loadKeys, loadPlan])
 
   async function copy(text: string) {
     try {
@@ -131,6 +165,9 @@ export function ApiKeysDashboard() {
       setCreating(false)
     }
   }, [creating, label, loadKeys])
+
+  const currentPlan = useMemo(() => plan?.plan || "free", [plan])
+  const isPaid = currentPlan !== "free"
 
   const handleRevoke = useCallback(
     async (keyId: string) => {
@@ -281,7 +318,10 @@ export function ApiKeysDashboard() {
           </>
         }
         right={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="font-mono text-[11px] text-muted-foreground">
+              {loadingPlan ? "Plan: …" : `Plan: ${currentPlan}`}
+            </Badge>
             <Link
               href="/developers"
               className="inline-flex items-center rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
@@ -293,6 +333,7 @@ export function ApiKeysDashboard() {
               href="/dashboard/billing"
               className="inline-flex items-center rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
             >
+              <CreditCard className="mr-2 h-4 w-4" />
               Upgrade limits
             </Link>
           </div>
@@ -325,27 +366,50 @@ export function ApiKeysDashboard() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="font-mono text-[11px] text-muted-foreground">Step 1</div>
-                    <div className="text-sm font-medium text-foreground">Generate a key</div>
+                    <div className="text-sm font-medium text-foreground">
+                      {isPaid ? "Generate a key" : "Activate Dev API"}
+                    </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Active keys: <span className="font-mono text-foreground">{activeCount}</span>
+                      {isPaid ? (
+                        <>
+                          Active keys:{" "}
+                          <span className="font-mono text-foreground">{activeCount}</span>
+                        </>
+                      ) : (
+                        <>Subscription required before you can create API keys.</>
+                      )}
                     </div>
                   </div>
                   <KeyRound className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-12">
-                  <div className="md:col-span-7">
-                    <Input
-                      value={label}
-                      onChange={(e) => setLabel(e.target.value)}
-                      placeholder="Label (optional) e.g. prod-api"
-                    />
+                {isPaid ? (
+                  <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-12">
+                    <div className="md:col-span-7">
+                      <Input
+                        value={label}
+                        onChange={(e) => setLabel(e.target.value)}
+                        placeholder="Label (optional) e.g. prod-api"
+                      />
+                    </div>
+                    <div className="md:col-span-5">
+                      <Button onClick={handleCreate} disabled={creating} className="w-full">
+                        {creating ? "Generating…" : "Generate key"}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="md:col-span-5">
-                    <Button onClick={handleCreate} disabled={creating} className="w-full">
-                      {creating ? "Generating…" : "Generate key"}
+                ) : (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button asChild className="gap-2">
+                      <Link href="/dashboard/billing">
+                        <CreditCard className="h-4 w-4" />
+                        Subscribe to unlock keys
+                      </Link>
+                    </Button>
+                    <Button variant="secondary" asChild>
+                      <Link href="/dashboard/billing">Redeem promo code</Link>
                     </Button>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="rounded-xl border border-border/60 bg-background p-4">
@@ -370,7 +434,9 @@ export function ApiKeysDashboard() {
                             ? revealKey
                               ? newKey
                               : maskKey(newKey)
-                            : "Generate a key first."}
+                            : isPaid
+                              ? "Generate a key first."
+                              : "Subscribe first, then generate a key."}
                         </div>
                       </div>
                       {newKey ? (
@@ -514,7 +580,9 @@ export function ApiKeysDashboard() {
           </div>
           {keys.length === 0 ? (
             <div className="px-4 py-6 text-sm text-muted-foreground">
-              No keys yet. Generate one above.
+              {isPaid
+                ? "No keys yet. Generate one above."
+                : "No keys yet. Subscribe to unlock key creation."}
             </div>
           ) : (
             <div className="divide-y divide-border/60">

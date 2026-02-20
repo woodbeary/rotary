@@ -1,9 +1,18 @@
+import { AdminBillingCostPromoGenerator } from "@/components/admin-billing-cost-promo-generator"
+import { AdminDevApiPromoGenerator } from "@/components/admin-dev-api-promo-generator"
 import { AdminPromoGenerator } from "@/components/admin-promo-generator"
 import { CLERK_ENABLED } from "@/lib/clerk-config"
 import {
   canUserGeneratePromoCodes,
+  getBillingCostPromoCampaignId,
+  getBillingCostPromoCents,
+  getDevApiPromoCampaignId,
+  getDevApiPromoPlan,
+  getDevApiPromoSignatureCents,
   getPromoCampaignId,
   getPromoGrantCents,
+  isBillingCostPromoEnabled,
+  isDevApiPromoEnabled,
 } from "@/lib/promo-config"
 import { auth } from "@clerk/nextjs/server"
 import { ArrowLeft } from "lucide-react"
@@ -51,7 +60,22 @@ export default async function AdminPromoPage() {
           Back to home
         </Link>
 
-        <AdminPromoGenerator campaignId={campaignId} grantCents={grantCents} />
+        <div className="grid gap-6">
+          <AdminPromoGenerator campaignId={campaignId} grantCents={grantCents} />
+          {isDevApiPromoEnabled() && getDevApiPromoPlan() !== "free" ? (
+            <AdminDevApiPromoGenerator
+              campaignId={getDevApiPromoCampaignId()}
+              signatureCents={getDevApiPromoSignatureCents()}
+              plan={getDevApiPromoPlan()}
+            />
+          ) : null}
+          {isBillingCostPromoEnabled() && getBillingCostPromoCents() > 0 ? (
+            <AdminBillingCostPromoGenerator
+              campaignId={getBillingCostPromoCampaignId()}
+              costCents={getBillingCostPromoCents()}
+            />
+          ) : null}
+        </div>
       </div>
     </main>
   )

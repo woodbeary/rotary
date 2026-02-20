@@ -16,8 +16,13 @@ export function generateStaticParams() {
   return DEV_DOCS.map((doc) => ({ slug: doc.slug }))
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const doc = DEV_DOCS_BY_SLUG[params.slug]
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const doc = DEV_DOCS_BY_SLUG[slug]
   if (!doc) return {}
   return {
     title: `${doc.title} — Developers — TXT CLAW`,
@@ -31,8 +36,13 @@ async function readPublicFile(rawPath: string): Promise<string> {
   return await fs.readFile(abs, "utf8")
 }
 
-export default async function DeveloperDocPage({ params }: { params: { slug: string } }) {
-  const doc = DEV_DOCS_BY_SLUG[params.slug]
+export default async function DeveloperDocPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const doc = DEV_DOCS_BY_SLUG[slug]
   if (!doc) notFound()
 
   const content = await readPublicFile(doc.rawPath)

@@ -3,7 +3,7 @@ import {
   getConsoleBaseUrl,
   getConsoleServiceToken,
   jsonError,
-  requireVerifiedUserId,
+  requirePaidDevApiUserId,
 } from "@/app/api/console/_shared"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -13,8 +13,8 @@ export const dynamic = "force-dynamic"
 type Ok = { ok: true; record: ApiKeyRecord }
 
 export async function POST(request: NextRequest) {
-  const verified = await requireVerifiedUserId()
-  if (!verified.ok) return verified.response
+  const paid = await requirePaidDevApiUserId()
+  if (!paid.ok) return paid.response
 
   const token = getConsoleServiceToken()
   if (!token) return jsonError("Missing TXTCLAW_CONSOLE_SERVICE_TOKEN.", 500)
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      user_id: verified.userId,
+      user_id: paid.userId,
       key_id: keyId,
       provider,
       api_key: apiKey,

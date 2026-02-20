@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -15,7 +15,9 @@
     "biome:check": "biome check .",
     "biome:fix": "biome check --write .",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "launch:gate": "node scripts/launch-go-no-go.mjs",
+    "launch:gate:repo": "node scripts/launch-go-no-go.mjs --skip-smoke --allow-unverified-provider --allow-unverified-ops"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.3",

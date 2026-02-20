@@ -1,5 +1,5 @@
 import { Separator } from "@/components/ui/separator"
-import { SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
+import { SMS_GATEWAY_LIVE, SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
 import Image from "next/image"
 
 export function Footer() {
@@ -110,40 +110,56 @@ export function Footer() {
           <p className="text-center text-[11px] text-muted-foreground/60">
             TXT CLAW is a product of The Interpreting App, LLC.
           </p>
-          <p className="max-w-4xl text-center text-[11px] leading-relaxed text-muted-foreground/70">
-            By texting{" "}
-            <a
-              href={SMS_PHONE_HREF}
-              className="font-mono font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
-            >
-              {SMS_PHONE_DISPLAY}
-            </a>
-            , you agree to receive conversational AI messages from TXT CLAW. Message and data rates
-            may apply. Reply <span className="font-mono font-medium text-foreground">STOP</span> to
-            opt out. Reply <span className="font-mono font-medium text-foreground">HELP</span> for
-            help. View our{" "}
-            <a
-              href="/privacy"
-              className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
-            >
-              Privacy Policy
-            </a>{" "}
-            and{" "}
-            <a
-              href="/terms"
-              className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
-            >
-              Terms
-            </a>
-            .{" "}
-            <a
-              href="/sms-consent"
-              className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
-            >
-              SMS Consent (Opt-In Proof)
-            </a>
-            .
-          </p>
+          {SMS_GATEWAY_LIVE ? (
+            <p className="max-w-4xl text-center text-[11px] leading-relaxed text-muted-foreground/70">
+              By texting{" "}
+              <a
+                href={SMS_PHONE_HREF}
+                className="font-mono font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+              >
+                {SMS_PHONE_DISPLAY}
+              </a>
+              , you agree to receive conversational AI messages from TXT CLAW. Message and data
+              rates may apply. Reply{" "}
+              <span className="font-mono font-medium text-foreground">STOP</span> to opt out. Reply{" "}
+              <span className="font-mono font-medium text-foreground">HELP</span> for help. Consent
+              is not a condition of purchase. View our{" "}
+              <a
+                href="/privacy"
+                className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+              >
+                Privacy Policy
+              </a>{" "}
+              and{" "}
+              <a
+                href="/terms"
+                className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+              >
+                Terms
+              </a>
+              .{" "}
+              <a
+                href="/sms-consent"
+                className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+              >
+                SMS Consent (Opt-In Proof)
+              </a>
+              .
+            </p>
+          ) : (
+            <p className="max-w-4xl text-center text-[11px] leading-relaxed text-muted-foreground/70">
+              TXT CLAW is currently in invite-only Apple beta. Join the waitlist and we&apos;ll
+              email access instructions as capacity opens. SMS program compliance details are
+              published at{" "}
+              <a
+                href="/sms-consent"
+                className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+              >
+                SMS Consent (Opt-In Proof)
+              </a>
+              .
+            </p>
+          )}
           <p className="text-center text-xs text-muted-foreground">
             © {new Date().getFullYear()} TXT CLAW
           </p>

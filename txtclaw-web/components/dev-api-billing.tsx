@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { CheckCircle2, CreditCard, Loader2, RefreshCw } from "lucide-react"
 import Link from "next/link"
@@ -29,6 +30,8 @@ export function DevApiBilling() {
   const [loadingPlan, setLoadingPlan] = useState(true)
   const [plan, setPlan] = useState<ApiUserPlan | null>(null)
   const [starting, setStarting] = useState<"monthly" | "ltd" | null>(null)
+  const [promoCode, setPromoCode] = useState("")
+  const [redeeming, setRedeeming] = useState(false)
 
   const loadPlan = useCallback(async () => {
     setLoadingPlan(true)
@@ -55,6 +58,8 @@ export function DevApiBilling() {
   }, [loadPlan])
 
   const current = useMemo(() => plan?.plan || "free", [plan])
+
+  const normalizedPromoCode = promoCode.trim().toUpperCase()
 
   const startCheckout = useCallback(
     async (offerType: "monthly" | "ltd") => {
@@ -84,6 +89,33 @@ export function DevApiBilling() {
     },
     [starting],
   )
+
+  const redeemPromo = useCallback(async () => {
+    if (redeeming) return
+    if (!normalizedPromoCode) return
+    setRedeeming(true)
+    try {
+      const res = await fetch("/api/promo/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: normalizedPromoCode }),
+      })
+      const data = (await res.json().catch(() => null)) as
+        | { ok: true; kind?: string; message?: string; plan?: string }
+        | { ok: false; error: string }
+        | null
+      if (!res.ok || !data || !("ok" in data) || !data.ok) {
+        throw new Error((data as any)?.error || "Unable to redeem code.")
+      }
+      toast.success(data.message || "Code redeemed.")
+      setPromoCode("")
+      await loadPlan()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to redeem code.")
+    } finally {
+      setRedeeming(false)
+    }
+  }, [loadPlan, normalizedPromoCode, promoCode, redeeming])
 
   return (
     <div className="space-y-8">
@@ -210,6 +242,38 @@ export function DevApiBilling() {
           </CardContent>
         </Card>
       </section>
+
+      <Card className="rounded-2xl border-border/60">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Redeem promo code</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Admin-issued codes can unlock Dev API plans, unlock cost-only checkout, or add launch
+            credits.
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Input
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              placeholder="TXT100-XXXXXXXXXXXX-XXXXXXXX"
+              className="font-mono uppercase"
+              maxLength={40}
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+            />
+            <Button
+              variant="secondary"
+              onClick={() => void redeemPromo()}
+              disabled={!normalizedPromoCode || redeeming}
+              className="sm:w-40"
+            >
+              {redeeming ? "Redeeming…" : "Redeem"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <section className="rounded-2xl border border-border/60 bg-card p-6 md:p-8">
         <h2 className="text-lg font-semibold text-foreground">Pricing + limits</h2>
