@@ -1,3 +1,5 @@
+import { Footer } from "@/components/footer"
+import { PublicRouteCompliance } from "@/components/public-route-compliance"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { CLERK_ENABLED } from "@/lib/clerk-config"
@@ -128,7 +130,7 @@ export default function RootLayout({
       storageKey="txtclaw-theme"
       disableTransitionOnChange
     >
-      {children}
+      <PublicRouteCompliance footer={<Footer />}>{children}</PublicRouteCompliance>
       <Toaster />
       <Analytics />
       <SpeedInsights />

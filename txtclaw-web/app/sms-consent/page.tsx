@@ -1,4 +1,4 @@
-import { SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
+import { SMS_COMPLIANCE_DISCLOSURE_WITH_POLICY, SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
 import { ArrowLeft } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -39,10 +39,7 @@ export default function SmsConsentPage() {
               Public disclosure language used for SMS consent:
             </p>
             <p className="mt-2 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
-              “TXT CLAW is a product of The Interpreting App, LLC. By texting {SMS_PHONE_DISPLAY},
-              you agree to receive conversational AI messages from TXT CLAW. Message and data rates
-              may apply. Reply STOP to opt out. Reply HELP for help. Consent is not a condition of
-              purchase. View our Privacy Policy and Terms.”
+              “{SMS_COMPLIANCE_DISCLOSURE_WITH_POLICY}”
             </p>
             <p className="mt-3 text-sm text-muted-foreground">
               Text us here:{" "}
@@ -94,8 +91,8 @@ export default function SmsConsentPage() {
               <div>
                 <p className="text-sm font-semibold text-foreground">Opt-In Confirmation Message</p>
                 <p className="mt-1 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
-                  TXT CLAW: You are now connected to TXT CLAW AI. Msg &amp; data rates may apply.
-                  Reply HELP for help, STOP to cancel.
+                  TXT CLAW: You are now connected to TXT CLAW AI. Message and data rates may apply.
+                  Reply HELP for help. Reply STOP to cancel.
                 </p>
               </div>
               <div>

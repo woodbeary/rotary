@@ -20,8 +20,14 @@ export TXTCLAW_API_KEY="vck_REPLACE_ME"
 ## 3) CLI (recommended)
 
 ```bash
-pnpm dlx txtclaw@latest init
-pnpm dlx txtclaw@latest doctor
+pnpm i txtclaw
+```
+
+## Optional: scaffold + verify immediately
+
+```bash
+pnpm exec txtclaw init
+pnpm exec txtclaw doctor
 ```
 
 ## Optional: warmup (recommended before first message)

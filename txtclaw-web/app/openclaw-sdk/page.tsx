@@ -35,7 +35,7 @@ export default function OpenClawSdkPage() {
             <CodeBlock
               title="1 line"
               language="bash"
-              code={`pnpm dlx txtclaw@latest init`}
+              code={`pnpm i txtclaw`}
               copyLabel="Copy"
             />
           </div>
@@ -63,7 +63,7 @@ export default function OpenClawSdkPage() {
             Published as the <span className="font-mono text-foreground">txtclaw</span> package.
           </p>
           <div className="mt-4 space-y-3">
-            <CodeBlock title="Install" language="bash" code={`pnpm add txtclaw`} copyLabel="Copy" />
+            <CodeBlock title="Install" language="bash" code={`pnpm i txtclaw`} copyLabel="Copy" />
             <CodeBlock
               title="Usage"
               language="ts"

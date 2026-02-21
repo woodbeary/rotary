@@ -1,4 +1,3 @@
-import { Footer } from "@/components/footer"
 import { Navbar } from "@/components/navbar"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
@@ -111,7 +110,6 @@ Public proof:
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 
 const DOC_ROUTES: Array<{ path: string; mustContain: string }> = [
   { path: "/quickstart.md", mustContain: "TXT CLAW Quickstart" },
-  { path: "/quickstart.md", mustContain: "pnpm dlx txtclaw@latest init" },
+  { path: "/quickstart.md", mustContain: "pnpm i txtclaw" },
   { path: "/agents.md", mustContain: "TXT CLAW Developer API" },
   { path: "/openapi.yaml", mustContain: "openapi:" },
   { path: "/pricing.md", mustContain: "Dev API Pricing" },

@@ -1,7 +1,6 @@
 import { AppleProofSection } from "@/components/apple-proof-section"
 import { CTA } from "@/components/cta"
 import { Features } from "@/components/features"
-import { Footer } from "@/components/footer"
 import { Hero } from "@/components/hero"
 import { HowItWorks } from "@/components/how-it-works"
 import { LifestyleHighlights } from "@/components/lifestyle-highlights"
@@ -25,7 +24,6 @@ export default function Page() {
         <LifestyleHighlights />
         <WhyFirstSection />
       </main>
-      <Footer />
     </div>
   )
 }

@@ -80,7 +80,7 @@ export default function DevelopersPage() {
                     <CodeBlock
                       title="Install + init"
                       language="bash"
-                      code={`pnpm dlx txtclaw@latest init`}
+                      code={`pnpm i txtclaw\npnpm exec txtclaw init`}
                       copyLabel="Copy"
                     />
                   </div>
@@ -93,7 +93,7 @@ export default function DevelopersPage() {
                     <CodeBlock
                       title="Doctor"
                       language="bash"
-                      code={`pnpm dlx txtclaw@latest doctor`}
+                      code={`pnpm exec txtclaw doctor`}
                       copyLabel="Copy"
                     />
                   </div>

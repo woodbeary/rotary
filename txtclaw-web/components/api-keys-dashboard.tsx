@@ -214,7 +214,7 @@ export function ApiKeysDashboard() {
   }, [])
 
   const doctorCommands = useMemo(() => {
-    return `pnpm dlx txtclaw@latest init\npnpm dlx txtclaw@latest doctor`
+    return `pnpm i txtclaw\npnpm exec txtclaw init\npnpm exec txtclaw doctor`
   }, [])
 
   const openByokForKey = useCallback((key: ApiKeyRecord) => {

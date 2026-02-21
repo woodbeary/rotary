@@ -65,7 +65,7 @@ export default function OpenClawRouterPage() {
             <CodeBlock
               title="Commands"
               language="bash"
-              code={`pnpm dlx txtclaw@latest init\npnpm dlx txtclaw@latest doctor`}
+              code={`pnpm i txtclaw\npnpm exec txtclaw init\npnpm exec txtclaw doctor`}
               copyLabel="Copy"
             />
           </div>

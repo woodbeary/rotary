@@ -66,7 +66,7 @@ export function Hero() {
 
           {SMS_GATEWAY_LIVE && (
             <p className="mt-1 font-mono text-xs text-muted-foreground/70">
-              Msg &amp; data rates may apply. Reply STOP to opt out.
+              Message and data rates may apply. Reply STOP to opt out.
             </p>
           )}
         </div>

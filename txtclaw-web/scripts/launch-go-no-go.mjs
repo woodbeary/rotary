@@ -36,6 +36,7 @@ const options = {
   skipRepoGates: hasFlag("--skip-repo-gates"),
   allowUnverifiedProvider: hasFlag("--allow-unverified-provider"),
   allowUnverifiedOps: hasFlag("--allow-unverified-ops"),
+  json: hasFlag("--json"),
 }
 
 /** @type {Array<{name: string, status: "PASS"|"FAIL"|"WARN"|"SKIP", detail: string}>} */
@@ -239,26 +240,33 @@ function printReportAndExit() {
     skip: checks.filter((entry) => entry.status === "SKIP").length,
   }
 
-  console.log("")
-  console.log("Controlled funnel launch checklist")
-  console.log("---------------------------------")
-  for (const entry of checks) {
-    console.log(`[${entry.status}] ${entry.name}: ${entry.detail}`)
+  const decision = counts.fail > 0 ? "RED" : "GREEN"
+  const report = {
+    generatedAt: new Date().toISOString(),
+    options,
+    counts,
+    decision,
+    checks,
   }
-  console.log("")
-  console.log(
-    `Totals -> PASS ${counts.pass} | FAIL ${counts.fail} | WARN ${counts.warn} | SKIP ${counts.skip}`,
-  )
 
-  if (counts.fail > 0) {
+  if (options.json) {
+    console.log(JSON.stringify(report, null, 2))
+  } else {
     console.log("")
-    console.log("Launch decision: RED")
-    process.exit(1)
+    console.log("Controlled funnel launch checklist")
+    console.log("---------------------------------")
+    for (const entry of checks) {
+      console.log(`[${entry.status}] ${entry.name}: ${entry.detail}`)
+    }
+    console.log("")
+    console.log(
+      `Totals -> PASS ${counts.pass} | FAIL ${counts.fail} | WARN ${counts.warn} | SKIP ${counts.skip}`,
+    )
+    console.log("")
+    console.log(`Launch decision: ${decision}`)
   }
 
-  console.log("")
-  console.log("Launch decision: GREEN")
-  process.exit(0)
+  process.exit(decision === "RED" ? 1 : 0)
 }
 
 async function main() {

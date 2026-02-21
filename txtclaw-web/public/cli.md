@@ -2,10 +2,16 @@
 
 The CLI scaffolds a working setup and verifies your API key.
 
-## Install/run (no global install)
+## Install
 
 ```bash
-pnpm dlx txtclaw@latest init
+pnpm i txtclaw
+```
+
+## Run (no global install)
+
+```bash
+pnpm exec txtclaw init
 ```
 
 ## Doctor (verify credentials)
@@ -14,7 +20,7 @@ pnpm dlx txtclaw@latest init
 export TXTCLAW_API_BASE_URL="https://txtclaw-sms-e2e.lopez731.workers.dev"
 export TXTCLAW_API_KEY="vck_REPLACE_ME"
 
-pnpm dlx txtclaw@latest doctor
+pnpm exec txtclaw doctor
 ```
 
 ## Environment

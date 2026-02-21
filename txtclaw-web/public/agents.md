@@ -7,7 +7,13 @@ SMS/iMessage are optional lanes. The **runtime API works without Twilio**.
 ## Quickstart (1 line)
 
 ```bash
-pnpm dlx txtclaw@latest init
+pnpm i txtclaw
+```
+
+## Optional: scaffold
+
+```bash
+pnpm exec txtclaw init
 ```
 
 Alias (same CLI):

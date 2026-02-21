@@ -545,7 +545,9 @@ export default function PrivacyPolicy() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Data Rates</span>
-                <span className="font-medium text-foreground">Msg &amp; data rates may apply</span>
+                <span className="font-medium text-foreground">
+                  Message and data rates may apply
+                </span>
               </div>
             </div>
           </section>

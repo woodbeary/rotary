@@ -39,7 +39,7 @@ export default function OpenClawApiPage() {
             <CodeBlock
               title="1 line"
               language="bash"
-              code={`pnpm dlx txtclaw@latest init`}
+              code={`pnpm i txtclaw`}
               copyLabel="Copy"
             />
           </div>

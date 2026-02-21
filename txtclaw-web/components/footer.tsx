@@ -1,5 +1,5 @@
 import { Separator } from "@/components/ui/separator"
-import { SMS_GATEWAY_LIVE, SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
+import { SMS_COMPLIANCE_DISCLOSURE, SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
 import Image from "next/image"
 
 export function Footer() {
@@ -107,59 +107,43 @@ export function Footer() {
               </a>
             </div>
           </div>
-          <p className="text-center text-[11px] text-muted-foreground/60">
-            TXT CLAW is a product of The Interpreting App, LLC.
-          </p>
-          {SMS_GATEWAY_LIVE ? (
-            <p className="max-w-4xl text-center text-[11px] leading-relaxed text-muted-foreground/70">
-              By texting{" "}
+          <div className="w-full max-w-4xl rounded-xl border border-foreground/20 bg-foreground px-5 py-4 text-center text-background">
+            <p className="text-sm font-semibold">
+              Text us:{" "}
               <a
                 href={SMS_PHONE_HREF}
-                className="font-mono font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+                className="font-mono text-base font-bold underline underline-offset-4 transition-opacity hover:opacity-80"
               >
                 {SMS_PHONE_DISPLAY}
               </a>
-              , you agree to receive conversational AI messages from TXT CLAW. Message and data
-              rates may apply. Reply{" "}
-              <span className="font-mono font-medium text-foreground">STOP</span> to opt out. Reply{" "}
-              <span className="font-mono font-medium text-foreground">HELP</span> for help. Consent
-              is not a condition of purchase. View our{" "}
+            </p>
+            <p className="mt-2 text-[11px] leading-relaxed text-background/90">
+              {SMS_COMPLIANCE_DISCLOSURE}
+            </p>
+            <p className="mt-2 text-xs">
               <a
                 href="/privacy"
-                className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+                className="font-medium underline underline-offset-4 transition-opacity hover:opacity-80"
               >
                 Privacy Policy
-              </a>{" "}
-              and{" "}
+              </a>
+              <span className="px-2 text-background/70">|</span>
               <a
                 href="/terms"
-                className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+                className="font-medium underline underline-offset-4 transition-opacity hover:opacity-80"
               >
-                Terms
+                Terms and Conditions
               </a>
-              .{" "}
+            </p>
+            <p className="mt-1 text-[11px] text-background/80">
               <a
                 href="/sms-consent"
-                className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+                className="font-medium underline underline-offset-4 transition-opacity hover:opacity-80"
               >
                 SMS Consent (Opt-In Proof)
               </a>
-              .
             </p>
-          ) : (
-            <p className="max-w-4xl text-center text-[11px] leading-relaxed text-muted-foreground/70">
-              TXT CLAW is currently in invite-only Apple beta. Join the waitlist and we&apos;ll
-              email access instructions as capacity opens. SMS program compliance details are
-              published at{" "}
-              <a
-                href="/sms-consent"
-                className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
-              >
-                SMS Consent (Opt-In Proof)
-              </a>
-              .
-            </p>
-          )}
+          </div>
           <p className="text-center text-xs text-muted-foreground">
             © {new Date().getFullYear()} TXT CLAW
           </p>

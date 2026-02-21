@@ -1,4 +1,3 @@
-import { Footer } from "@/components/footer"
 import { Navbar } from "@/components/navbar"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -109,7 +108,6 @@ export default function SmsAgentApiPage() {
           </section>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }
