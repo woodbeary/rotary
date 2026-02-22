@@ -21,7 +21,10 @@ export function CodeBlock({
 }) {
   return (
     <div
-      className={cn("min-w-0 w-full rounded-xl border border-border/60 bg-background", className)}
+      className={cn(
+        "not-prose min-w-0 w-full rounded-xl border border-border/60 bg-background",
+        className,
+      )}
     >
       <div className="flex items-center justify-between gap-3 border-b border-border/60 px-3 py-2">
         <div className="min-w-0">
@@ -41,7 +44,7 @@ export function CodeBlock({
       </div>
       <pre
         className={cn(
-          "max-w-full overflow-x-auto p-3 text-xs text-foreground",
+          "max-w-full overflow-x-auto bg-transparent p-3 font-mono text-xs text-foreground",
           wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre",
         )}
       >
