@@ -1,6 +1,14 @@
 import { expect, test } from "@playwright/test"
 
-const COMPLIANCE_ROUTES = ["/", "/sms-consent", "/privacy", "/terms", "/developers", "/changelog", "/waitlist"]
+const COMPLIANCE_ROUTES = [
+  "/",
+  "/sms-consent",
+  "/privacy",
+  "/terms",
+  "/developers",
+  "/changelog",
+  "/waitlist",
+]
 
 test("compliance CTA is visible on public routes", async ({ page }) => {
   for (const route of COMPLIANCE_ROUTES) {

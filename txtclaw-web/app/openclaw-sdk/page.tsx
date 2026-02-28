@@ -32,12 +32,7 @@ export default function OpenClawSdkPage() {
         <section className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
           <h2 className="text-lg font-semibold text-foreground">Quickstart</h2>
           <div className="mt-4">
-            <CodeBlock
-              title="1 line"
-              language="bash"
-              code={`pnpm i txtclaw`}
-              copyLabel="Copy"
-            />
+            <CodeBlock title="1 line" language="bash" code={`pnpm i txtclaw`} copyLabel="Copy" />
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             Agent docs:{" "}

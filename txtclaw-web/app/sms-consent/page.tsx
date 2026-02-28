@@ -1,4 +1,8 @@
-import { SMS_COMPLIANCE_DISCLOSURE_WITH_POLICY, SMS_PHONE_DISPLAY, SMS_PHONE_HREF } from "@/lib/launch"
+import {
+  SMS_COMPLIANCE_DISCLOSURE_WITH_POLICY,
+  SMS_PHONE_DISPLAY,
+  SMS_PHONE_HREF,
+} from "@/lib/launch"
 import { ArrowLeft } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -89,21 +93,43 @@ export default function SmsConsentPage() {
             </h2>
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-semibold text-foreground">Opt-In Confirmation Message</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Sample #1: Opt-In Confirmation Message
+                </p>
                 <p className="mt-1 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
                   TXT CLAW: You are now connected to TXT CLAW AI. Message and data rates may apply.
-                  Reply HELP for help. Reply STOP to cancel.
+                  Message frequency varies. Reply HELP for help. Reply STOP to opt out.
                 </p>
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Help Message Sample</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Sample #2: Conversational response
+                </p>
+                <p className="mt-1 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
+                  TXT CLAW: I scheduled your meeting for Tuesday at 3:00 PM. Would you like me to
+                  send the invite? Reply HELP for help. Reply STOP to opt out.
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  Sample #3: Transactional response (Payment)
+                </p>
+                <p className="mt-1 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
+                  TXT CLAW: Here is your secure payment link: https://txtclaw.com/pay. Reply HELP
+                  for help. Reply STOP to opt out.
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Sample #4: Help Message</p>
                 <p className="mt-1 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
                   TXT CLAW Help: For support, email support@txtclaw.com or visit
-                  https://www.txtclaw.com. Reply STOP to cancel.
+                  https://www.txtclaw.com. Reply STOP to opt out. Reply START to re-subscribe.
                 </p>
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Opt-Out Confirmation</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Sample #5: Opt-Out Confirmation
+                </p>
                 <p className="mt-1 rounded-md border border-border bg-background p-4 text-sm text-foreground/90">
                   TXT CLAW: You have been unsubscribed and will no longer receive messages. Reply
                   START to re-subscribe.
