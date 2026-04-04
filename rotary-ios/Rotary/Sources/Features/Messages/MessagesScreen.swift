@@ -342,12 +342,6 @@ struct MessagesScreen: View {
             .padding(.horizontal, 12)
             .padding(.top, 10)
             .padding(.bottom, 10)
-            .background(
-                Color(uiColor: .systemBackground)
-                    .overlay(alignment: .top) {
-                        Divider()
-                    }
-            )
         }
     }
 
@@ -691,9 +685,7 @@ struct MessageThreadScreen: View {
                 isWorking: isWorking,
                 isFocused: $composerFocused,
                 showsMenu: false,
-                onMic: {
-                    unsupportedComposerAction(message: "Use the keyboard dictation button for now.")
-                },
+                onMic: nil,
                 onSend: {
                     Task { await sendMessage() }
                 }
@@ -753,11 +745,6 @@ struct MessageThreadScreen: View {
             RotaryHaptics.error()
             errorMessage = error.localizedDescription
         }
-    }
-
-    private func unsupportedComposerAction(message: String = "Media and scheduled sends are not enabled on this Rotary line yet.") {
-        errorMessage = message
-        RotaryHaptics.warning()
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {
@@ -1090,9 +1077,7 @@ private struct ComposeMessageSheet: View {
             placeholder: "Text message",
             isWorking: isWorking,
             showsMenu: false,
-            onMic: {
-                unsupportedAction(message: "Use the keyboard dictation button for now.")
-            },
+            onMic: nil,
             onSend: {
                 Task { await send() }
             }
@@ -1144,11 +1129,6 @@ private struct ComposeMessageSheet: View {
             RotaryHaptics.error()
             errorMessage = error.localizedDescription
         }
-    }
-
-    private func unsupportedAction(message: String = "Media and scheduled sends are not enabled on this Rotary line yet.") {
-        errorMessage = message
-        RotaryHaptics.warning()
     }
 
     private func icon(for kind: String) -> String {

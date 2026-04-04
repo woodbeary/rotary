@@ -71,11 +71,26 @@ struct RotaryContactEditorScreen: View {
                 RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
 
                 ScrollView {
-                    VStack(spacing: 18) {
-                        VStack(spacing: 12) {
-                            RotaryEditableAvatar(dataURL: draft.avatarDataURL, fallbackTitle: draft.displayName.isEmpty ? "?" : draft.displayName)
+                    VStack(spacing: 22) {
+                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                            VStack(spacing: 12) {
+                                ZStack(alignment: .bottomTrailing) {
+                                    RotaryEditableAvatar(
+                                        dataURL: draft.avatarDataURL,
+                                        fallbackTitle: draft.displayName.isEmpty ? "?" : draft.displayName
+                                    )
 
-                            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                                    Circle()
+                                        .fill(RotaryTheme.accent)
+                                        .frame(width: 34, height: 34)
+                                        .overlay(
+                                            Image(systemName: draft.avatarDataURL == nil ? "plus" : "camera.fill")
+                                                .font(.system(size: 14, weight: .semibold))
+                                                .foregroundStyle(.white)
+                                        )
+                                        .offset(x: -4, y: -4)
+                                }
+
                                 Text(photoButtonTitle)
                                     .font(.headline)
                                     .foregroundStyle(.primary)
@@ -87,23 +102,38 @@ struct RotaryContactEditorScreen: View {
                                             .stroke(RotaryContactEditorPalette.chromeBorder, lineWidth: 1)
                                     )
                             }
-                            .buttonStyle(.plain)
+                            .frame(maxWidth: .infinity)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.top, 12)
+                        .buttonStyle(.plain)
+                        .padding(.top, 8)
 
                         RotaryContactFieldGroup {
                             TextField("First name", text: $draft.firstName)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
                             Divider()
+                                .padding(.leading, 16)
                             TextField("Last name", text: $draft.lastName)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
                             Divider()
+                                .padding(.leading, 16)
                             TextField("Company", text: $draft.company)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
                         }
 
                         RotaryContactFieldGroup {
                             TextField("Phone", text: $draft.phoneNumber)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
                                 .keyboardType(.phonePad)
                             Divider()
+                                .padding(.leading, 16)
                             TextField("Email", text: $draft.email)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
                                 .keyboardType(.emailAddress)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
@@ -112,6 +142,8 @@ struct RotaryContactEditorScreen: View {
                         RotaryContactFieldGroup {
                             TextField("Address", text: $draft.fullAddress, axis: .vertical)
                                 .lineLimit(2 ... 4)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 16)
                         }
 
                         if let errorMessage, !errorMessage.isEmpty {
@@ -126,6 +158,10 @@ struct RotaryContactEditorScreen: View {
                     .padding(.bottom, 24)
                 }
                 .scrollDismissesKeyboard(.interactively)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    RotaryKeyboard.dismiss()
+                }
             }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
@@ -206,9 +242,8 @@ private struct RotaryContactFieldGroup<Content: View>: View {
             content
         }
         .textInputAutocapitalization(.words)
-        .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(minHeight: 58)
+        .frame(minHeight: 70)
         .background(RotaryContactEditorPalette.chromeFill, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)

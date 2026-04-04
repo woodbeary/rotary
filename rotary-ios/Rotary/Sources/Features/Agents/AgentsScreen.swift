@@ -236,10 +236,7 @@ struct AgentsScreen: View {
         let agentDate = parseDate(agent.updatedAt)
         let date = [threadDate, callDate, agentDate].compactMap { $0 }.max()
         guard let date else { return "" }
-        if Calendar.current.isDateInToday(date) {
-            return date.formatted(.dateTime.hour().minute())
-        }
-        return date.formatted(.dateTime.month().day())
+        return RotaryDateFormatting.relativeTimestamp(for: date)
     }
 
     private func relatedCalls(for agent: MobileAgent) -> [MobileCall] {

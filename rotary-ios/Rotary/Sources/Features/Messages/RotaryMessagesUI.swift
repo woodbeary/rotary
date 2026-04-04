@@ -197,9 +197,9 @@ struct RotaryMessagesScreen: View {
                                         .tint(RotaryTheme.warning)
                                     }
                                 }
-                                .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 2, trailing: 16))
+                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                                 .listRowBackground(Color.clear)
-                                .listRowSeparatorTint(RotaryTheme.elevatedStroke)
+                                .listRowSeparator(.hidden)
                             }
                         }
                         .listStyle(.plain)
@@ -423,7 +423,7 @@ struct RotaryMessagesScreen: View {
         .buttonStyle(.plain)
         .listRowBackground(Color.clear)
         .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-        .listRowSeparatorTint(RotaryTheme.elevatedStroke)
+        .listRowSeparator(.hidden)
     }
 
     private var loadingState: some View {
@@ -724,9 +724,7 @@ struct RotaryMessageThreadScreen: View {
                 isWorking: false,
                 isFocused: $composerFocused,
                 showsMenu: false,
-                onMic: {
-                    RotaryHaptics.warning()
-                },
+                onMic: nil,
                 onSend: {
                     Task { await sendMessage() }
                 }
@@ -825,10 +823,10 @@ private struct RotaryComposeMessageSheet: View {
             ZStack {
                 RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
 
-                VStack(spacing: 12) {
-                    recipientSection
-                        .padding(.horizontal, 12)
-                        .padding(.top, 12)
+            VStack(spacing: 12) {
+                recipientSection
+                    .padding(.horizontal, 12)
+                    .padding(.top, 12)
 
                     if let existingThreadPreview {
                         previewCard(existingThreadPreview)
@@ -845,7 +843,7 @@ private struct RotaryComposeMessageSheet: View {
                             .padding(.top, 4)
                     }
 
-                    Spacer()
+                Spacer()
 
                     if let errorMessage, !errorMessage.isEmpty {
                         Text(errorMessage)
@@ -854,13 +852,17 @@ private struct RotaryComposeMessageSheet: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 8)
-                    }
                 }
             }
-            .navigationTitle("New Message")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+            .contentShape(Rectangle())
+            .onTapGesture {
+                dismissKeyboard()
+            }
+        }
+        .navigationTitle("New Message")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
                 }
             }
@@ -1077,9 +1079,7 @@ private struct RotaryComposeMessageSheet: View {
             placeholder: "Text message",
             isWorking: false,
             showsMenu: false,
-            onMic: {
-                RotaryHaptics.warning()
-            },
+            onMic: nil,
             onSend: {
                 Task { await send() }
             }
@@ -1200,6 +1200,7 @@ private struct RotaryThreadInfoScreen: View {
 
     @State private var selectedTab = RotaryThreadInfoTab.info
     @State private var showingEditContact = false
+    @State private var showingMessageSheet = false
     @State private var editedContact: MobileCreatedContact?
 
     private var resolvedName: String {
@@ -1297,6 +1298,15 @@ private struct RotaryThreadInfoScreen: View {
                 }
             )
         }
+        .sheet(isPresented: $showingMessageSheet) {
+            if let resolvedPhone {
+                ProxyMessageSheet(
+                    fromNumber: fromNumber,
+                    initialToNumber: resolvedPhone,
+                    messagesStore: store
+                )
+            }
+        }
     }
 
     private var header: some View {
@@ -1314,8 +1324,10 @@ private struct RotaryThreadInfoScreen: View {
                         }
                     }
 
-                    RotaryProfileActionButton(title: "Edit", systemImage: "square.and.pencil") {
-                        showingEditContact = true
+                    if resolvedPhone != nil {
+                        RotaryProfileActionButton(title: "Message", systemImage: "bubble.left.fill") {
+                            showingMessageSheet = true
+                        }
                     }
 
                     if let resolvedEmail {

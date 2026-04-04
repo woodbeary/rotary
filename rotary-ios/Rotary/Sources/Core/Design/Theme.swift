@@ -455,9 +455,6 @@ struct RotarySearchField: View {
                             .foregroundStyle(.tertiary)
                     }
                     .buttonStyle(.plain)
-                } else {
-                    Image(systemName: "mic.fill")
-                        .foregroundStyle(.tertiary)
                 }
             } else {
                 Button {
@@ -500,7 +497,7 @@ struct RotaryComposerBar<MenuContent: View>: View {
     let isWorking: Bool
     let isFocused: FocusState<Bool>.Binding?
     let showsMenu: Bool
-    let onMic: () -> Void
+    let onMic: (() -> Void)?
     let onSend: () -> Void
     @ViewBuilder let menuContent: () -> MenuContent
 
@@ -511,7 +508,7 @@ struct RotaryComposerBar<MenuContent: View>: View {
         isWorking: Bool = false,
         isFocused: FocusState<Bool>.Binding? = nil,
         showsMenu: Bool = true,
-        onMic: @escaping () -> Void,
+        onMic: (() -> Void)? = nil,
         onSend: @escaping () -> Void,
         @ViewBuilder menuContent: @escaping () -> MenuContent
     ) {
@@ -555,7 +552,7 @@ struct RotaryComposerBar<MenuContent: View>: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(isWorking)
-                } else {
+                } else if let onMic {
                     Button(action: onMic) {
                         Image(systemName: "waveform")
                             .font(.system(size: 16, weight: .semibold))
@@ -672,8 +669,19 @@ enum RotaryDateFormatting {
 
     static func listTimestamp(_ value: String) -> String {
         guard let date = parse(value) else { return "" }
+        return relativeTimestamp(for: date)
+    }
+
+    static func relativeTimestamp(for date: Date) -> String {
         if Calendar.current.isDateInToday(date) {
             return date.formatted(.dateTime.hour().minute())
+        }
+        if Calendar.current.isDateInYesterday(date) {
+            return "Yesterday"
+        }
+        if let weekAgo = Calendar.current.date(byAdding: .day, value: -6, to: Date()),
+           date >= weekAgo {
+            return date.formatted(.dateTime.weekday(.wide))
         }
         return date.formatted(.dateTime.month().day())
     }
@@ -706,7 +714,7 @@ struct RotaryCenteredShell<Content: View>: View {
 
     var body: some View {
         ZStack {
-            RotaryBackdrop()
+            RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
             VStack {
                 Spacer(minLength: 28)
                 content

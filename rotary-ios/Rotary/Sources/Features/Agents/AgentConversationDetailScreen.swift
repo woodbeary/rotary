@@ -261,9 +261,7 @@ struct AgentConversationDetailScreen: View {
                 placeholder: "Ask \(agent.name) anything",
                 isWorking: isSending,
                 isFocused: $composerFocused,
-                onMic: {
-                    unsupportedAttachmentAction(message: "Use the keyboard dictation button for now.")
-                },
+                onMic: nil,
                 onSend: {
                     Task { await send() }
                 }
@@ -452,11 +450,6 @@ struct AgentConversationDetailScreen: View {
 
     private func timestamp(for value: String) -> String {
         RotaryDateFormatting.messageTimestamp(value)
-    }
-
-    private func unsupportedAttachmentAction(message: String = "That attachment source is not ready yet.") {
-        RotaryHaptics.warning()
-        errorMessage = message
     }
 }
 

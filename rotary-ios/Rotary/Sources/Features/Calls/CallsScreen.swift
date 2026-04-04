@@ -1956,19 +1956,7 @@ private func rotaryCallTimestampLabel(_ value: String) -> String {
     guard let date = ISO8601DateFormatter().date(from: value) else {
         return ""
     }
-
-    let calendar = Calendar.current
-    if calendar.isDateInToday(date) {
-        return date.formatted(.dateTime.hour().minute())
-    }
-    if calendar.isDateInYesterday(date) {
-        return "Yesterday"
-    }
-    if let weekAgo = calendar.date(byAdding: .day, value: -6, to: Date()),
-       date >= weekAgo {
-        return date.formatted(.dateTime.weekday(.wide))
-    }
-    return date.formatted(.dateTime.month().day())
+    return RotaryDateFormatting.relativeTimestamp(for: date)
 }
 
 private func voicemailContextLabel(for call: MobileCall) -> String {
