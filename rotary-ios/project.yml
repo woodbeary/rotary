@@ -1,0 +1,111 @@
+name: Rotary
+options:
+  defaultConfig: Debug
+  groupSortPosition: top
+configs:
+  Debug: debug
+  Release: release
+configFiles:
+  Debug: Configs/Debug.xcconfig
+  Release: Configs/Release.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+    IPHONEOS_DEPLOYMENT_TARGET: 18.0
+    TARGETED_DEVICE_FAMILY: 1
+    DEVELOPMENT_TEAM: YOUR_TEAM_ID
+    CODE_SIGN_STYLE: Automatic
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: 1.0.0
+    GENERATE_INFOPLIST_FILE: NO
+    INFOPLIST_FILE: Rotary/Info.plist
+    PRODUCT_NAME: Rotary
+    PRODUCT_BUNDLE_IDENTIFIER: $(ROTARY_BUNDLE_IDENTIFIER)
+    ROTARY_API_BASE_URL: https://www.textjacob.com
+    ROTARY_AUTH_BASE_URL: https://www.textjacob.com
+    ROTARY_HOSTED_SIGN_IN_URL: ""
+    ROTARY_CLERK_FRONTEND_API: clerk.textjacob.com
+    ROTARY_CLERK_PUBLISHABLE_KEY: pk_test_YOUR_CLERK_PUBLISHABLE_KEY
+    ROTARY_SENTRY_DSN: ""
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    OTHER_LDFLAGS:
+      - $(inherited)
+      - -ObjC
+    LD_RUNPATH_SEARCH_PATHS:
+      - $(inherited)
+      - "@executable_path/Frameworks"
+      - "@loader_path/Frameworks"
+    OTHER_SWIFT_FLAGS:
+      - -enable-bare-slash-regex
+targets:
+  Rotary:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Rotary/Sources
+    resources:
+      - path: Rotary/Resources
+    settings:
+      base:
+        INFOPLIST_KEY_CFBundleDisplayName: Rotary
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.business
+      configs:
+        Debug:
+          ENABLE_TESTABILITY: YES
+    entitlements:
+      path: Rotary/Rotary.entitlements
+    dependencies:
+      - framework: Vendor/TwilioVoice.xcframework
+    info:
+      path: Rotary/Info.plist
+      properties:
+        CFBundleDevelopmentRegion: en
+        CFBundleDisplayName: Rotary
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Editor
+            CFBundleURLName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            CFBundleURLSchemes:
+              - rotary
+        UILaunchScreen: {}
+        UIApplicationSupportsIndirectInputEvents: true
+        UIBackgroundModes:
+          - audio
+          - voip
+          - remote-notification
+          - fetch
+        NSMicrophoneUsageDescription: Rotary uses the microphone for business calls on your Twilio line.
+        NSContactsUsageDescription: Rotary can use contacts to help label calls and conversations.
+        ITSAppUsesNonExemptEncryption: false
+        ROTARY_API_BASE_URL: $(ROTARY_API_BASE_URL)
+        ROTARY_AUTH_BASE_URL: $(ROTARY_AUTH_BASE_URL)
+        ROTARY_HOSTED_SIGN_IN_URL: $(ROTARY_HOSTED_SIGN_IN_URL)
+        ROTARY_IOS_PUSH_ENVIRONMENT: $(APS_ENVIRONMENT)
+        ROTARY_CLERK_PUBLISHABLE_KEY: $(ROTARY_CLERK_PUBLISHABLE_KEY)
+        ROTARY_CLERK_FRONTEND_API: $(ROTARY_CLERK_FRONTEND_API)
+        ROTARY_SENTRY_DSN: $(ROTARY_SENTRY_DSN)
+  RotaryTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Rotary/Tests
+    settings:
+      base:
+        PRODUCT_NAME: RotaryTests
+        BUNDLE_LOADER: $(TEST_HOST)
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Rotary.app/Rotary
+    dependencies:
+      - target: Rotary
+schemes:
+  Rotary:
+    build:
+      targets:
+        Rotary: all
+        RotaryTests: [test]
+    test:
+      targets:
+        - RotaryTests
