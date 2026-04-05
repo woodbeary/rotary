@@ -57,6 +57,8 @@ struct AgentsScreen: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                agentsHeader
+
                 ZStack {
                     RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
 
@@ -88,18 +90,17 @@ struct AgentsScreen: View {
                             }
                             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                             .listRowBackground(Color.clear)
-                            .listRowSeparatorTint(RotaryTheme.elevatedStroke)
+                            .listRowSeparator(.hidden)
                         }
                         .listStyle(.plain)
                         .scrollDismissesKeyboard(.interactively)
                         .scrollContentBackground(.hidden)
                     }
                 }
-
-                agentSearchBar
             }
             .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("Agents")
+            .navigationTitle("")
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Menu {
@@ -147,12 +148,16 @@ struct AgentsScreen: View {
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button("Refresh Agents", systemImage: "arrow.clockwise") {
+                    HStack(spacing: 8) {
+                        RotaryGlassIconButton(systemName: "plus") {
+                            RotaryHaptics.selection()
+                            showingCreateAgent = true
+                        }
+
+                        RotaryGlassIconButton(systemName: "arrow.clockwise") {
+                            RotaryHaptics.selection()
                             refresh()
                         }
-                    } label: {
-                        RotaryGlassIcon(systemName: "arrow.clockwise")
                     }
                 }
             }
@@ -171,21 +176,56 @@ struct AgentsScreen: View {
         }
     }
 
-    private var agentSearchBar: some View {
-        RotarySearchField(text: $searchText, prompt: "Search agents")
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
-            .padding(.bottom, 8)
-            .background {
-                Rectangle()
-                    .fill(Color(uiColor: .systemBackground))
-                    .overlay(alignment: .top) {
-                        Rectangle()
-                            .fill(RotaryTheme.chromeStroke)
-                            .frame(height: 1 / UIScreen.main.scale)
+    private var agentsHeader: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            RotaryScreenHeading(
+                title: "Agents",
+                subtitle: agentsHeaderSubtitle
+            )
+
+            RotarySearchField(text: $searchText, prompt: "Search agents")
+
+            if let folders = bootstrap.folders, !folders.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        folderChip(title: "All", isActive: selectedFolderId == nil) {
+                            selectedFolderId = nil
+                        }
+
+                        ForEach(folders) { folder in
+                            folderChip(title: folder.name, isActive: selectedFolderId == folder.id) {
+                                selectedFolderId = folder.id
+                            }
+                        }
                     }
-                    .ignoresSafeArea(edges: .bottom)
+                    .padding(.vertical, 1)
+                }
             }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 10)
+    }
+
+    private var agentsHeaderSubtitle: String {
+        if !searchText.isEmpty {
+            return filteredAgents.isEmpty ? "No matches" : "\(filteredAgents.count) result\(filteredAgents.count == 1 ? "" : "s")"
+        }
+        if let currentFolder {
+            return currentFolder.name
+        }
+        return "All assistants"
+    }
+
+    private func folderChip(title: String, isActive: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            guard !isActive else { return }
+            RotaryHaptics.selection()
+            action()
+        } label: {
+            RotaryPill(text: title, active: isActive)
+        }
+        .buttonStyle(.plain)
     }
 
     private var emptyState: some View {
@@ -201,7 +241,7 @@ struct AgentsScreen: View {
                 )
             Text(searchText.isEmpty ? "No agents yet" : "No matching agents")
                 .font(.headline)
-            Text(searchText.isEmpty ? "Create an agent and it will live here like a conversation." : "Try a different search or folder.")
+            Text(searchText.isEmpty ? "Create an agent to get started." : "Try a different search or folder.")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             if searchText.isEmpty {

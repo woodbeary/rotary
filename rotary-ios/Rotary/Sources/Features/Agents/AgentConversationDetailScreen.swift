@@ -99,7 +99,7 @@ struct AgentConversationDetailScreen: View {
                                     .id(transcriptMessages.count)
                             }
                             .padding(.horizontal, 12)
-                            .padding(.top, 12)
+                            .padding(.top, 86)
                             .padding(.bottom, 24)
                         }
                         .scrollDismissesKeyboard(.interactively)
@@ -125,12 +125,52 @@ struct AgentConversationDetailScreen: View {
                         if isLoading {
                             ProgressView()
                                 .controlSize(.large)
+                        } else if let errorMessage, !errorMessage.isEmpty {
+                            VStack(spacing: 14) {
+                                Circle()
+                                    .fill(RotaryTheme.softSurface)
+                                    .frame(width: 62, height: 62)
+                                    .overlay(
+                                        Image(systemName: "exclamationmark.bubble.fill")
+                                            .font(.system(size: 22, weight: .semibold))
+                                            .foregroundStyle(RotaryTheme.warning)
+                                    )
+
+                                Text("Couldn’t load this conversation")
+                                    .font(.headline)
+
+                                Text(errorMessage)
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+
+                                Button("Retry") {
+                                    Task { await loadConversation(forceRefresh: true) }
+                                }
+                                .buttonStyle(RotaryPrimaryButtonStyle())
+                                .frame(maxWidth: 180)
+                            }
+                            .padding(.horizontal, 28)
                         }
                     }
                 }
             }
 
             composer
+        }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            RotaryConversationTopHeader(
+                title: agent.name,
+                subtitle: nil,
+                avatarSize: 42,
+                action: {
+                    composerFocused = false
+                    showingInfo = true
+                }
+            )
+            .padding(.horizontal, 52)
+            .padding(.top, 4)
+            .padding(.bottom, 6)
         }
         .onDisappear {
             composerFocused = false
@@ -139,18 +179,6 @@ struct AgentConversationDetailScreen: View {
         .toolbar(.hidden, for: .tabBar)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                RotaryConversationPrincipalHeader(
-                    title: agent.name,
-                    subtitle: agent.assignedPhoneNumber,
-                    avatarSize: 38,
-                    action: {
-                        composerFocused = false
-                        showingInfo = true
-                    }
-                )
-            }
-
             if agent.assignedPhoneNumber != nil {
                 ToolbarItem(placement: .topBarTrailing) {
                     RotaryGlassIconButton(systemName: isCallingAgent ? "phone.badge.waveform" : "phone.fill") {

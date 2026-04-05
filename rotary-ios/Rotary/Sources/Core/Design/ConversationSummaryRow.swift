@@ -25,42 +25,44 @@ struct RotaryConversationSummaryRow: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(alignment: .top, spacing: 14) {
             RotaryAvatarView(title: title, size: avatarSize, imageURL: avatarURL)
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .top, spacing: 8) {
                     Text(title)
-                        .font(.body.weight(isUnread ? .semibold : .regular))
+                        .font(.body.weight(isUnread ? .semibold : .medium))
                         .lineLimit(1)
+                        .foregroundStyle(.primary)
 
                     Spacer(minLength: 8)
 
                     if !timestamp.isEmpty {
                         Text(timestamp)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .font(.caption.weight(isUnread ? .semibold : .regular))
+                            .foregroundStyle(isUnread ? RotaryTheme.accent : .secondary)
                     }
                 }
 
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
                     Text(preview)
-                        .font(.subheadline)
+                        .font(.subheadline.weight(isUnread ? .medium : .regular))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
+                        .multilineTextAlignment(.leading)
 
                     Spacer(minLength: 8)
 
                     if isUnread {
                         Circle()
                             .fill(RotaryTheme.accent)
-                            .frame(width: 10, height: 10)
+                            .frame(width: 8, height: 8)
                     }
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
-        .padding(.vertical, 6)
+        .padding(.vertical, 10)
     }
 }

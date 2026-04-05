@@ -15,25 +15,58 @@ enum RotaryTheme {
         .systemRed
     })
     static let tint = Color(uiColor: .systemBlue)
-    static let backgroundTop = Color(uiColor: .systemBackground)
-    static let backgroundBottom = Color(uiColor: .systemBackground)
+    static let backgroundTop = dynamicColor(
+        light: UIColor(red: 0.97, green: 0.975, blue: 0.985, alpha: 1),
+        dark: UIColor(red: 0.10, green: 0.11, blue: 0.14, alpha: 1)
+    )
+    static let backgroundBottom = dynamicColor(
+        light: UIColor(red: 0.93, green: 0.945, blue: 0.97, alpha: 1),
+        dark: UIColor(red: 0.14, green: 0.15, blue: 0.19, alpha: 1)
+    )
     static let cardStroke = dynamicColor(
         light: UIColor.separator.withAlphaComponent(0.10),
         dark: UIColor.separator.withAlphaComponent(0.22)
     )
-    static let cardFill = Color(uiColor: .secondarySystemGroupedBackground)
-    static let secondarySurface = Color(uiColor: .secondarySystemGroupedBackground)
-    static let elevatedSurface = Color(uiColor: .secondarySystemBackground)
+    static let cardFill = dynamicColor(
+        light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.78),
+        dark: UIColor(red: 0.17, green: 0.18, blue: 0.23, alpha: 0.86)
+    )
+    static let secondarySurface = dynamicColor(
+        light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.72),
+        dark: UIColor(red: 0.17, green: 0.18, blue: 0.22, alpha: 0.82)
+    )
+    static let elevatedSurface = dynamicColor(
+        light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.92),
+        dark: UIColor(red: 0.22, green: 0.23, blue: 0.28, alpha: 0.92)
+    )
     static let elevatedStroke = dynamicColor(
         light: UIColor.separator.withAlphaComponent(0.10),
         dark: UIColor.separator.withAlphaComponent(0.20)
     )
-    static let softSurface = Color(uiColor: .tertiarySystemGroupedBackground)
-    static let subtleSurface = Color(uiColor: .tertiarySystemFill)
-    static let incomingBubble = Color(uiColor: .secondarySystemBackground)
-    static let nestedBubble = Color(uiColor: .tertiarySystemBackground)
-    static let inactivePillFill = Color(uiColor: .tertiarySystemFill)
-    static let fieldFill = Color(uiColor: .secondarySystemBackground)
+    static let softSurface = dynamicColor(
+        light: UIColor(red: 0.94, green: 0.95, blue: 0.97, alpha: 0.92),
+        dark: UIColor(red: 0.24, green: 0.25, blue: 0.30, alpha: 0.90)
+    )
+    static let subtleSurface = dynamicColor(
+        light: UIColor(red: 0.90, green: 0.92, blue: 0.96, alpha: 0.92),
+        dark: UIColor(red: 0.27, green: 0.28, blue: 0.33, alpha: 0.86)
+    )
+    static let incomingBubble = dynamicColor(
+        light: UIColor(red: 0.98, green: 0.985, blue: 0.995, alpha: 0.94),
+        dark: UIColor(red: 0.18, green: 0.19, blue: 0.24, alpha: 0.96)
+    )
+    static let nestedBubble = dynamicColor(
+        light: UIColor(red: 0.95, green: 0.965, blue: 0.985, alpha: 0.96),
+        dark: UIColor(red: 0.23, green: 0.24, blue: 0.29, alpha: 0.94)
+    )
+    static let inactivePillFill = dynamicColor(
+        light: UIColor(red: 0.92, green: 0.935, blue: 0.96, alpha: 0.88),
+        dark: UIColor(red: 0.25, green: 0.26, blue: 0.31, alpha: 0.92)
+    )
+    static let fieldFill = dynamicColor(
+        light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.92),
+        dark: UIColor(red: 0.20, green: 0.21, blue: 0.26, alpha: 0.94)
+    )
     static let fieldStroke = dynamicColor(
         light: UIColor.separator.withAlphaComponent(0.10),
         dark: UIColor.separator.withAlphaComponent(0.18)
@@ -46,7 +79,10 @@ enum RotaryTheme {
         light: UIColor.systemGray5,
         dark: UIColor.systemGray4.withAlphaComponent(0.55)
     )
-    static let chromeFill = Color(uiColor: .systemBackground)
+    static let chromeFill = dynamicColor(
+        light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.78),
+        dark: UIColor(red: 0.18, green: 0.19, blue: 0.24, alpha: 0.86)
+    )
     static let chromeStroke = dynamicColor(
         light: UIColor.separator.withAlphaComponent(0.10),
         dark: UIColor.separator.withAlphaComponent(0.18)
@@ -101,13 +137,49 @@ struct RotaryBackdrop: View {
     }
 
     var body: some View {
+        let background = ZStack {
+            LinearGradient(
+                colors: [
+                    RotaryTheme.backgroundTop,
+                    RotaryTheme.backgroundBottom,
+                    RotaryTheme.backgroundTop,
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            Circle()
+                .fill(RotaryTheme.accent.opacity(0.14))
+                .frame(width: 280, height: 280)
+                .blur(radius: 96)
+                .offset(x: 150, y: -250)
+
+            Circle()
+                .fill(Color.white.opacity(0.34))
+                .frame(width: 240, height: 240)
+                .blur(radius: 110)
+                .offset(x: -150, y: -220)
+
+            Circle()
+                .fill(RotaryTheme.callAccent.opacity(0.10))
+                .frame(width: 300, height: 300)
+                .blur(radius: 132)
+                .offset(x: -160, y: 260)
+
+            Circle()
+                .fill(Color.white.opacity(0.09))
+                .frame(width: 260, height: 260)
+                .blur(radius: 120)
+                .offset(x: 120, y: 260)
+        }
+
         Group {
             if let onTap {
-                RotaryTheme.backgroundTop
+                background
                     .contentShape(Rectangle())
                     .onTapGesture(perform: onTap)
             } else {
-                RotaryTheme.backgroundTop
+                background
             }
         }
         .ignoresSafeArea()
@@ -261,6 +333,67 @@ struct RotaryGlassIconButton: View {
             )
         }
         .buttonStyle(RotaryPressScaleButtonStyle())
+    }
+}
+
+struct RotaryGlassTextButton: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if #available(iOS 26, *) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .lineLimit(1)
+                        .padding(.horizontal, 14)
+                        .frame(height: 36)
+                        .glassEffect(.regular.tint(.white.opacity(0.22)).interactive(), in: .capsule)
+                } else {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .lineLimit(1)
+                        .padding(.horizontal, 14)
+                        .frame(height: 36)
+                        .background(RotaryTheme.secondarySurface, in: Capsule())
+                        .overlay(
+                            Capsule(style: .continuous)
+                                .stroke(RotaryTheme.elevatedStroke, lineWidth: 1)
+                        )
+                }
+            }
+            .foregroundStyle(.primary)
+            .fixedSize(horizontal: true, vertical: false)
+        }
+        .buttonStyle(RotaryPressScaleButtonStyle(pressedScale: 0.97))
+    }
+}
+
+struct RotaryScreenHeading: View {
+    let title: String
+    let subtitle: String?
+
+    init(title: String, subtitle: String? = nil) {
+        self.title = title
+        self.subtitle = subtitle
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+
+            if let subtitle, !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -442,11 +575,13 @@ struct RotarySearchField: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(.secondary)
 
             TextField(prompt, text: $text)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
+                .submitLabel(.search)
 
             if text.isEmpty {
                 if let onMic {
@@ -467,22 +602,22 @@ struct RotarySearchField: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 14)
-        .frame(minHeight: 44)
+        .padding(.horizontal, 16)
+        .frame(minHeight: 48)
         .background(searchFieldBackground)
     }
 
     @ViewBuilder
     private var searchFieldBackground: some View {
         if #available(iOS 26, *) {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .fill(.clear)
-                .glassEffect(.regular.tint(.white.opacity(0.12)).interactive(), in: .rect(cornerRadius: 18))
+                .glassEffect(.regular.tint(.white.opacity(0.14)).interactive(), in: .rect(cornerRadius: 22))
         } else {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .fill(RotaryTheme.incomingBubble)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
                         .stroke(RotaryTheme.elevatedStroke, lineWidth: 1)
                 )
         }
@@ -565,22 +700,24 @@ struct RotaryComposerBar<MenuContent: View>: View {
             }
             .padding(.leading, 14)
             .padding(.trailing, 12)
-            .padding(.vertical, 8)
-            .frame(minHeight: 54)
+            .padding(.vertical, 7)
+            .frame(minHeight: 52)
             .background(composerBackground)
         }
         .padding(.horizontal, 12)
-        .padding(.top, 8)
+        .padding(.top, 6)
         .padding(.bottom, 8)
         .background {
-            Rectangle()
-                .fill(Color(uiColor: .systemBackground))
-                .overlay(alignment: .top) {
-                    Rectangle()
-                        .fill(RotaryTheme.chromeStroke)
-                        .frame(height: 1 / UIScreen.main.scale)
-                }
-                .ignoresSafeArea(edges: .bottom)
+            ZStack(alignment: .top) {
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+
+                Rectangle()
+                    .fill(RotaryTheme.chromeStroke)
+                    .frame(height: 1 / UIScreen.main.scale)
+                    .opacity(0.55)
+            }
+            .ignoresSafeArea(edges: .bottom)
         }
     }
 
@@ -617,14 +754,14 @@ struct RotaryComposerBar<MenuContent: View>: View {
     @ViewBuilder
     private var composerBackground: some View {
         if #available(iOS 26, *) {
-            Capsule(style: .continuous)
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(.clear)
-                .glassEffect(.regular.tint(.white.opacity(0.12)).interactive(), in: .capsule)
+                .glassEffect(.regular.tint(.white.opacity(0.16)).interactive(), in: .rect(cornerRadius: 24))
         } else {
-            Capsule(style: .continuous)
-                .fill(Color(uiColor: .secondarySystemGroupedBackground))
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(RotaryTheme.fieldFill)
                 .overlay(
-                    Capsule(style: .continuous)
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .stroke(RotaryTheme.elevatedStroke, lineWidth: 1)
                 )
         }

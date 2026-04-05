@@ -113,6 +113,8 @@ struct RotaryMessagesScreen: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                inboxHeader
+
                 ZStack {
                     RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
 
@@ -197,7 +199,7 @@ struct RotaryMessagesScreen: View {
                                         .tint(RotaryTheme.warning)
                                     }
                                 }
-                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
                             }
@@ -207,88 +209,93 @@ struct RotaryMessagesScreen: View {
                         .scrollContentBackground(.hidden)
                     }
                 }
-
+            }
+            .safeAreaInset(edge: .bottom) {
                 if isEditing {
                     bulkActionBar
-                } else {
-                    inboxAccessoryBar
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("Messages")
+            .navigationTitle("")
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(isEditing ? "Done" : "Edit") {
-                        toggleEditing()
-                    }
+                    RotaryGlassTextButton(title: isEditing ? "Done" : "Edit", action: toggleEditing)
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Section("Filters") {
-                            ForEach(RotaryMessageInboxFilter.allCases) { filter in
-                                Button {
-                                    RotaryHaptics.selection()
-                                    selectedFilter = filter
-                                } label: {
-                                    Label(filter.title, systemImage: filter.icon)
-                                }
-                            }
+                    HStack(spacing: 8) {
+                        RotaryGlassIconButton(systemName: "square.and.pencil") {
+                            RotaryHaptics.selection()
+                            showingCompose = true
                         }
 
-                        Section("Inbox") {
-                            Button("Refresh Inbox", systemImage: "arrow.clockwise") {
-                                Task { await store.refreshInbox(forceRefresh: true) }
+                        Menu {
+                            Section("Filters") {
+                                ForEach(RotaryMessageInboxFilter.allCases) { filter in
+                                    Button {
+                                        RotaryHaptics.selection()
+                                        selectedFilter = filter
+                                    } label: {
+                                        Label(filter.title, systemImage: filter.icon)
+                                    }
+                                }
                             }
 
-                            if filteredThreads.contains(where: { ($0.unreadCount ?? 0) > 0 }) {
-                                Button("Mark Visible Read", systemImage: "envelope.open") {
-                                    let visibleUnread = filteredThreads
-                                        .filter { ($0.unreadCount ?? 0) > 0 }
-                                        .map(\.contactId)
-                                    Task {
-                                        await store.performThreadAction(contactIds: visibleUnread, action: "mark_read")
-                                    }
+                            Section("Inbox") {
+                                Button("Refresh Inbox", systemImage: "arrow.clockwise") {
+                                    Task { await store.refreshInbox(forceRefresh: true) }
                                 }
-                            }
-                        }
 
-                        if isEditing {
-                            Section("Selected") {
-                                Button("Select All", systemImage: "checkmark.circle") {
-                                    selectedThreadIDs = Set(filteredThreads.map(\.contactId))
-                                }
-                                Button("Deselect All", systemImage: "circle") {
-                                    selectedThreadIDs.removeAll()
-                                }
-                                Divider()
-                                Button("Mark Read", systemImage: "envelope.open") {
-                                    Task { await store.performThreadAction(contactIds: Array(selectedThreadIDs), action: "mark_read") }
-                                }
-                                Button("Mark Unread", systemImage: "envelope.badge") {
-                                    Task { await store.performThreadAction(contactIds: Array(selectedThreadIDs), action: "mark_unread") }
-                                }
-                                Button(selectedFilter == .deleted ? "Recover" : "Delete", systemImage: selectedFilter == .deleted ? "arrow.uturn.backward" : "trash") {
-                                    Task {
-                                        await store.performThreadAction(
-                                            contactIds: Array(selectedThreadIDs),
-                                            action: selectedFilter == .deleted ? "restore" : "move_to_deleted"
-                                        )
-                                    }
-                                }
-                                if selectedFilter == .spam {
-                                    Button("Move to Inbox", systemImage: "tray.and.arrow.down") {
-                                        Task { await store.performThreadAction(contactIds: Array(selectedThreadIDs), action: "unmark_spam") }
-                                    }
-                                } else if selectedFilter != .deleted {
-                                    Button("Move to Spam", systemImage: "exclamationmark.bubble") {
-                                        Task { await store.performThreadAction(contactIds: Array(selectedThreadIDs), action: "mark_spam") }
+                                if filteredThreads.contains(where: { ($0.unreadCount ?? 0) > 0 }) {
+                                    Button("Mark Visible Read", systemImage: "envelope.open") {
+                                        let visibleUnread = filteredThreads
+                                            .filter { ($0.unreadCount ?? 0) > 0 }
+                                            .map(\.contactId)
+                                        Task {
+                                            await store.performThreadAction(contactIds: visibleUnread, action: "mark_read")
+                                        }
                                     }
                                 }
                             }
+
+                            if isEditing {
+                                Section("Selected") {
+                                    Button("Select All", systemImage: "checkmark.circle") {
+                                        selectedThreadIDs = Set(filteredThreads.map(\.contactId))
+                                    }
+                                    Button("Deselect All", systemImage: "circle") {
+                                        selectedThreadIDs.removeAll()
+                                    }
+                                    Divider()
+                                    Button("Mark Read", systemImage: "envelope.open") {
+                                        Task { await store.performThreadAction(contactIds: Array(selectedThreadIDs), action: "mark_read") }
+                                    }
+                                    Button("Mark Unread", systemImage: "envelope.badge") {
+                                        Task { await store.performThreadAction(contactIds: Array(selectedThreadIDs), action: "mark_unread") }
+                                    }
+                                    Button(selectedFilter == .deleted ? "Recover" : "Delete", systemImage: selectedFilter == .deleted ? "arrow.uturn.backward" : "trash") {
+                                        Task {
+                                            await store.performThreadAction(
+                                                contactIds: Array(selectedThreadIDs),
+                                                action: selectedFilter == .deleted ? "restore" : "move_to_deleted"
+                                            )
+                                        }
+                                    }
+                                    if selectedFilter == .spam {
+                                        Button("Move to Inbox", systemImage: "tray.and.arrow.down") {
+                                            Task { await store.performThreadAction(contactIds: Array(selectedThreadIDs), action: "unmark_spam") }
+                                        }
+                                    } else if selectedFilter != .deleted {
+                                        Button("Move to Spam", systemImage: "exclamationmark.bubble") {
+                                            Task { await store.performThreadAction(contactIds: Array(selectedThreadIDs), action: "mark_spam") }
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            RotaryGlassIcon(systemName: "line.3.horizontal")
                         }
-                    } label: {
-                        RotaryGlassIcon(systemName: "line.3.horizontal")
                     }
                 }
             }
@@ -312,6 +319,50 @@ struct RotaryMessagesScreen: View {
         }
     }
 
+    private var inboxHeader: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            RotaryScreenHeading(
+                title: "Messages",
+                subtitle: messageHeaderSubtitle
+            )
+
+            RotarySearchField(text: $searchText, prompt: "Search messages")
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(RotaryMessageInboxFilter.allCases) { filter in
+                        Button {
+                            guard selectedFilter != filter else { return }
+                            RotaryHaptics.selection()
+                            selectedFilter = filter
+                        } label: {
+                            RotaryPill(text: filter.title, active: selectedFilter == filter)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 1)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 10)
+    }
+
+    private var messageHeaderSubtitle: String {
+        if !searchText.isEmpty {
+            return filteredThreads.isEmpty ? "No matches" : "\(filteredThreads.count) result\(filteredThreads.count == 1 ? "" : "s")"
+        }
+        if isEditing {
+            return "\(selectedThreadIDs.count) selected"
+        }
+        let unread = store.unreadCount()
+        if unread > 0 {
+            return "\(unread) unread"
+        }
+        return selectedFilter == .all ? "All conversations" : selectedFilter.title
+    }
+
     private func toggleEditing() {
         RotaryHaptics.selection()
         withAnimation(.easeInOut(duration: 0.18)) {
@@ -324,8 +375,6 @@ struct RotaryMessagesScreen: View {
 
     private var bulkActionBar: some View {
         VStack(spacing: 0) {
-            Divider()
-
             HStack(spacing: 10) {
                 bulkActionButton("Read", systemImage: "envelope.open") {
                     Task { await store.performThreadAction(contactIds: Array(selectedThreadIDs), action: "mark_read") }
@@ -355,42 +404,16 @@ struct RotaryMessagesScreen: View {
             .padding(.top, 10)
             .padding(.bottom, 10)
             .background {
-                Rectangle()
-                    .fill(Color(uiColor: .systemBackground))
-                    .overlay(alignment: .top) {
-                        Rectangle()
-                            .fill(RotaryTheme.chromeStroke)
-                            .frame(height: 1 / UIScreen.main.scale)
-                    }
-                    .ignoresSafeArea(edges: .bottom)
-            }
-        }
-    }
-
-    private var inboxAccessoryBar: some View {
-        HStack(spacing: 10) {
-            RotarySearchField(text: $searchText, prompt: "Search")
-
-            Button {
-                RotaryHaptics.selection()
-                showingCompose = true
-            } label: {
-                RotaryGlassIcon(systemName: "square.and.pencil", size: 19, frameSize: 44)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 12)
-        .padding(.top, 8)
-        .padding(.bottom, 8)
-        .background {
-            Rectangle()
-                .fill(Color(uiColor: .systemBackground))
-                .overlay(alignment: .top) {
+                ZStack(alignment: .top) {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
                     Rectangle()
                         .fill(RotaryTheme.chromeStroke)
                         .frame(height: 1 / UIScreen.main.scale)
+                        .opacity(0.55)
                 }
                 .ignoresSafeArea(edges: .bottom)
+            }
         }
     }
 
@@ -429,19 +452,10 @@ struct RotaryMessagesScreen: View {
     private var loadingState: some View {
         VStack(spacing: 14) {
             Spacer()
-            Circle()
-                .fill(RotaryTheme.softSurface)
-                .frame(width: 62, height: 62)
-                .overlay(
-                    Image(systemName: "bubble.left.and.bubble.right.fill")
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                )
-            Text("Checking recent conversations")
+            ProgressView()
+                .controlSize(.large)
+            Text("Loading conversations")
                 .font(.headline)
-            Text("Rotary keeps likely threads warm in the background so the inbox opens instantly.")
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
             Spacer()
         }
         .padding(.horizontal, 28)
@@ -455,7 +469,7 @@ struct RotaryMessagesScreen: View {
                 .foregroundStyle(.secondary)
             Text(searchText.isEmpty ? emptyTitle : "No matching conversations")
                 .font(.headline)
-            Text(searchText.isEmpty ? emptyMessage : "Search names, numbers, or previews.")
+            Text(searchText.isEmpty ? emptyMessage : "Try a different search.")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             if let inboxError = store.inboxError, !inboxError.isEmpty {
@@ -485,11 +499,11 @@ struct RotaryMessagesScreen: View {
     private var emptyMessage: String {
         switch selectedFilter {
         case .all:
-            return "Messages from your real Rotary numbers will appear here."
+            return "Your conversations will show up here."
         case .known:
-            return "Conversations with named senders will appear here."
+            return "Known senders will show up here."
         case .spam:
-            return "Unknown and spam conversations live here."
+            return "Spam and unknown senders show up here."
         case .deleted:
             return "Deleted conversations can be recovered here."
         }
@@ -638,7 +652,7 @@ struct RotaryMessageThreadScreen: View {
                                     .id(displayedMessages.count)
                             }
                             .padding(.horizontal, 12)
-                            .padding(.top, 12)
+                            .padding(.top, 86)
                             .padding(.bottom, 24)
                         }
                         .scrollDismissesKeyboard(.interactively)
@@ -658,6 +672,21 @@ struct RotaryMessageThreadScreen: View {
 
             composer
         }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            RotaryConversationTopHeader(
+                title: currentThread.contactName,
+                subtitle: nil,
+                avatarSize: 42,
+                imageURL: avatarURL,
+                action: {
+                    composerFocused = false
+                    showingInfo = true
+                }
+            )
+            .padding(.horizontal, 52)
+            .padding(.top, 4)
+            .padding(.bottom, 6)
+        }
         .onDisappear {
             composerFocused = false
         }
@@ -665,19 +694,6 @@ struct RotaryMessageThreadScreen: View {
         .toolbar(.hidden, for: .tabBar)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                RotaryConversationPrincipalHeader(
-                    title: currentThread.contactName,
-                    subtitle: nil,
-                    avatarSize: 40,
-                    imageURL: avatarURL,
-                    action: {
-                        composerFocused = false
-                        showingInfo = true
-                    }
-                )
-            }
-
             if let phoneNumber = currentThread.contactPhone {
                 ToolbarItem(placement: .topBarTrailing) {
                     RotaryGlassIconButton(systemName: "phone.fill") {

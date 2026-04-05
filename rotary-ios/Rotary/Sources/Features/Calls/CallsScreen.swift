@@ -50,29 +50,11 @@ private struct CallsContactSection: Identifiable {
 }
 
 private enum CallsPhonePalette {
-    static let chromeFill = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(white: 0.12, alpha: 1)
-            : .secondarySystemBackground
-    })
-    static let chromeBorder = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(white: 0.22, alpha: 1)
-            : UIColor.separator.withAlphaComponent(0.12)
-    })
-    static let keyFill = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(white: 0.11, alpha: 1)
-            : .secondarySystemBackground
-    })
-    static let contactAvatarFill = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 0.23, green: 0.21, blue: 0.34, alpha: 1)
-            : UIColor(red: 0.89, green: 0.89, blue: 0.95, alpha: 1)
-    })
-    static let chromeText = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark ? .white : .label
-    })
+    static let chromeFill = RotaryTheme.secondarySurface
+    static let chromeBorder = RotaryTheme.elevatedStroke
+    static let keyFill = RotaryTheme.elevatedSurface
+    static let contactAvatarFill = RotaryTheme.avatarTint
+    static let chromeText = Color.primary
 }
 
 private typealias CallsContactRow = RotaryCallContact
@@ -446,21 +428,8 @@ struct CallsScreen: View {
 
     @ViewBuilder
     private var toolbarPrincipal: some View {
-        switch selectedSurface {
-        case .recents:
-            CallsRecentsFilterControl(selection: $selectedRecentsFilter)
-        case .contacts:
-            Text("Contacts")
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(CallsPhonePalette.chromeText)
-        case .voicemail:
-            Text("Voicemail")
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(CallsPhonePalette.chromeText)
-        case .keypad:
-            Color.clear
-                .frame(width: 1, height: 1)
-        }
+        Color.clear
+            .frame(width: 1, height: 1)
     }
 
     @ViewBuilder
@@ -508,12 +477,14 @@ struct CallsScreen: View {
 
     private var recentSurface: some View {
         VStack(spacing: 0) {
-            Text("Recents")
-                .font(.system(size: 41, weight: .bold))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
-                .padding(.top, 4)
-                .padding(.bottom, 12)
+            callsSurfaceHeader(
+                title: "Calls",
+                subtitle: store.missedCallCount > 0 ? "\(store.missedCallCount) missed" : "Recent activity"
+            )
+
+            CallsRecentsFilterControl(selection: $selectedRecentsFilter)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 10)
 
             if isSearchVisible {
                 RotarySearchField(text: $searchText, prompt: searchPrompt)
@@ -527,6 +498,8 @@ struct CallsScreen: View {
 
     private var contactsSurface: some View {
         VStack(spacing: 0) {
+            callsSurfaceHeader(title: "Contacts", subtitle: contacts.isEmpty ? "People and businesses you reach" : "\(contacts.count) saved")
+
             if isSearchVisible {
                 RotarySearchField(text: $searchText, prompt: searchPrompt)
                     .padding(.horizontal, 16)
@@ -539,6 +512,11 @@ struct CallsScreen: View {
 
     private var voicemailSurface: some View {
         VStack(spacing: 0) {
+            callsSurfaceHeader(
+                title: "Voicemail",
+                subtitle: voicemailCalls.isEmpty ? "Summaries, transcripts, and recordings" : "\(voicemailCalls.count) item\(voicemailCalls.count == 1 ? "" : "s")"
+            )
+
             if isSearchVisible {
                 RotarySearchField(text: $searchText, prompt: searchPrompt)
                     .padding(.horizontal, 16)
@@ -553,7 +531,7 @@ struct CallsScreen: View {
         callsList(
             filteredRecents,
             emptyTitle: "No calls yet",
-            emptyMessage: "Your live call history will show up here.",
+            emptyMessage: "Recent calls will show up here.",
             includeAssist: true,
             isLoading: store.isLoadingCalls,
             loadErrorText: store.loadError
@@ -690,7 +668,8 @@ struct CallsScreen: View {
                         }
                     }
                     .listRowBackground(Color.clear)
-                    .listRowSeparatorTint(RotaryTheme.elevatedStroke)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 }
                 .listStyle(.plain)
                 .scrollDismissesKeyboard(.interactively)
@@ -995,6 +974,13 @@ struct CallsScreen: View {
         }
         return keypadSignature(for: name).contains(digitsQuery)
     }
+
+    private func callsSurfaceHeader(title: String, subtitle: String) -> some View {
+        RotaryScreenHeading(title: title, subtitle: subtitle)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
+    }
 }
 
 private struct RotaryDialpadDigitButton: View {
@@ -1039,19 +1025,7 @@ private struct CallsToolbarTextButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(CallsPhonePalette.chromeText)
-                .padding(.horizontal, 14)
-                .frame(height: 36)
-                .background(CallsPhonePalette.chromeFill, in: Capsule())
-                .overlay(
-                    Capsule(style: .continuous)
-                        .stroke(CallsPhonePalette.chromeBorder, lineWidth: 1)
-                )
-        }
-        .buttonStyle(RotaryPressScaleButtonStyle(pressedScale: 0.97))
+        RotaryGlassTextButton(title: title, action: action)
     }
 }
 
@@ -1059,15 +1033,7 @@ private struct CallsToolbarIconLabel: View {
     let systemName: String
 
     var body: some View {
-        Image(systemName: systemName)
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(CallsPhonePalette.chromeText)
-            .frame(width: 36, height: 36)
-            .background(CallsPhonePalette.chromeFill, in: Circle())
-            .overlay(
-                Circle()
-                    .stroke(CallsPhonePalette.chromeBorder, lineWidth: 1)
-            )
+        RotaryGlassIcon(systemName: systemName, size: 16, frameSize: 36)
     }
 }
 
@@ -1087,30 +1053,18 @@ private struct CallsRecentsFilterControl: View {
     @Binding var selection: CallsRecentsFilter
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 8) {
             ForEach(CallsRecentsFilter.allCases) { filter in
                 Button {
                     RotaryHaptics.selection()
                     selection = filter
                 } label: {
-                    Text(filter.rawValue)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(selection == filter ? .primary : .secondary)
-                        .frame(width: 74, height: 36)
-                        .background(
-                            Capsule(style: .continuous)
-                                .fill(selection == filter ? Color.white.opacity(0.16) : Color.clear)
-                        )
+                    RotaryPill(text: filter.rawValue, active: selection == filter)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(4)
-        .background(CallsPhonePalette.chromeFill, in: Capsule())
-        .overlay(
-            Capsule(style: .continuous)
-                .stroke(CallsPhonePalette.chromeBorder, lineWidth: 1)
-        )
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

@@ -91,17 +91,20 @@ struct RotaryConversationTopHeader: View {
     let title: String
     let subtitle: String?
     let avatarSize: CGFloat
+    let imageURL: String?
     let action: (() -> Void)?
 
     init(
         title: String,
         subtitle: String? = nil,
         avatarSize: CGFloat = 48,
+        imageURL: String? = nil,
         action: (() -> Void)? = nil
     ) {
         self.title = title
         self.subtitle = subtitle
         self.avatarSize = avatarSize
+        self.imageURL = imageURL
         self.action = action
     }
 
@@ -122,13 +125,14 @@ struct RotaryConversationTopHeader: View {
     }
 
     private var content: some View {
-        VStack(spacing: 4) {
-            RotaryAvatarView(title: title, size: avatarSize)
+        VStack(spacing: 5) {
+            RotaryAvatarView(title: title, size: avatarSize, imageURL: imageURL)
 
             Text(title)
-                .font(.headline.weight(.semibold))
+                .font(.system(size: 23, weight: .bold, design: .rounded))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
+                .minimumScaleFactor(0.86)
 
             if let subtitle, !subtitle.isEmpty {
                 Text(subtitle)
@@ -137,7 +141,30 @@ struct RotaryConversationTopHeader: View {
                     .lineLimit(1)
             }
         }
+        .frame(maxWidth: 232)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 10)
+        .background(headerBackground)
+        .overlay(headerStroke)
+        .shadow(color: RotaryTheme.shadow.opacity(0.12), radius: 16, x: 0, y: 8)
         .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private var headerBackground: some View {
+        if #available(iOS 26, *) {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(.clear)
+                .glassEffect(.regular.tint(.white.opacity(0.24)).interactive(action != nil), in: .rect(cornerRadius: 28))
+        } else {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(RotaryTheme.chromeFill)
+        }
+    }
+
+    private var headerStroke: some View {
+        RoundedRectangle(cornerRadius: 28, style: .continuous)
+            .stroke(RotaryTheme.chromeStroke, lineWidth: 1)
     }
 }
 
@@ -268,20 +295,31 @@ struct RotaryConversationPrincipalHeader: View {
     }
 
     private var headerContent: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 4) {
             RotaryAvatarView(title: title, size: avatarSize, imageURL: imageURL)
 
-            Text(title)
-                .font(.headline.weight(.semibold))
-                .lineLimit(1)
+            HStack(spacing: 4) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.84)
+
+                if action != nil {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             if let subtitle, !subtitle.isEmpty {
                 Text(subtitle)
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.82)
             }
         }
-        .frame(maxWidth: 220)
+        .frame(maxWidth: 232)
+        .padding(.top, 2)
     }
 }

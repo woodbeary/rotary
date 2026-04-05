@@ -77,15 +77,24 @@ struct RotaryConversationTranscriptView: View {
     }
 
     var body: some View {
-        LazyVStack(spacing: 10) {
+        LazyVStack(spacing: 14) {
             ForEach(rows) { row in
                 switch row {
                 case let .day(_, label):
-                    Text(label)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                    HStack {
+                        Spacer(minLength: 0)
+                        Text(label)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(
+                                RotaryTheme.softSurface.opacity(0.9),
+                                in: Capsule(style: .continuous)
+                            )
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 2)
                 case let .message(message):
                     RotaryConversationBubble(message: message)
                 }
@@ -116,6 +125,8 @@ private struct RotaryConversationBubble: View {
 
                 if !message.text.isEmpty {
                     Text(message.text)
+                        .font(.body)
+                        .lineSpacing(1.2)
                         .foregroundStyle(isOutgoing ? Color.white : Color.primary)
                 }
 
@@ -168,11 +179,15 @@ private struct RotaryConversationBubble: View {
                 }
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .frame(maxWidth: min(UIScreen.main.bounds.width * 0.72, 308), alignment: .leading)
+            .padding(.vertical, 11)
+            .frame(maxWidth: min(UIScreen.main.bounds.width * 0.76, 324), alignment: .leading)
             .background(
                 isOutgoing ? RotaryTheme.accent : RotaryTheme.incomingBubble,
                 in: bubbleShape
+            )
+            .overlay(
+                bubbleShape
+                    .stroke(isOutgoing ? Color.clear : RotaryTheme.elevatedStroke, lineWidth: 1)
             )
             .opacity(message.isPreviewPlaceholder ? 0.88 : 1)
 
@@ -185,10 +200,10 @@ private struct RotaryConversationBubble: View {
 
     private var bubbleShape: UnevenRoundedRectangle {
         UnevenRoundedRectangle(
-            topLeadingRadius: 22,
-            bottomLeadingRadius: isOutgoing ? 22 : 8,
-            bottomTrailingRadius: isOutgoing ? 8 : 22,
-            topTrailingRadius: 22,
+            topLeadingRadius: 24,
+            bottomLeadingRadius: isOutgoing ? 24 : 9,
+            bottomTrailingRadius: isOutgoing ? 9 : 24,
+            topTrailingRadius: 24,
             style: .continuous
         )
     }
