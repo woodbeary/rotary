@@ -510,7 +510,9 @@ private struct AgentInfoScreen: View {
     }
 
     private var tabItems: [RotaryProfileTabItem] {
-        AgentInfoTab.allCases.map { RotaryProfileTabItem(id: $0.rawValue, title: $0.title) }
+        AgentInfoTab.allCases.map {
+            RotaryProfileTabItem(id: $0.rawValue, title: $0.title, systemImage: $0.systemImage)
+        }
     }
 
     private var activityItems: [AgentActivityItem] {
@@ -593,21 +595,17 @@ private struct AgentInfoScreen: View {
         VStack(spacing: 14) {
             RotaryProfileHero(
                 title: agent.name,
-                subtitle: agent.assignedPhoneNumber ?? "Provisioning line",
-                tertiaryText: agent.folderName ?? "\(agent.voiceName) voice"
+                subtitle: nil,
+                tertiaryText: nil
             ) {
                 HStack(spacing: 18) {
-                    RotaryProfileActionButton(title: "Call", systemImage: "phone.fill") {
+                    RotaryProfileActionButton(title: "Call", systemImage: "phone.fill", showsTitle: false) {
                         Task { await callAgent() }
                     }
 
-                    RotaryProfileActionButton(title: "Message", systemImage: "bubble.left.fill") {
+                    RotaryProfileActionButton(title: "Message", systemImage: "bubble.left.fill", showsTitle: false) {
                         seededPhoneNumber = ""
                         showingMessageSheet = true
-                    }
-
-                    RotaryProfileActionButton(title: "Line", systemImage: "waveform.path.ecg") {
-                        selectedTab = .activity
                     }
                 }
                 .padding(.horizontal, 18)
@@ -623,42 +621,30 @@ private struct AgentInfoScreen: View {
         case .overview:
             ScrollView {
                 VStack(spacing: 16) {
-                    RotaryProfileInfoCard(title: "Agent") {
-                        RotaryProfileMetaRow(label: "status", value: agent.isActive ? "Active" : "Paused")
-                        Divider()
-                        RotaryProfileMetaRow(label: "voice", value: agent.voiceName)
-                        Divider()
-                        RotaryProfileMetaRow(label: "provider", value: agent.voiceProvider ?? "Unknown")
-                        if let folderName = agent.folderName {
-                            Divider()
-                            RotaryProfileMetaRow(label: "folder", value: folderName)
-                        }
-                    }
+                    RotaryGlassCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            HStack(spacing: 10) {
+                                RotaryAgentMetaPill(
+                                    systemImage: agent.isActive ? "checkmark.circle.fill" : "pause.circle.fill",
+                                    title: agent.isActive ? "Active" : "Paused",
+                                    tint: agent.isActive ? RotaryTheme.accent : .secondary
+                                )
 
-                    RotaryProfileInfoCard(title: "Quick Actions") {
-                        HStack(spacing: 12) {
-                            Button {
-                                seededPhoneNumber = ""
-                                showingMessageSheet = true
-                            } label: {
-                                Label("Send as Agent", systemImage: "bubble.left.and.bubble.right.fill")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(RotarySecondaryButtonStyle())
+                                if let folderName = agent.folderName {
+                                    RotaryAgentMetaPill(
+                                        systemImage: "folder.fill",
+                                        title: folderName,
+                                        tint: .secondary
+                                    )
+                                }
 
-                            Button {
-                                seededPhoneNumber = ""
-                                showingCallSheet = true
-                            } label: {
-                                Label("Call From Line", systemImage: "phone.connection.fill")
-                                    .frame(maxWidth: .infinity)
+                                Spacer(minLength: 0)
                             }
-                            .buttonStyle(RotarySecondaryButtonStyle())
                         }
                     }
 
                     if let latest = activityItems.first {
-                        RotaryProfileInfoCard(title: "Latest Activity") {
+                        RotaryGlassCard {
                             agentActivityRow(latest)
                         }
                     }
@@ -957,6 +943,44 @@ private enum AgentInfoTab: String, CaseIterable {
 
     var title: String {
         rawValue.capitalized
+    }
+
+    var systemImage: String {
+        switch self {
+        case .overview:
+            return "sparkles"
+        case .activity:
+            return "clock.fill"
+        case .people:
+            return "person.2.fill"
+        case .assets:
+            return "folder.fill"
+        }
+    }
+}
+
+private struct RotaryAgentMetaPill: View {
+    let systemImage: String
+    let title: String
+    let tint: Color
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: systemImage)
+                .font(.system(size: 12, weight: .semibold))
+
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .lineLimit(1)
+        }
+        .foregroundStyle(tint)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(RotaryTheme.softSurface, in: Capsule(style: .continuous))
+        .overlay(
+            Capsule(style: .continuous)
+                .stroke(RotaryTheme.elevatedStroke, lineWidth: 1)
+        )
     }
 }
 

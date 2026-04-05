@@ -3,6 +3,13 @@ import SwiftUI
 struct RotaryProfileTabItem: Identifiable, Hashable {
     let id: String
     let title: String
+    let systemImage: String?
+
+    init(id: String, title: String, systemImage: String? = nil) {
+        self.id = id
+        self.title = title
+        self.systemImage = systemImage
+    }
 }
 
 struct RotaryProfileTabBar: View {
@@ -11,23 +18,38 @@ struct RotaryProfileTabBar: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 18) {
+            HStack(spacing: 10) {
                 ForEach(items) { item in
                     Button {
                         guard selectedID != item.id else { return }
                         RotaryHaptics.selection()
                         selectedID = item.id
                     } label: {
-                        VStack(spacing: 8) {
-                            Text(item.title)
-                                .font(.subheadline.weight(selectedID == item.id ? .semibold : .regular))
-                                .foregroundStyle(selectedID == item.id ? Color.primary : .secondary)
+                        VStack(spacing: item.systemImage == nil ? 0 : 4) {
+                            if let systemImage = item.systemImage {
+                                Image(systemName: systemImage)
+                                    .font(.system(size: 13, weight: .semibold))
+                            }
 
-                            Capsule(style: .continuous)
-                                .fill(selectedID == item.id ? RotaryTheme.accent : Color.clear)
-                                .frame(width: 18, height: 3)
+                            Text(item.title)
+                                .font(.caption2.weight(selectedID == item.id ? .semibold : .medium))
+                                .lineLimit(1)
                         }
-                        .frame(minWidth: 44)
+                        .foregroundStyle(selectedID == item.id ? Color.primary : .secondary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .frame(minWidth: item.systemImage == nil ? 52 : 64)
+                        .background {
+                            Capsule(style: .continuous)
+                                .fill(selectedID == item.id ? RotaryTheme.chromeFill : Color.clear)
+                                .overlay(
+                                    Capsule(style: .continuous)
+                                        .stroke(
+                                            selectedID == item.id ? RotaryTheme.chromeStroke : Color.clear,
+                                            lineWidth: 1
+                                        )
+                                )
+                        }
                     }
                     .buttonStyle(.plain)
                 }
@@ -100,14 +122,27 @@ struct RotaryProfileHero<Actions: View>: View {
 struct RotaryProfileActionButton: View {
     let title: String
     let systemImage: String
+    let showsTitle: Bool
     let action: () -> Void
+
+    init(
+        title: String,
+        systemImage: String,
+        showsTitle: Bool = true,
+        action: @escaping () -> Void
+    ) {
+        self.title = title
+        self.systemImage = systemImage
+        self.showsTitle = showsTitle
+        self.action = action
+    }
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 8) {
+            VStack(spacing: showsTitle ? 8 : 0) {
                 Image(systemName: systemImage)
                     .font(.system(size: 17, weight: .semibold))
-                    .frame(width: 42, height: 42)
+                    .frame(width: showsTitle ? 42 : 46, height: showsTitle ? 42 : 46)
                     .foregroundStyle(.primary)
                     .background(RotaryTheme.chromeFill, in: Circle())
                     .overlay(
@@ -115,13 +150,16 @@ struct RotaryProfileActionButton: View {
                             .stroke(RotaryTheme.chromeStroke, lineWidth: 1)
                     )
 
-                Text(title)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.primary)
+                if showsTitle {
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.primary)
+                }
             }
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(title))
     }
 }
 

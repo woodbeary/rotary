@@ -25,10 +25,13 @@ struct RotaryConversationSummaryRow: View {
     }
 
     var body: some View {
+        let trimmedPreview = preview.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasPreview = !trimmedPreview.isEmpty
+
         HStack(alignment: .top, spacing: 14) {
             RotaryAvatarView(title: title, size: avatarSize, imageURL: avatarURL)
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: hasPreview ? 6 : 2) {
                 HStack(alignment: .top, spacing: 8) {
                     Text(title)
                         .font(.body.weight(isUnread ? .semibold : .medium))
@@ -38,26 +41,26 @@ struct RotaryConversationSummaryRow: View {
                     Spacer(minLength: 8)
 
                     if !timestamp.isEmpty {
-                        Text(timestamp)
-                            .font(.caption.weight(isUnread ? .semibold : .regular))
-                            .foregroundStyle(isUnread ? RotaryTheme.accent : .secondary)
+                        HStack(spacing: 6) {
+                            Text(timestamp)
+                                .font(.caption.weight(isUnread ? .semibold : .regular))
+                                .foregroundStyle(isUnread ? RotaryTheme.accent : .secondary)
+
+                            if isUnread {
+                                Circle()
+                                    .fill(RotaryTheme.accent)
+                                    .frame(width: 8, height: 8)
+                            }
+                        }
                     }
                 }
 
-                HStack(alignment: .center, spacing: 8) {
-                    Text(preview)
+                if hasPreview {
+                    Text(trimmedPreview)
                         .font(.subheadline.weight(isUnread ? .medium : .regular))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-
-                    Spacer(minLength: 8)
-
-                    if isUnread {
-                        Circle()
-                            .fill(RotaryTheme.accent)
-                            .frame(width: 8, height: 8)
-                    }
                 }
             }
         }

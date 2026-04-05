@@ -207,14 +207,14 @@ struct AgentsScreen: View {
         .padding(.bottom, 10)
     }
 
-    private var agentsHeaderSubtitle: String {
+    private var agentsHeaderSubtitle: String? {
         if !searchText.isEmpty {
             return filteredAgents.isEmpty ? "No matches" : "\(filteredAgents.count) result\(filteredAgents.count == 1 ? "" : "s")"
         }
         if let currentFolder {
             return currentFolder.name
         }
-        return "All assistants"
+        return nil
     }
 
     private func folderChip(title: String, isActive: Bool, action: @escaping () -> Void) -> some View {
@@ -264,10 +264,7 @@ struct AgentsScreen: View {
         if let call = relatedCalls(for: agent).first {
             return call.summary ?? call.transcript ?? call.contactPhone ?? "Recent phone activity"
         }
-        if let number = agent.assignedPhoneNumber {
-            return number
-        }
-        return "Provisioning your assistant"
+        return ""
     }
 
     private func latestTimestampText(for agent: MobileAgent) -> String {
