@@ -295,6 +295,7 @@ struct RotaryMessagesScreen: View {
                             }
                         } label: {
                             RotaryGlassIcon(systemName: "line.3.horizontal")
+                                .accessibilityLabel("Inbox options")
                         }
                     }
                 }
@@ -320,44 +321,12 @@ struct RotaryMessagesScreen: View {
     }
 
     private var inboxHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            RotaryInlineStatusHeader(subtitle: messageHeaderSubtitle)
-
-            RotarySearchField(text: $searchText, prompt: "Search messages")
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(RotaryMessageInboxFilter.allCases) { filter in
-                        Button {
-                            guard selectedFilter != filter else { return }
-                            RotaryHaptics.selection()
-                            selectedFilter = filter
-                        } label: {
-                            RotaryPill(text: filter.title, active: selectedFilter == filter)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.vertical, 1)
-            }
+        VStack(alignment: .leading, spacing: 8) {
+            RotarySearchField(text: $searchText, prompt: "Search")
         }
         .padding(.horizontal, 16)
         .padding(.top, 8)
-        .padding(.bottom, 10)
-    }
-
-    private var messageHeaderSubtitle: String {
-        if !searchText.isEmpty {
-            return filteredThreads.isEmpty ? "No matches" : "\(filteredThreads.count) result\(filteredThreads.count == 1 ? "" : "s")"
-        }
-        if isEditing {
-            return "\(selectedThreadIDs.count) selected"
-        }
-        let unread = store.unreadCount()
-        if unread > 0 {
-            return "\(unread) unread"
-        }
-        return selectedFilter == .all ? "All conversations" : selectedFilter.title
+        .padding(.bottom, 8)
     }
 
     private func toggleEditing() {
@@ -588,10 +557,6 @@ struct RotaryMessageThreadScreen: View {
         displayedMessages.contains { !$0.isPreviewPlaceholder }
     }
 
-    private var avatarURL: String? {
-        store.detail(for: currentThread.contactId)?.contact.avatarUrl
-    }
-
     private var transcriptMessages: [RotaryConversationBubbleModel] {
         displayedMessages.map { item in
             RotaryConversationBubbleModel(
@@ -612,7 +577,11 @@ struct RotaryMessageThreadScreen: View {
             ZStack {
                 RotaryBackdrop(onTap: { composerFocused = false })
 
-                if displayedMessages.isEmpty {
+                if state.isLoading && !hasLiveMessages {
+                    RotaryConversationSkeleton(rows: 5)
+                        .padding(.horizontal, 12)
+                        .padding(.top, 14)
+                } else if displayedMessages.isEmpty {
                     Color.clear
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -626,7 +595,7 @@ struct RotaryMessageThreadScreen: View {
                                     .id(displayedMessages.count)
                             }
                             .padding(.horizontal, 12)
-                            .padding(.top, 86)
+                            .padding(.top, 12)
                             .padding(.bottom, 24)
                         }
                         .scrollDismissesKeyboard(.interactively)
@@ -646,33 +615,28 @@ struct RotaryMessageThreadScreen: View {
 
             composer
         }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            RotaryConversationTopHeader(
-                title: currentThread.contactName,
-                subtitle: nil,
-                avatarSize: 30,
-                imageURL: avatarURL,
-                action: {
-                    composerFocused = false
-                    showingInfo = true
-                }
-            )
-            .padding(.horizontal, 52)
-            .padding(.top, 2)
-            .padding(.bottom, 2)
-        }
         .onDisappear {
             composerFocused = false
         }
+        .navigationTitle(currentThread.contactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
-            if let phoneNumber = currentThread.contactPhone {
-                ToolbarItem(placement: .topBarTrailing) {
-                    RotaryGlassIconButton(systemName: "phone.fill") {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    composerFocused = false
+                    showingInfo = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+
+                if let phoneNumber = currentThread.contactPhone {
+                    Button {
                         composerFocused = false
                         startCall(phoneNumber, effectiveFromNumber)
+                    } label: {
+                        Image(systemName: "phone.fill")
                     }
                 }
             }
@@ -829,7 +793,7 @@ private struct RotaryComposeMessageSheet: View {
                     }
 
                     if isSearching {
-                        ProgressView()
+                        RotarySkeletonList(rows: 2, showTimestamp: false)
                             .padding(.top, 4)
                     }
 

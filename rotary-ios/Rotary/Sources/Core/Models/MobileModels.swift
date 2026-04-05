@@ -152,6 +152,43 @@ struct MobileCall: Codable, Identifiable {
     let updatedAt: String
 }
 
+extension MobileCall {
+    var hasPlayableRecording: Bool {
+        guard let recordingURL = recordingUrl?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !recordingURL.isEmpty,
+              URL(string: recordingURL) != nil
+        else {
+            return false
+        }
+        return true
+    }
+
+    var isVoicemailConversation: Bool {
+        let normalizedStatus = status.lowercased()
+        if normalizedStatus.contains("voicemail") {
+            return true
+        }
+
+        if livePhase == .voicemail {
+            return true
+        }
+
+        if screeningOutcome?.lowercased().contains("voicemail") == true {
+            return true
+        }
+
+        if twilioAnsweredBy?.contains("machine") == true {
+            return true
+        }
+
+        return false
+    }
+
+    var hasPlayableVoicemailRecording: Bool {
+        isVoicemailConversation && hasPlayableRecording
+    }
+}
+
 enum MobileLiveCallPhase: Equatable {
     case calling
     case ringing

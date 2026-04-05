@@ -614,7 +614,7 @@ struct CreateAgentSheet: View {
 
                 Section("Popular Voices") {
                     if isLoadingVoices {
-                        ProgressView()
+                        RotarySkeletonList(rows: 3, showTimestamp: false)
                     } else {
                         ForEach(displayVoiceOptions, id: \.id) { voice in
                             AgentVoiceOptionRow(

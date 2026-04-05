@@ -585,11 +585,13 @@ struct RotaryFloatingActionButton: View {
                         .overlay(
                             Circle()
                                 .stroke(tint.opacity(0.08), lineWidth: 1)
-                        )
+                    )
                 }
             }
             .shadow(color: RotaryTheme.shadow, radius: 10, x: 0, y: 6)
         }
+        .frame(width: 72, height: 72)
+        .contentShape(Circle())
         .buttonStyle(RotaryPressScaleButtonStyle())
     }
 }

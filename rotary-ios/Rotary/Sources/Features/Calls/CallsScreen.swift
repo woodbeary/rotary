@@ -349,23 +349,26 @@ struct CallsScreen: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
-                RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
-                surfaceContent
+            GeometryReader { proxy in
+                ZStack(alignment: .bottomTrailing) {
+                    RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
+                    surfaceContent
 
-                if selectedSurface != .keypad {
-                    RotaryFloatingActionButton(
-                        systemName: "circle.grid.3x3.fill",
-                        tint: RotaryTheme.callAccent
-                    ) {
-                        RotaryHaptics.softTap()
-                        selectedSurface = .keypad
+                    if selectedSurface != .keypad {
+                        RotaryFloatingActionButton(
+                            systemName: "circle.grid.3x3.fill",
+                            tint: RotaryTheme.callAccent
+                        ) {
+                            RotaryHaptics.softTap()
+                            selectedSurface = .keypad
+                        }
+                        .accessibilityLabel("Keypad")
+                        .accessibilityIdentifier("rotary.callsKeypadButton")
+                        .padding(.trailing, 16)
+                        .padding(.bottom, max(proxy.safeAreaInsets.bottom, 0) + 16)
                     }
-                    .accessibilityLabel("Keypad")
-                    .accessibilityIdentifier("rotary.callsKeypadButton")
-                    .padding(.trailing, 18)
-                    .padding(.bottom, 108)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
@@ -1306,16 +1309,7 @@ private func callIsMissed(_ call: MobileCall) -> Bool {
 }
 
 private func callIsUnreadVoicemail(_ call: MobileCall) -> Bool {
-    callIsVoicemailLike(call) && call.readAt == nil
-}
-
-private func callIsVoicemailLike(_ call: MobileCall) -> Bool {
-    guard let recordingURL = call.recordingUrl?.trimmingCharacters(in: .whitespacesAndNewlines),
-          !recordingURL.isEmpty
-    else {
-        return false
-    }
-    return URL(string: recordingURL) != nil
+    call.hasPlayableVoicemailRecording && call.readAt == nil
 }
 
 private func callLocationLabel(for call: MobileCall) -> String? {
@@ -1715,9 +1709,10 @@ struct CallDetailScreen: View {
                     }
                 }
 
-                if let url = playableVoicemailURL {
+                if let url = playableRecordingURL,
+                   let recordingSectionTitle {
                     RotaryGlassCard {
-                        Text("Voicemail")
+                        Text(recordingSectionTitle)
                             .font(.headline)
                         VoicemailPlaybackCard(player: player, url: url)
                     }
@@ -1810,13 +1805,19 @@ struct CallDetailScreen: View {
         return formatDuration(durationSeconds)
     }
 
-    private var playableVoicemailURL: URL? {
+    private var playableRecordingURL: URL? {
         guard let recordingURL = displayCall.recordingUrl?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !recordingURL.isEmpty
+              !recordingURL.isEmpty,
+              let url = URL(string: recordingURL)
         else {
             return nil
         }
-        return URL(string: recordingURL)
+        return url
+    }
+
+    private var recordingSectionTitle: String? {
+        guard playableRecordingURL != nil else { return nil }
+        return displayCall.isVoicemailConversation ? "Voicemail" : "Recording"
     }
 
     private func parseDate(_ value: String) -> Date? {
@@ -1831,7 +1832,7 @@ struct CallDetailScreen: View {
 
     private func loadDetails() async {
         do {
-            if playableVoicemailURL != nil {
+            if displayCall.isVoicemailConversation, playableRecordingURL != nil {
                 voicemailDetailPayload = try await withAuthorizedRetry(tokenProvider: tokenProvider) { token in
                     try await api.voicemailDetail(token: token, voicemailId: call.id)
                 }

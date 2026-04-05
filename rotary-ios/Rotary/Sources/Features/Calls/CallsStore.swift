@@ -51,7 +51,7 @@ final class CallsStore {
         self.api = api
         self.tokenProvider = tokenProvider
         self.allCalls = Self.sortedCalls(bootstrap.callPreview)
-        self.voicemails = Self.sortedCalls(bootstrap.callPreview.filter(Self.hasPlayableVoicemail))
+        self.voicemails = Self.sortedCalls(bootstrap.callPreview.filter(Self.isPlayableVoicemail))
         self.threadPreview = bootstrap.threadPreview
         self.agents = bootstrap.agents
         self.ownerLinePhoneNumber = bootstrap.ownerLine?.phoneNumber ?? bootstrap.capabilities.defaultMainLine
@@ -66,7 +66,7 @@ final class CallsStore {
         allCalls = Self.mergeCalls(existing: allCalls, incoming: bootstrap.callPreview)
         voicemails = Self.mergeCalls(
             existing: voicemails,
-            incoming: bootstrap.callPreview.filter(Self.hasPlayableVoicemail)
+            incoming: bootstrap.callPreview.filter(Self.isPlayableVoicemail)
         )
 
         rebuildDerivedData()
@@ -253,12 +253,7 @@ final class CallsStore {
         return trimmed.isEmpty ? nil : trimmed
     }
 
-    private static func hasPlayableVoicemail(_ call: MobileCall) -> Bool {
-        guard let recordingURL = call.recordingUrl?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !recordingURL.isEmpty
-        else {
-            return false
-        }
-        return URL(string: recordingURL) != nil
+    private static func isPlayableVoicemail(_ call: MobileCall) -> Bool {
+        call.hasPlayableVoicemailRecording
     }
 }

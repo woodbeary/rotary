@@ -628,7 +628,9 @@ struct MessageThreadScreen: View {
                         }
                     }
                 } else if isWorking {
-                    ProgressView()
+                    RotaryConversationSkeleton(rows: 5)
+                        .padding(.horizontal, 12)
+                        .padding(.top, 12)
                 } else if let errorMessage {
                     VStack(spacing: 12) {
                         Spacer()

@@ -1068,13 +1068,7 @@ private func agentCallIsMissed(_ call: MobileCall) -> Bool {
 }
 
 private func agentCallIsUnreadVoicemail(_ call: MobileCall) -> Bool {
-    guard let recordingURL = call.recordingUrl?.trimmingCharacters(in: .whitespacesAndNewlines),
-          !recordingURL.isEmpty,
-          URL(string: recordingURL) != nil
-    else {
-        return false
-    }
-    return call.readAt == nil
+    call.hasPlayableVoicemailRecording && call.readAt == nil
 }
 
 private func agentCallLocationAndStatus(_ call: MobileCall) -> String {
