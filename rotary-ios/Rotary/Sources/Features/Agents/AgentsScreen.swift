@@ -16,6 +16,8 @@ struct AgentsScreen: View {
     @State private var showingCreateFolder = false
     @State private var searchText = ""
     @State private var renamingFolder: MobileAgentFolderSummary?
+    @State private var prefetchedConversations: [String: MobileAgentConversationPayload] = [:]
+    @State private var prefetchingAgentIDs = Set<String>()
 
     private var filteredAgents: [MobileAgent] {
         let base = selectedFolderId == nil
@@ -79,6 +81,10 @@ struct AgentsScreen: View {
                                     voiceCoordinator: voiceCoordinator,
                                     tokenProvider: { forceRefresh in
                                         try await appModel.token(forceRefresh: forceRefresh)
+                                    },
+                                    initialConversation: prefetchedConversations[agent.id],
+                                    onConversationLoaded: { payload in
+                                        prefetchedConversations[agent.id] = payload
                                     }
                                 )
                             } label: {
@@ -88,7 +94,9 @@ struct AgentsScreen: View {
                                     timestamp: latestTimestampText(for: agent),
                                     avatarURL: nil,
                                     avatarSize: 50,
-                                    isUnread: false
+                                    isUnread: false,
+                                    showsPreviewSkeleton: shouldShowPreviewSkeleton(for: agent),
+                                    previewSystemImage: previewSymbol(for: agent)
                                 )
                             }
                             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
@@ -258,22 +266,76 @@ struct AgentsScreen: View {
     }
 
     private func latestPreview(for agent: MobileAgent) -> String {
+        if let preview = conversationPreview(for: agent) {
+            return preview
+        }
         if let thread = relatedThreads(for: agent).first {
             return thread.preview
         }
         if let call = relatedCalls(for: agent).first {
             return call.summary ?? call.transcript ?? call.contactPhone ?? "Recent phone activity"
         }
-        return ""
+        return "Ready"
     }
 
     private func latestTimestampText(for agent: MobileAgent) -> String {
+        let conversationDate = prefetchedConversations[agent.id].flatMap(latestConversationDate)
         let threadDate = relatedThreads(for: agent).compactMap { $0.lastMessageAt }.compactMap(parseDate).max()
         let callDate = relatedCalls(for: agent).compactMap { parseDate($0.createdAt) }.max()
-        let agentDate = parseDate(agent.updatedAt)
-        let date = [threadDate, callDate, agentDate].compactMap { $0 }.max()
+        let date = [conversationDate, threadDate, callDate].compactMap { $0 }.max()
         guard let date else { return "" }
         return RotaryDateFormatting.relativeTimestamp(for: date)
+    }
+
+    private func previewSymbol(for agent: MobileAgent) -> String? {
+        if shouldShowPreviewSkeleton(for: agent) {
+            return nil
+        }
+
+        if conversationPreview(for: agent) != nil {
+            return nil
+        }
+
+        if relatedThreads(for: agent).first != nil || relatedCalls(for: agent).first != nil {
+            return nil
+        }
+
+        return "sparkles"
+    }
+
+    private func shouldShowPreviewSkeleton(for agent: MobileAgent) -> Bool {
+        prefetchingAgentIDs.contains(agent.id)
+            && conversationPreview(for: agent) == nil
+            && relatedThreads(for: agent).first == nil
+            && relatedCalls(for: agent).first == nil
+    }
+
+    private func conversationPreview(for agent: MobileAgent) -> String? {
+        guard let conversation = prefetchedConversations[agent.id] else {
+            return nil
+        }
+
+        guard let lastMessage = conversation.messages.last else {
+            return nil
+        }
+
+        let content = lastMessage.content.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !content.isEmpty {
+            return content
+        }
+
+        if let firstAttachment = lastMessage.attachments.first {
+            return firstAttachment.fileName
+        }
+
+        return nil
+    }
+
+    private func latestConversationDate(for payload: MobileAgentConversationPayload) -> Date? {
+        if let messageDate = payload.messages.compactMap({ parseDate($0.createdAt) }).max() {
+            return messageDate
+        }
+        return parseDate(payload.conversation.lastActivityAt)
     }
 
     private func relatedCalls(for agent: MobileAgent) -> [MobileCall] {
@@ -312,17 +374,36 @@ struct AgentsScreen: View {
         let candidates = Array(filteredAgents.prefix(searchText.isEmpty ? 4 : 6))
         guard !candidates.isEmpty else { return }
 
-        for agent in candidates {
-            do {
-                _ = try await withAuthorizedRetry(tokenProvider: tokenProvider) { token in
-                    try await api.agentConversation(
-                        token: token,
-                        agentId: agent.id,
-                        forceRefresh: false
-                    )
+        let uncached = candidates.filter { prefetchedConversations[$0.id] == nil }
+        guard !uncached.isEmpty else { return }
+
+        prefetchingAgentIDs.formUnion(uncached.map(\.id))
+        let tokenProvider = tokenProvider
+        let api = api
+
+        await withTaskGroup(of: (String, MobileAgentConversationPayload?).self) { group in
+            for agent in uncached {
+                group.addTask {
+                    do {
+                        let payload = try await withAuthorizedRetry(tokenProvider: tokenProvider) { token in
+                            try await api.agentConversation(
+                                token: token,
+                                agentId: agent.id,
+                                forceRefresh: false
+                            )
+                        }
+                        return (agent.id, payload)
+                    } catch {
+                        return (agent.id, nil)
+                    }
                 }
-            } catch {
-                continue
+            }
+
+            for await (agentID, payload) in group {
+                if let payload {
+                    prefetchedConversations[agentID] = payload
+                }
+                prefetchingAgentIDs.remove(agentID)
             }
         }
     }

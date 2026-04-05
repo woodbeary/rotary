@@ -31,12 +31,14 @@ struct AgentConversationDetailScreen: View {
     let api: RotaryAPIClient
     @Bindable var voiceCoordinator: VoiceCoordinator
     let tokenProvider: RotaryTokenProvider
+    let onConversationLoaded: ((MobileAgentConversationPayload) -> Void)?
 
     @State private var conversationPayload: MobileAgentConversationPayload?
     @State private var conversationMessages: [MobileAgentConversationMessage] = []
     @State private var draft = ""
     @State private var pendingAttachments: [PendingAgentAttachment] = []
     @State private var isLoading = false
+    @State private var isRefreshing = false
     @State private var isSending = false
     @State private var errorMessage: String?
     @State private var showingFileImporter = false
@@ -49,6 +51,29 @@ struct AgentConversationDetailScreen: View {
     @State private var isCallingAgent = false
     @State private var attachmentUploadTask: Task<Void, Never>?
     @FocusState private var composerFocused: Bool
+
+    init(
+        agent: MobileAgent,
+        relatedCalls: [MobileCall],
+        relatedThreads: [MobileThreadSummary],
+        messagesStore: MessagesStore,
+        api: RotaryAPIClient,
+        voiceCoordinator: VoiceCoordinator,
+        tokenProvider: @escaping RotaryTokenProvider,
+        initialConversation: MobileAgentConversationPayload? = nil,
+        onConversationLoaded: ((MobileAgentConversationPayload) -> Void)? = nil
+    ) {
+        self.agent = agent
+        self.relatedCalls = relatedCalls
+        self.relatedThreads = relatedThreads
+        self.messagesStore = messagesStore
+        self.api = api
+        self.voiceCoordinator = voiceCoordinator
+        self.tokenProvider = tokenProvider
+        self.onConversationLoaded = onConversationLoaded
+        _conversationPayload = State(initialValue: initialConversation)
+        _conversationMessages = State(initialValue: initialConversation?.messages ?? [])
+    }
 
     private var transcriptMessages: [RotaryConversationBubbleModel] {
         conversationMessages.map { message in
@@ -79,7 +104,7 @@ struct AgentConversationDetailScreen: View {
                     ScrollViewReader { proxy in
                         ScrollView {
                             LazyVStack(spacing: 8) {
-                                if isLoading {
+                                if isRefreshing {
                                     HStack(spacing: 8) {
                                         Image(systemName: "arrow.triangle.2.circlepath")
                                             .font(.caption.weight(.semibold))
@@ -156,6 +181,8 @@ struct AgentConversationDetailScreen: View {
                                 .frame(maxWidth: 180)
                             }
                             .padding(.horizontal, 28)
+                        } else {
+                            emptyConversationState
                         }
                     }
                 }
@@ -334,8 +361,19 @@ struct AgentConversationDetailScreen: View {
 
     @MainActor
     private func loadConversation(forceRefresh: Bool = false) async {
-        isLoading = true
-        defer { isLoading = false }
+        let shouldShowPrimaryLoading = conversationPayload == nil
+        if shouldShowPrimaryLoading {
+            isLoading = true
+        } else {
+            isRefreshing = true
+        }
+        defer {
+            if shouldShowPrimaryLoading {
+                isLoading = false
+            } else {
+                isRefreshing = false
+            }
+        }
         do {
             let payload = try await withAuthorizedRetry(tokenProvider: tokenProvider) { token in
                 try await api.agentConversation(
@@ -347,6 +385,7 @@ struct AgentConversationDetailScreen: View {
             conversationPayload = payload
             conversationMessages = payload.messages
             errorMessage = nil
+            onConversationLoaded?(payload)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -483,6 +522,44 @@ struct AgentConversationDetailScreen: View {
 
     private func timestamp(for value: String) -> String {
         RotaryDateFormatting.messageTimestamp(value)
+    }
+
+    private var emptyConversationState: some View {
+        VStack(spacing: 16) {
+            Spacer(minLength: 0)
+
+            RotaryAvatarView(title: agent.name, size: 72)
+
+            VStack(spacing: 6) {
+                Text(agent.name)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.center)
+
+                Text("No history yet")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
+
+            if isRefreshing {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Syncing")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(RotaryTheme.softSurface, in: Capsule(style: .continuous))
+            }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 24)
+        .padding(.top, 104)
+        .padding(.bottom, 24)
     }
 }
 
