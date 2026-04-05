@@ -95,7 +95,7 @@ struct AgentsScreen: View {
                                     avatarURL: nil,
                                     avatarSize: 50,
                                     isUnread: false,
-                                    showsPreviewSkeleton: shouldShowPreviewSkeleton(for: agent),
+                                    showsPreviewSkeleton: false,
                                     previewSystemImage: previewSymbol(for: agent)
                                 )
                             }
@@ -288,10 +288,6 @@ struct AgentsScreen: View {
     }
 
     private func previewSymbol(for agent: MobileAgent) -> String? {
-        if shouldShowPreviewSkeleton(for: agent) {
-            return nil
-        }
-
         if conversationPreview(for: agent) != nil {
             return nil
         }
@@ -301,13 +297,6 @@ struct AgentsScreen: View {
         }
 
         return "sparkles"
-    }
-
-    private func shouldShowPreviewSkeleton(for agent: MobileAgent) -> Bool {
-        prefetchingAgentIDs.contains(agent.id)
-            && conversationPreview(for: agent) == nil
-            && relatedThreads(for: agent).first == nil
-            && relatedCalls(for: agent).first == nil
     }
 
     private func conversationPreview(for agent: MobileAgent) -> String? {

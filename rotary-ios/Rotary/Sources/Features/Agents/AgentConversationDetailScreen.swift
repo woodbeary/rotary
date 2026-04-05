@@ -38,7 +38,6 @@ struct AgentConversationDetailScreen: View {
     @State private var draft = ""
     @State private var pendingAttachments: [PendingAgentAttachment] = []
     @State private var isLoading = false
-    @State private var isRefreshing = false
     @State private var isSending = false
     @State private var errorMessage: String?
     @State private var showingFileImporter = false
@@ -104,22 +103,6 @@ struct AgentConversationDetailScreen: View {
                     ScrollViewReader { proxy in
                         ScrollView {
                             LazyVStack(spacing: 8) {
-                                if isRefreshing {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "arrow.triangle.2.circlepath")
-                                            .font(.caption.weight(.semibold))
-                                        Text("Refreshing in background")
-                                            .font(.caption.weight(.semibold))
-                                    }
-                                    .foregroundStyle(.secondary)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        RotaryTheme.softSurface,
-                                        in: Capsule(style: .continuous)
-                                    )
-                                }
-
                                 RotaryConversationTranscriptView(messages: transcriptMessages)
                                     .id(transcriptMessages.count)
                             }
@@ -234,7 +217,11 @@ struct AgentConversationDetailScreen: View {
             )
         }
         .task {
-            await loadConversation()
+            if conversationPayload == nil {
+                await loadConversation()
+            } else {
+                await refreshConversationSilently(forceRefresh: true)
+            }
         }
         .fileImporter(
             isPresented: $showingFileImporter,
@@ -364,14 +351,10 @@ struct AgentConversationDetailScreen: View {
         let shouldShowPrimaryLoading = conversationPayload == nil
         if shouldShowPrimaryLoading {
             isLoading = true
-        } else {
-            isRefreshing = true
         }
         defer {
             if shouldShowPrimaryLoading {
                 isLoading = false
-            } else {
-                isRefreshing = false
             }
         }
         do {
@@ -387,7 +370,28 @@ struct AgentConversationDetailScreen: View {
             errorMessage = nil
             onConversationLoaded?(payload)
         } catch {
-            errorMessage = error.localizedDescription
+            if shouldShowPrimaryLoading {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    @MainActor
+    private func refreshConversationSilently(forceRefresh: Bool = false) async {
+        do {
+            let payload = try await withAuthorizedRetry(tokenProvider: tokenProvider) { token in
+                try await api.agentConversation(
+                    token: token,
+                    agentId: agent.id,
+                    forceRefresh: forceRefresh
+                )
+            }
+            conversationPayload = payload
+            conversationMessages = payload.messages
+            errorMessage = nil
+            onConversationLoaded?(payload)
+        } catch {
+            // Keep the last rendered content stable when background refresh fails.
         }
     }
 
@@ -419,7 +423,7 @@ struct AgentConversationDetailScreen: View {
 
             draft = ""
             pendingAttachments = []
-            await loadConversation(forceRefresh: true)
+            await refreshConversationSilently(forceRefresh: true)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -539,19 +543,6 @@ struct AgentConversationDetailScreen: View {
                 Text("No history yet")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
-            }
-
-            if isRefreshing {
-                HStack(spacing: 8) {
-                    ProgressView()
-                        .controlSize(.small)
-                    Text("Syncing")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(RotaryTheme.softSurface, in: Capsule(style: .continuous))
             }
 
             Spacer(minLength: 0)

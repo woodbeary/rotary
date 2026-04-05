@@ -67,18 +67,18 @@ private enum RotaryCacheKey {
 }
 
 private enum RotaryCacheTTL {
-    static let bootstrap: TimeInterval = 20
-    static let threads: TimeInterval = 15
-    static let threadDetail: TimeInterval = 15
-    static let filters: TimeInterval = 15
-    static let calls: TimeInterval = 15
-    static let callDetail: TimeInterval = 30
-    static let voicemail: TimeInterval = 20
-    static let voicemailDetail: TimeInterval = 30
-    static let folders: TimeInterval = 30
-    static let voicePresets: TimeInterval = 600
-    static let agentConversation: TimeInterval = 10
-    static let callScreening: TimeInterval = 60
+    static let bootstrap: TimeInterval = 45
+    static let threads: TimeInterval = 45
+    static let threadDetail: TimeInterval = 45
+    static let filters: TimeInterval = 45
+    static let calls: TimeInterval = 45
+    static let callDetail: TimeInterval = 60
+    static let voicemail: TimeInterval = 60
+    static let voicemailDetail: TimeInterval = 60
+    static let folders: TimeInterval = 120
+    static let voicePresets: TimeInterval = 1800
+    static let agentConversation: TimeInterval = 180
+    static let callScreening: TimeInterval = 120
 }
 
 private func makeDefaultRotarySession() -> URLSession {

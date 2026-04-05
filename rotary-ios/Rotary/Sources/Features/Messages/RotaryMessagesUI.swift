@@ -622,22 +622,6 @@ struct RotaryMessageThreadScreen: View {
                     ScrollViewReader { proxy in
                         ScrollView {
                             VStack(spacing: 12) {
-                                if state.isLoading && hasLiveMessages {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "arrow.triangle.2.circlepath")
-                                            .font(.caption.weight(.semibold))
-                                        Text("Refreshing in background")
-                                            .font(.caption.weight(.semibold))
-                                    }
-                                    .foregroundStyle(.secondary)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        RotaryTheme.softSurface,
-                                        in: Capsule(style: .continuous)
-                                    )
-                                }
-
                                 RotaryConversationTranscriptView(messages: transcriptMessages)
                                     .id(displayedMessages.count)
                             }
