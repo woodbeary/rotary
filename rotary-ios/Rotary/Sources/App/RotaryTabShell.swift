@@ -549,7 +549,7 @@ private struct RotaryActiveCallScreen: View {
                 .accessibilityLabel("Keypad")
                 .accessibilityIdentifier("rotary.callKeypadButton")
                 .padding(.trailing, 18)
-                .padding(.bottom, 24)
+                .padding(.bottom, 132)
             }
             .sheet(isPresented: $showingKeypad) {
                 RotaryDialpadSheet(

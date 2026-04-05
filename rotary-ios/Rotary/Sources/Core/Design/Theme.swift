@@ -17,11 +17,11 @@ enum RotaryTheme {
     static let tint = Color(uiColor: .systemBlue)
     static let backgroundTop = dynamicColor(
         light: UIColor(red: 0.97, green: 0.975, blue: 0.985, alpha: 1),
-        dark: UIColor(red: 0.10, green: 0.11, blue: 0.14, alpha: 1)
+        dark: UIColor(red: 0.145, green: 0.155, blue: 0.19, alpha: 1)
     )
     static let backgroundBottom = dynamicColor(
         light: UIColor(red: 0.93, green: 0.945, blue: 0.97, alpha: 1),
-        dark: UIColor(red: 0.14, green: 0.15, blue: 0.19, alpha: 1)
+        dark: UIColor(red: 0.17, green: 0.18, blue: 0.22, alpha: 1)
     )
     static let cardStroke = dynamicColor(
         light: UIColor.separator.withAlphaComponent(0.10),
@@ -29,15 +29,15 @@ enum RotaryTheme {
     )
     static let cardFill = dynamicColor(
         light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.78),
-        dark: UIColor(red: 0.17, green: 0.18, blue: 0.23, alpha: 0.86)
+        dark: UIColor(red: 0.19, green: 0.20, blue: 0.24, alpha: 0.72)
     )
     static let secondarySurface = dynamicColor(
         light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.72),
-        dark: UIColor(red: 0.17, green: 0.18, blue: 0.22, alpha: 0.82)
+        dark: UIColor(red: 0.19, green: 0.20, blue: 0.24, alpha: 0.64)
     )
     static let elevatedSurface = dynamicColor(
         light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.92),
-        dark: UIColor(red: 0.22, green: 0.23, blue: 0.28, alpha: 0.92)
+        dark: UIColor(red: 0.22, green: 0.23, blue: 0.27, alpha: 0.76)
     )
     static let elevatedStroke = dynamicColor(
         light: UIColor.separator.withAlphaComponent(0.10),
@@ -45,19 +45,19 @@ enum RotaryTheme {
     )
     static let softSurface = dynamicColor(
         light: UIColor(red: 0.94, green: 0.95, blue: 0.97, alpha: 0.92),
-        dark: UIColor(red: 0.24, green: 0.25, blue: 0.30, alpha: 0.90)
+        dark: UIColor(red: 0.21, green: 0.22, blue: 0.26, alpha: 0.66)
     )
     static let subtleSurface = dynamicColor(
         light: UIColor(red: 0.90, green: 0.92, blue: 0.96, alpha: 0.92),
-        dark: UIColor(red: 0.27, green: 0.28, blue: 0.33, alpha: 0.86)
+        dark: UIColor(red: 0.23, green: 0.24, blue: 0.29, alpha: 0.68)
     )
     static let incomingBubble = dynamicColor(
         light: UIColor(red: 0.98, green: 0.985, blue: 0.995, alpha: 0.94),
-        dark: UIColor(red: 0.18, green: 0.19, blue: 0.24, alpha: 0.96)
+        dark: UIColor(red: 0.20, green: 0.21, blue: 0.25, alpha: 0.70)
     )
     static let nestedBubble = dynamicColor(
         light: UIColor(red: 0.95, green: 0.965, blue: 0.985, alpha: 0.96),
-        dark: UIColor(red: 0.23, green: 0.24, blue: 0.29, alpha: 0.94)
+        dark: UIColor(red: 0.22, green: 0.23, blue: 0.27, alpha: 0.72)
     )
     static let inactivePillFill = dynamicColor(
         light: UIColor(red: 0.92, green: 0.935, blue: 0.96, alpha: 0.88),
@@ -65,7 +65,7 @@ enum RotaryTheme {
     )
     static let fieldFill = dynamicColor(
         light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.92),
-        dark: UIColor(red: 0.20, green: 0.21, blue: 0.26, alpha: 0.94)
+        dark: UIColor(red: 0.19, green: 0.20, blue: 0.24, alpha: 0.70)
     )
     static let fieldStroke = dynamicColor(
         light: UIColor.separator.withAlphaComponent(0.10),
@@ -81,7 +81,7 @@ enum RotaryTheme {
     )
     static let chromeFill = dynamicColor(
         light: UIColor(red: 1, green: 1, blue: 1, alpha: 0.78),
-        dark: UIColor(red: 0.18, green: 0.19, blue: 0.24, alpha: 0.86)
+        dark: UIColor(red: 0.19, green: 0.20, blue: 0.24, alpha: 0.64)
     )
     static let chromeStroke = dynamicColor(
         light: UIColor.separator.withAlphaComponent(0.10),
@@ -91,7 +91,7 @@ enum RotaryTheme {
     static let backdropSecondaryOrb = Color.clear
     static let shadow = dynamicColor(
         light: UIColor.black.withAlphaComponent(0.08),
-        dark: UIColor.black.withAlphaComponent(0.22)
+        dark: UIColor.black.withAlphaComponent(0.12)
     )
     static let muted = Color.secondary
 
@@ -155,7 +155,11 @@ struct RotaryBackdrop: View {
                 .offset(x: 150, y: -250)
 
             Circle()
-                .fill(Color.white.opacity(0.34))
+                .fill(Color(uiColor: UIColor { traits in
+                    traits.userInterfaceStyle == .dark
+                        ? UIColor(red: 0.78, green: 0.82, blue: 0.92, alpha: 0.10)
+                        : UIColor(white: 1, alpha: 0.34)
+                }))
                 .frame(width: 240, height: 240)
                 .blur(radius: 110)
                 .offset(x: -150, y: -220)
@@ -167,7 +171,11 @@ struct RotaryBackdrop: View {
                 .offset(x: -160, y: 260)
 
             Circle()
-                .fill(Color.white.opacity(0.09))
+                .fill(Color(uiColor: UIColor { traits in
+                    traits.userInterfaceStyle == .dark
+                        ? UIColor(red: 0.78, green: 0.82, blue: 0.92, alpha: 0.05)
+                        : UIColor(white: 1, alpha: 0.09)
+                }))
                 .frame(width: 260, height: 260)
                 .blur(radius: 120)
                 .offset(x: 120, y: 260)
@@ -209,17 +217,21 @@ enum RotaryDebugFlags {
 }
 
 struct RotaryGlassCard<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
     @ViewBuilder var content: Content
 
     var body: some View {
         Group {
             if #available(iOS 26, *) {
                 GlassEffectContainer(spacing: 20) {
-                    inner
-                        .glassEffect(.regular.tint(.white.opacity(0.12)).interactive(false), in: .rect(cornerRadius: 22))
+                    glassInner
+                        .glassEffect(
+                            .regular.tint(Color.white.opacity(colorScheme == .dark ? 0.06 : 0.12)).interactive(false),
+                            in: .rect(cornerRadius: 22)
+                        )
                 }
             } else {
-                inner
+                fallbackInner
                     .background(
                         RotaryTheme.secondarySurface,
                         in: RoundedRectangle(cornerRadius: 22, style: .continuous)
@@ -232,10 +244,24 @@ struct RotaryGlassCard<Content: View>: View {
         }
     }
 
-    private var inner: some View {
+    private var contentStack: some View {
         VStack(alignment: .leading, spacing: 18) {
             content
         }
+    }
+
+    private var glassInner: some View {
+        contentStack
+            .padding(20)
+            .background(
+                Color.white.opacity(colorScheme == .dark ? 0.015 : 0.18),
+                in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+            )
+            .shadow(color: RotaryTheme.shadow, radius: 6, x: 0, y: 3)
+    }
+
+    private var fallbackInner: some View {
+        contentStack
         .padding(20)
         .background(RotaryTheme.cardFill, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .shadow(color: RotaryTheme.shadow, radius: 8, x: 0, y: 4)

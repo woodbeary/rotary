@@ -112,11 +112,11 @@ struct RotaryMessagesScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                inboxHeader
+            ZStack {
+                RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
 
-                ZStack {
-                    RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
+                VStack(spacing: 0) {
+                    inboxHeader
 
                     if RotaryDebugFlags.forceSkeletonPlaceholders || (store.isRefreshingInbox && filteredThreads.isEmpty) {
                         loadingState
