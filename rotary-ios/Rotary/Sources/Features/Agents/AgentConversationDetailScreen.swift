@@ -123,8 +123,13 @@ struct AgentConversationDetailScreen: View {
                             }
 
                         if isLoading {
-                            ProgressView()
-                                .controlSize(.large)
+                            ScrollView {
+                                RotaryConversationSkeleton(rows: 6)
+                                    .padding(.horizontal, 24)
+                                    .padding(.top, 96)
+                                    .padding(.bottom, 24)
+                            }
+                            .scrollDisabled(true)
                         } else if let errorMessage, !errorMessage.isEmpty {
                             VStack(spacing: 14) {
                                 Circle()
@@ -162,15 +167,15 @@ struct AgentConversationDetailScreen: View {
             RotaryConversationTopHeader(
                 title: agent.name,
                 subtitle: nil,
-                avatarSize: 42,
+                avatarSize: 30,
                 action: {
                     composerFocused = false
                     showingInfo = true
                 }
             )
             .padding(.horizontal, 52)
-            .padding(.top, 4)
-            .padding(.bottom, 6)
+            .padding(.top, 2)
+            .padding(.bottom, 2)
         }
         .onDisappear {
             composerFocused = false
@@ -276,7 +281,7 @@ struct AgentConversationDetailScreen: View {
                 }
             }
 
-            if let errorMessage, !errorMessage.isEmpty {
+            if !transcriptMessages.isEmpty, let errorMessage, !errorMessage.isEmpty {
                 Text(errorMessage)
                     .font(.footnote)
                     .foregroundStyle(.red)

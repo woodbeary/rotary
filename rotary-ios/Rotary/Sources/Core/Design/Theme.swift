@@ -198,6 +198,16 @@ enum RotaryKeyboard {
     }
 }
 
+enum RotaryDebugFlags {
+    static var forceSkeletonPlaceholders: Bool {
+#if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-rotary-force-skeleton-placeholders")
+#else
+        false
+#endif
+    }
+}
+
 struct RotaryGlassCard<Content: View>: View {
     @ViewBuilder var content: Content
 
@@ -269,40 +279,82 @@ struct RotaryPrimaryButtonStyle: ButtonStyle {
     }
 }
 
+enum RotaryGlassIconShape {
+    case roundedRect
+    case circle
+}
+
 struct RotaryGlassIcon: View {
     let systemName: String
     let size: CGFloat
     let frameSize: CGFloat
+    let shape: RotaryGlassIconShape
 
     init(
         systemName: String,
         size: CGFloat = 18,
-        frameSize: CGFloat = 36
+        frameSize: CGFloat = 36,
+        shape: RotaryGlassIconShape = .roundedRect
     ) {
         self.systemName = systemName
         self.size = size
         self.frameSize = frameSize
+        self.shape = shape
     }
 
     var body: some View {
         Group {
             if #available(iOS 26, *) {
-                Image(systemName: systemName)
-                    .font(.system(size: size, weight: .semibold))
-                    .frame(width: frameSize, height: frameSize)
-                    .glassEffect(.regular.tint(.white.opacity(0.24)).interactive(), in: .circle)
+                iconLabel
+                    .glassEffect(
+                        .regular.tint(.white.opacity(shape == .circle ? 0.14 : 0.10)).interactive(),
+                        in: glassShape
+                    )
             } else {
-                Image(systemName: systemName)
-                    .font(.system(size: size, weight: .semibold))
-                    .frame(width: frameSize, height: frameSize)
-                    .background(Color(uiColor: .secondarySystemGroupedBackground), in: Circle())
+                iconLabel
+                    .background(RotaryTheme.secondarySurface, in: fallbackShape)
                     .overlay(
-                        Circle()
+                        fallbackShape
                             .stroke(RotaryTheme.elevatedStroke, lineWidth: 1)
                     )
             }
         }
         .foregroundStyle(.primary)
+    }
+
+    private var iconLabel: some View {
+        Image(systemName: systemName)
+            .font(.system(size: size, weight: .semibold))
+            .frame(
+                width: shape == .circle ? frameSize : frameSize + 6,
+                height: frameSize
+            )
+    }
+
+    private var glassShape: AnyInsettableShape {
+        switch shape {
+        case .roundedRect:
+            AnyInsettableShape(
+                UnevenRoundedRectangle(
+                topLeadingRadius: 16,
+                bottomLeadingRadius: 16,
+                bottomTrailingRadius: 16,
+                topTrailingRadius: 16,
+                style: .continuous
+                )
+            )
+        case .circle:
+            AnyInsettableShape(Circle())
+        }
+    }
+
+    private var fallbackShape: some InsettableShape {
+        switch shape {
+        case .roundedRect:
+            AnyInsettableShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        case .circle:
+            AnyInsettableShape(Circle())
+        }
     }
 }
 
@@ -310,17 +362,20 @@ struct RotaryGlassIconButton: View {
     let systemName: String
     let size: CGFloat
     let frameSize: CGFloat
+    let shape: RotaryGlassIconShape
     let action: () -> Void
 
     init(
         systemName: String,
         size: CGFloat = 18,
         frameSize: CGFloat = 36,
+        shape: RotaryGlassIconShape = .roundedRect,
         action: @escaping () -> Void
     ) {
         self.systemName = systemName
         self.size = size
         self.frameSize = frameSize
+        self.shape = shape
         self.action = action
     }
 
@@ -329,7 +384,8 @@ struct RotaryGlassIconButton: View {
             RotaryGlassIcon(
                 systemName: systemName,
                 size: size,
-                frameSize: frameSize
+                frameSize: frameSize,
+                shape: shape
             )
         }
         .buttonStyle(RotaryPressScaleButtonStyle())
@@ -397,6 +453,21 @@ struct RotaryScreenHeading: View {
     }
 }
 
+struct RotaryInlineStatusHeader: View {
+    let subtitle: String?
+
+    var body: some View {
+        Group {
+            if let subtitle, !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+}
+
 struct RotaryGlassMenuChip: View {
     let title: String?
     let systemName: String
@@ -414,7 +485,7 @@ struct RotaryGlassMenuChip: View {
 
     var body: some View {
         if title == nil && !showsChevron {
-            RotaryGlassIcon(systemName: systemName, size: 17, frameSize: 36)
+            RotaryGlassIcon(systemName: systemName, size: 17, frameSize: 36, shape: .roundedRect)
         } else {
             Group {
                 if #available(iOS 26, *) {
@@ -670,7 +741,7 @@ struct RotaryComposerBar<MenuContent: View>: View {
         HStack(alignment: .bottom, spacing: 10) {
             if showsMenu {
                 Menu(content: menuContent) {
-                    RotaryGlassIcon(systemName: "plus", size: 18, frameSize: 42)
+                    RotaryGlassIcon(systemName: "plus", size: 18, frameSize: 42, shape: .circle)
                 }
                 .buttonStyle(.plain)
             }
@@ -859,6 +930,119 @@ struct RotaryCenteredShell<Content: View>: View {
                 Spacer(minLength: 28)
             }
             .padding(.horizontal, 20)
+        }
+    }
+}
+
+struct AnyInsettableShape: InsettableShape {
+    private let _path: @Sendable (CGRect) -> Path
+    private let _inset: @Sendable (CGFloat) -> AnyInsettableShape
+
+    init<S: InsettableShape>(_ shape: S) {
+        _path = { rect in shape.path(in: rect) }
+        _inset = { amount in AnyInsettableShape(shape.inset(by: amount)) }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        _path(rect)
+    }
+
+    func inset(by amount: CGFloat) -> AnyInsettableShape {
+        _inset(amount)
+    }
+}
+
+struct RotarySkeletonList: View {
+    let rows: Int
+    let showTimestamp: Bool
+
+    init(rows: Int = 6, showTimestamp: Bool = true) {
+        self.rows = rows
+        self.showTimestamp = showTimestamp
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(0..<rows, id: \.self) { index in
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(RotaryTheme.softSurface)
+                        .frame(width: 50, height: 50)
+
+                    VStack(alignment: .leading, spacing: 9) {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(RotaryTheme.softSurface)
+                            .frame(width: 118, height: 14)
+
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(RotaryTheme.softSurface.opacity(0.9))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 12)
+                    }
+
+                    if showTimestamp {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(RotaryTheme.softSurface)
+                            .frame(width: 54, height: 12)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .redacted(reason: .placeholder)
+
+                if index < rows - 1 {
+                    Divider()
+                        .padding(.leading, 78)
+                }
+            }
+        }
+    }
+}
+
+struct RotaryConversationSkeleton: View {
+    let rows: Int
+
+    init(rows: Int = 6) {
+        self.rows = rows
+    }
+
+    var body: some View {
+        VStack(spacing: 14) {
+            ForEach(0..<rows, id: \.self) { index in
+                HStack {
+                    if index.isMultiple(of: 2) {
+                        Spacer(minLength: 52)
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(index.isMultiple(of: 2) ? RotaryTheme.accent.opacity(0.22) : RotaryTheme.softSurface)
+                            .frame(width: index.isMultiple(of: 2) ? 184 : 158, height: 15)
+
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(index.isMultiple(of: 2) ? RotaryTheme.accent.opacity(0.18) : RotaryTheme.softSurface.opacity(0.86))
+                            .frame(width: index.isMultiple(of: 2) ? 132 : 112, height: 12)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 14)
+                    .frame(maxWidth: 270, alignment: .leading)
+                    .background(
+                        index.isMultiple(of: 2) ? RotaryTheme.accent.opacity(0.18) : RotaryTheme.incomingBubble,
+                        in: UnevenRoundedRectangle(
+                            topLeadingRadius: 24,
+                            bottomLeadingRadius: index.isMultiple(of: 2) ? 24 : 9,
+                            bottomTrailingRadius: index.isMultiple(of: 2) ? 9 : 24,
+                            topTrailingRadius: 24,
+                            style: .continuous
+                        )
+                    )
+                    .redacted(reason: .placeholder)
+
+                    if !index.isMultiple(of: 2) {
+                        Spacer(minLength: 52)
+                    }
+                }
+            }
         }
     }
 }

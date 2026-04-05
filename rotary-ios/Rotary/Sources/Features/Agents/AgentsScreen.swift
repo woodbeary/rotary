@@ -62,7 +62,10 @@ struct AgentsScreen: View {
                 ZStack {
                     RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
 
-                    if filteredAgents.isEmpty {
+                    if RotaryDebugFlags.forceSkeletonPlaceholders {
+                        RotarySkeletonList(rows: 6)
+                            .padding(.top, 4)
+                    } else if filteredAgents.isEmpty {
                         emptyState
                     } else {
                         List(filteredAgents) { agent in
@@ -178,10 +181,7 @@ struct AgentsScreen: View {
 
     private var agentsHeader: some View {
         VStack(alignment: .leading, spacing: 12) {
-            RotaryScreenHeading(
-                title: "Agents",
-                subtitle: agentsHeaderSubtitle
-            )
+            RotaryInlineStatusHeader(subtitle: agentsHeaderSubtitle)
 
             RotarySearchField(text: $searchText, prompt: "Search agents")
 

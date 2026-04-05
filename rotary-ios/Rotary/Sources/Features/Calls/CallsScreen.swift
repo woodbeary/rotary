@@ -478,7 +478,6 @@ struct CallsScreen: View {
     private var recentSurface: some View {
         VStack(spacing: 0) {
             callsSurfaceHeader(
-                title: "Calls",
                 subtitle: store.missedCallCount > 0 ? "\(store.missedCallCount) missed" : "Recent activity"
             )
 
@@ -498,7 +497,7 @@ struct CallsScreen: View {
 
     private var contactsSurface: some View {
         VStack(spacing: 0) {
-            callsSurfaceHeader(title: "Contacts", subtitle: contacts.isEmpty ? "People and businesses you reach" : "\(contacts.count) saved")
+            callsSurfaceHeader(subtitle: contacts.isEmpty ? "People and businesses you reach" : "\(contacts.count) saved")
 
             if isSearchVisible {
                 RotarySearchField(text: $searchText, prompt: searchPrompt)
@@ -513,7 +512,6 @@ struct CallsScreen: View {
     private var voicemailSurface: some View {
         VStack(spacing: 0) {
             callsSurfaceHeader(
-                title: "Voicemail",
                 subtitle: voicemailCalls.isEmpty ? "Summaries, transcripts, and recordings" : "\(voicemailCalls.count) item\(voicemailCalls.count == 1 ? "" : "s")"
             )
 
@@ -540,14 +538,9 @@ struct CallsScreen: View {
 
     private var voicemailList: some View {
         Group {
-            if store.isLoadingVoicemail && voicemailCalls.isEmpty {
-                VStack(spacing: 14) {
-                    Spacer()
-                    ProgressView()
-                    Text("Loading voicemail")
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                }
+            if RotaryDebugFlags.forceSkeletonPlaceholders || (store.isLoadingVoicemail && voicemailCalls.isEmpty) {
+                RotarySkeletonList(rows: 5)
+                    .padding(.top, 4)
             } else if voicemailCalls.isEmpty {
                 VStack(spacing: 12) {
                     Spacer()
@@ -619,14 +612,9 @@ struct CallsScreen: View {
         loadErrorText: String?
     ) -> some View {
         Group {
-            if isLoading && calls.isEmpty {
-                VStack(spacing: 14) {
-                    Spacer()
-                    ProgressView()
-                    Text("Loading call history")
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                }
+            if RotaryDebugFlags.forceSkeletonPlaceholders || (isLoading && calls.isEmpty) {
+                RotarySkeletonList(rows: 6)
+                    .padding(.top, 4)
             } else if calls.isEmpty {
                 VStack(spacing: 12) {
                     Spacer()
@@ -975,8 +963,8 @@ struct CallsScreen: View {
         return keypadSignature(for: name).contains(digitsQuery)
     }
 
-    private func callsSurfaceHeader(title: String, subtitle: String) -> some View {
-        RotaryScreenHeading(title: title, subtitle: subtitle)
+    private func callsSurfaceHeader(subtitle: String) -> some View {
+        RotaryInlineStatusHeader(subtitle: subtitle)
             .padding(.horizontal, 16)
             .padding(.top, 8)
             .padding(.bottom, 12)

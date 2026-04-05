@@ -26,11 +26,6 @@ struct RotaryAvatarView: View {
                     .scaledToFill()
                     .frame(width: size, height: size)
                     .clipShape(Circle())
-            } else if #available(iOS 26, *) {
-                Text(initials)
-                    .font(.system(size: size * 0.40, weight: .semibold))
-                    .frame(width: size, height: size)
-                    .glassEffect(.regular.tint(tint.opacity(0.22)).interactive(false), in: .circle)
             } else {
                 Text(initials)
                     .font(.system(size: size * 0.40, weight: .semibold))
@@ -40,6 +35,7 @@ struct RotaryAvatarView: View {
                         Circle()
                             .stroke(RotaryTheme.elevatedStroke, lineWidth: 1)
                     )
+                    .shadow(color: RotaryTheme.shadow.opacity(0.08), radius: 4, x: 0, y: 2)
             }
         }
         .foregroundStyle(.primary)
@@ -128,43 +124,46 @@ struct RotaryConversationTopHeader: View {
         VStack(spacing: 5) {
             RotaryAvatarView(title: title, size: avatarSize, imageURL: imageURL)
 
-            Text(title)
-                .font(.system(size: 23, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.86)
-
-            if let subtitle, !subtitle.isEmpty {
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            VStack(spacing: subtitle?.isEmpty == false ? 2 : 0) {
+                Text(title)
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
+
+                if let subtitle, !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(titlePillBackground)
+            .overlay(titlePillStroke)
         }
-        .frame(maxWidth: 232)
-        .padding(.horizontal, 18)
-        .padding(.vertical, 10)
-        .background(headerBackground)
-        .overlay(headerStroke)
-        .shadow(color: RotaryTheme.shadow.opacity(0.12), radius: 16, x: 0, y: 8)
+        .frame(maxWidth: 220)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .shadow(color: RotaryTheme.shadow.opacity(0.08), radius: 10, x: 0, y: 4)
         .contentShape(Rectangle())
     }
 
     @ViewBuilder
-    private var headerBackground: some View {
+    private var titlePillBackground: some View {
         if #available(iOS 26, *) {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
+            Capsule(style: .continuous)
                 .fill(.clear)
-                .glassEffect(.regular.tint(.white.opacity(0.24)).interactive(action != nil), in: .rect(cornerRadius: 28))
+                .glassEffect(.regular.tint(.white.opacity(0.14)).interactive(action != nil), in: .capsule)
         } else {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
+            Capsule(style: .continuous)
                 .fill(RotaryTheme.chromeFill)
         }
     }
 
-    private var headerStroke: some View {
-        RoundedRectangle(cornerRadius: 28, style: .continuous)
-            .stroke(RotaryTheme.chromeStroke, lineWidth: 1)
+    private var titlePillStroke: some View {
+        Capsule(style: .continuous)
+            .stroke(RotaryTheme.chromeStroke.opacity(0.85), lineWidth: 1)
     }
 }
 

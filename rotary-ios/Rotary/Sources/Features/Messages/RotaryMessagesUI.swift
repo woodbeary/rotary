@@ -118,7 +118,7 @@ struct RotaryMessagesScreen: View {
                 ZStack {
                     RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
 
-                    if store.isRefreshingInbox && filteredThreads.isEmpty {
+                    if RotaryDebugFlags.forceSkeletonPlaceholders || (store.isRefreshingInbox && filteredThreads.isEmpty) {
                         loadingState
                     } else if filteredThreads.isEmpty {
                         emptyState
@@ -321,10 +321,7 @@ struct RotaryMessagesScreen: View {
 
     private var inboxHeader: some View {
         VStack(alignment: .leading, spacing: 12) {
-            RotaryScreenHeading(
-                title: "Messages",
-                subtitle: messageHeaderSubtitle
-            )
+            RotaryInlineStatusHeader(subtitle: messageHeaderSubtitle)
 
             RotarySearchField(text: $searchText, prompt: "Search messages")
 
@@ -450,15 +447,8 @@ struct RotaryMessagesScreen: View {
     }
 
     private var loadingState: some View {
-        VStack(spacing: 14) {
-            Spacer()
-            ProgressView()
-                .controlSize(.large)
-            Text("Loading conversations")
-                .font(.headline)
-            Spacer()
-        }
-        .padding(.horizontal, 28)
+        RotarySkeletonList(rows: 7)
+            .padding(.top, 4)
     }
 
     private var emptyState: some View {
@@ -676,7 +666,7 @@ struct RotaryMessageThreadScreen: View {
             RotaryConversationTopHeader(
                 title: currentThread.contactName,
                 subtitle: nil,
-                avatarSize: 42,
+                avatarSize: 30,
                 imageURL: avatarURL,
                 action: {
                     composerFocused = false
@@ -684,8 +674,8 @@ struct RotaryMessageThreadScreen: View {
                 }
             )
             .padding(.horizontal, 52)
-            .padding(.top, 4)
-            .padding(.bottom, 6)
+            .padding(.top, 2)
+            .padding(.bottom, 2)
         }
         .onDisappear {
             composerFocused = false

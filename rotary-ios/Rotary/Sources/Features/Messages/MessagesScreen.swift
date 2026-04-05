@@ -192,7 +192,7 @@ struct MessagesScreen: View {
                     }
                 }
             }
-            .navigationTitle("Messages")
+            .navigationTitle("")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(isEditing ? "Done" : "Edit") {
@@ -375,13 +375,7 @@ struct MessagesScreen: View {
     }
 
     private var loadingState: some View {
-        VStack(spacing: 14) {
-            Spacer()
-            ProgressView()
-            Text("Loading conversations")
-                .foregroundStyle(.secondary)
-            Spacer()
-        }
+        RotarySkeletonList(rows: 7)
     }
 
     private var emptyState: some View {
