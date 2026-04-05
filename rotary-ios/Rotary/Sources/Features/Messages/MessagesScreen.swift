@@ -674,7 +674,7 @@ struct MessageThreadScreen: View {
 
             RotaryComposerBar(
                 text: $message,
-                placeholder: "Text message",
+                placeholder: "",
                 maxLines: 1 ... 5,
                 isWorking: isWorking,
                 isFocused: $composerFocused,
@@ -1068,7 +1068,7 @@ private struct ComposeMessageSheet: View {
     private var composeBar: some View {
         RotaryComposerBar(
             text: $message,
-            placeholder: "Text message",
+            placeholder: "",
             isWorking: isWorking,
             showsMenu: false,
             onMic: nil,

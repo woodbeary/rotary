@@ -795,7 +795,8 @@ struct RotaryComposerBar<MenuContent: View>: View {
     @ViewBuilder
     private var composerField: some View {
         let field = ZStack(alignment: .topLeading) {
-            if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if !placeholder.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+               text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 Text(placeholder)
                     .foregroundStyle(RotaryTheme.placeholderText)
                     .padding(.top, 8)

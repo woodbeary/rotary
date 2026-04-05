@@ -291,7 +291,7 @@ struct AgentConversationDetailScreen: View {
 
             RotaryComposerBar(
                 text: $draft,
-                placeholder: "Ask \(agent.name) anything",
+                placeholder: "",
                 isWorking: isSending,
                 isFocused: $composerFocused,
                 onMic: nil,
