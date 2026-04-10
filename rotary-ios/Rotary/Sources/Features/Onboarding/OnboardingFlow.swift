@@ -13,7 +13,7 @@ struct OnboardingFlow: View {
     @State private var searchResults: [MobileSearchNumber] = []
     @State private var selectedNumber: MobileSearchNumber?
     @State private var agentName = "Rotary"
-    @State private var selectedVoice = "Rachel"
+    @State private var selectedVoice = ""
     @State private var selectedVoiceProfileId: String?
     @State private var voiceOptions: [MobileVoicePreset] = []
     @State private var isWorking = false
@@ -33,7 +33,13 @@ struct OnboardingFlow: View {
     }
 
     private var curatedVoiceOptions: [MobileVoicePreset] {
-        let sorted = voiceOptions.sorted { lhs, rhs in
+        let preferred = eligibleElevenLabsVoices
+        let sorted = preferred.sorted { lhs, rhs in
+            let lhsPriority = lhs.rotaryRealtimePriority
+            let rhsPriority = rhs.rotaryRealtimePriority
+            if lhsPriority != rhsPriority {
+                return lhsPriority > rhsPriority
+            }
             switch (lhs.previewUrl == nil, rhs.previewUrl == nil) {
             case (false, true): return true
             case (true, false): return false
@@ -43,20 +49,11 @@ struct OnboardingFlow: View {
         return Array(sorted.prefix(8))
     }
 
+    private var eligibleElevenLabsVoices: [MobileVoicePreset] {
+        voiceOptions.filter(\.rotaryV3ExpressiveEligible)
+    }
+
     private var voiceChoices: [MobileVoicePreset] {
-        if curatedVoiceOptions.isEmpty {
-            return [
-                MobileVoicePreset(
-                    id: "fallback-rachel",
-                    name: "Rachel",
-                    provider: "elevenlabs",
-                    category: "fallback",
-                    description: "Warm and clear.",
-                    previewUrl: nil,
-                    labels: ["accent": "american", "gender": "female"]
-                )
-            ]
-        }
         return curatedVoiceOptions
     }
 
@@ -94,6 +91,17 @@ struct OnboardingFlow: View {
         }
         .task(id: step) {
             if step == 5, voiceOptions.isEmpty {
+                let cached = appModel.cachedVoicePresetsSnapshot
+                if !cached.isEmpty {
+                    voiceOptions = cached
+                    if let first = voiceChoices.first {
+                        selectedVoice = first.name
+                        selectedVoiceProfileId = first.id
+                    } else {
+                        selectedVoice = ""
+                        selectedVoiceProfileId = nil
+                    }
+                }
                 await loadVoicePresets()
             }
         }
@@ -140,6 +148,7 @@ struct OnboardingFlow: View {
                 Task { await createWorkspace() }
             }
             .buttonStyle(RotaryPrimaryButtonStyle())
+            .disabled(isWorking || workspaceName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
     }
 
@@ -158,7 +167,7 @@ struct OnboardingFlow: View {
                 Task { await search() }
             }
             .buttonStyle(RotaryPrimaryButtonStyle())
-            .disabled(!isNumberSearchEnabled)
+            .disabled(isWorking || !isNumberSearchEnabled)
 
             if !isNumberSearchEnabled {
                 Text("Live number search is not enabled for this workspace yet. Rotary needs Twilio number provisioning turned on first.")
@@ -203,7 +212,7 @@ struct OnboardingFlow: View {
                 Task { await provisionNumber() }
             }
             .buttonStyle(RotaryPrimaryButtonStyle())
-            .disabled(selectedNumber == nil || !isLineProvisioningEnabled)
+            .disabled(isWorking || selectedNumber == nil || !isLineProvisioningEnabled)
 
             if !isLineProvisioningEnabled {
                 Text("Line provisioning is blocked right now. Turn on Twilio number purchasing before this account can claim a number.")
@@ -225,24 +234,30 @@ struct OnboardingFlow: View {
                 step = 5
             }
             .buttonStyle(RotaryPrimaryButtonStyle())
-            .disabled(agentName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .disabled(isWorking || agentName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
     }
 
     private var voiceStep: some View {
         VStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(voiceChoices, id: \.id) { voice in
-                    OnboardingVoiceOptionRow(
-                        voice: voice,
-                        isSelected: selectedVoiceProfileId == voice.id,
-                        isPlaying: previewPlayer.isPlaying(voice.id),
-                        onPreviewToggle: { previewPlayer.toggle(for: voice) },
-                        onSelect: {
-                            selectedVoice = voice.name
-                            selectedVoiceProfileId = voice.id
-                        }
-                    )
+                if voiceChoices.isEmpty {
+                    Text("Rotary requires an ElevenLabs v3 expressive voice before setup can continue.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(voiceChoices, id: \.id) { voice in
+                        OnboardingVoiceOptionRow(
+                            voice: voice,
+                            isSelected: selectedVoiceProfileId == voice.id,
+                            isPlaying: previewPlayer.isPlaying(voice.id),
+                            onPreviewToggle: { previewPlayer.toggle(for: voice) },
+                            onSelect: {
+                                selectedVoice = voice.name
+                                selectedVoiceProfileId = voice.id
+                            }
+                        )
+                    }
                 }
             }
 
@@ -250,7 +265,7 @@ struct OnboardingFlow: View {
                 Task { await createAgent() }
             }
             .buttonStyle(RotaryPrimaryButtonStyle())
-            .disabled(selectedVoiceProfileId == nil || agentName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .disabled(isWorking || selectedVoiceProfileId == nil || agentName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
     }
 
@@ -333,11 +348,14 @@ struct OnboardingFlow: View {
 
     private func loadVoicePresets() async {
         do {
-            let presets = try await appModel.listVoicePresets()
+            let presets = try await appModel.refreshVoicePresets()
             voiceOptions = presets
             if let first = voiceChoices.first, selectedVoiceProfileId == nil {
                 selectedVoice = first.name
                 selectedVoiceProfileId = first.id
+            } else if voiceChoices.isEmpty {
+                selectedVoice = ""
+                selectedVoiceProfileId = nil
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -345,6 +363,7 @@ struct OnboardingFlow: View {
     }
 
     private func runStep(_ action: @escaping () async throws -> Void) async {
+        guard !isWorking else { return }
         isWorking = true
         errorMessage = nil
         defer { isWorking = false }

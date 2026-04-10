@@ -18,27 +18,29 @@ struct RotaryProfileTabBar: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 ForEach(items) { item in
                     Button {
                         guard selectedID != item.id else { return }
                         RotaryHaptics.selection()
                         selectedID = item.id
                     } label: {
-                        VStack(spacing: item.systemImage == nil ? 0 : 4) {
+                        HStack(spacing: item.systemImage == nil ? 0 : 6) {
                             if let systemImage = item.systemImage {
                                 Image(systemName: systemImage)
-                                    .font(.system(size: 13, weight: .semibold))
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .frame(width: 16, height: 16, alignment: .center)
                             }
 
                             Text(item.title)
-                                .font(.caption2.weight(selectedID == item.id ? .semibold : .medium))
+                                .font(.footnote.weight(selectedID == item.id ? .semibold : .medium))
                                 .lineLimit(1)
                         }
+                        .frame(minHeight: 24)
                         .foregroundStyle(selectedID == item.id ? Color.primary : .secondary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .frame(minWidth: item.systemImage == nil ? 52 : 64)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .frame(minWidth: item.systemImage == nil ? 80 : 96)
                         .background {
                             Capsule(style: .continuous)
                                 .fill(selectedID == item.id ? RotaryTheme.chromeFill : Color.clear)
@@ -138,25 +140,34 @@ struct RotaryProfileActionButton: View {
     }
 
     var body: some View {
+        let controlSize: CGFloat = 52
+        let itemWidth: CGFloat = showsTitle ? 98 : 56
+
         Button(action: action) {
-            VStack(spacing: showsTitle ? 8 : 0) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 17, weight: .semibold))
-                    .frame(width: showsTitle ? 42 : 46, height: showsTitle ? 42 : 46)
-                    .foregroundStyle(.primary)
-                    .background(RotaryTheme.chromeFill, in: Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(RotaryTheme.chromeStroke, lineWidth: 1)
-                    )
+            VStack(alignment: .center, spacing: showsTitle ? 9 : 0) {
+                ZStack(alignment: .center) {
+                    Circle()
+                        .fill(RotaryTheme.chromeFill)
+                    Circle()
+                        .stroke(RotaryTheme.chromeStroke, lineWidth: 1)
+                    Image(systemName: systemImage)
+                        .font(.system(size: 19, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .frame(width: 20, height: 20)
+                }
+                .frame(width: controlSize, height: controlSize, alignment: .center)
 
                 if showsTitle {
                     Text(title)
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+                        .multilineTextAlignment(.center)
                 }
             }
-            .frame(maxWidth: .infinity)
+            .frame(width: itemWidth, alignment: .center)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text(title))

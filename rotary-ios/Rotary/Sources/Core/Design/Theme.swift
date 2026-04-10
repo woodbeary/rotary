@@ -2,7 +2,26 @@ import SwiftUI
 import UIKit
 
 enum RotaryTheme {
-    static let accent = Color(uiColor: .systemBlue)
+    static let accent = dynamicColor(
+        light: UIColor.systemBlue,
+        dark: UIColor.systemBlue
+    )
+    static let accentSoftFill = dynamicColor(
+        light: UIColor.systemBlue.withAlphaComponent(0.14),
+        dark: UIColor.systemBlue.withAlphaComponent(0.22)
+    )
+    static let accentSoftStroke = dynamicColor(
+        light: UIColor.systemBlue.withAlphaComponent(0.30),
+        dark: UIColor.systemBlue.withAlphaComponent(0.44)
+    )
+    static let accentEmphasisFill = dynamicColor(
+        light: UIColor.systemBlue.withAlphaComponent(0.96),
+        dark: UIColor.systemBlue.withAlphaComponent(0.90)
+    )
+    static let accentOnEmphasis = dynamicColor(
+        light: UIColor.white,
+        dark: UIColor.white
+    )
     static let callAccent = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark
             ? UIColor(red: 0.26, green: 0.74, blue: 0.44, alpha: 1)
@@ -14,7 +33,7 @@ enum RotaryTheme {
     static let destructive = Color(uiColor: UIColor { _ in
         .systemRed
     })
-    static let tint = Color(uiColor: .systemBlue)
+    static let tint = accent
     static let backgroundTop = dynamicColor(
         light: UIColor(red: 0.97, green: 0.975, blue: 0.985, alpha: 1),
         dark: UIColor(red: 0.145, green: 0.155, blue: 0.19, alpha: 1)
@@ -55,6 +74,7 @@ enum RotaryTheme {
         light: UIColor(red: 0.98, green: 0.985, blue: 0.995, alpha: 0.94),
         dark: UIColor(red: 0.20, green: 0.21, blue: 0.25, alpha: 0.70)
     )
+    static let outgoingBubble = Color(uiColor: .systemBlue)
     static let nestedBubble = dynamicColor(
         light: UIColor(red: 0.95, green: 0.965, blue: 0.985, alpha: 0.96),
         dark: UIColor(red: 0.22, green: 0.23, blue: 0.27, alpha: 0.72)
@@ -149,7 +169,7 @@ struct RotaryBackdrop: View {
             )
 
             Circle()
-                .fill(RotaryTheme.accent.opacity(0.14))
+                .fill(RotaryTheme.accent.opacity(0.08))
                 .frame(width: 280, height: 280)
                 .blur(radius: 96)
                 .offset(x: 150, y: -250)
@@ -165,7 +185,7 @@ struct RotaryBackdrop: View {
                 .offset(x: -150, y: -220)
 
             Circle()
-                .fill(RotaryTheme.callAccent.opacity(0.10))
+                .fill(RotaryTheme.callAccent.opacity(0.06))
                 .frame(width: 300, height: 300)
                 .blur(radius: 132)
                 .offset(x: -160, y: 260)
@@ -199,6 +219,15 @@ enum RotaryKeyboard {
     static func dismiss() {
         UIApplication.shared.sendAction(
             #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+
+    static func selectAll() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.selectAll(_:)),
             to: nil,
             from: nil,
             for: nil
@@ -275,16 +304,16 @@ struct RotaryPill: View {
     var body: some View {
         Text(text)
             .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(active ? .white : .primary)
+            .foregroundStyle(active ? RotaryTheme.accent : .primary)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
             .background(
                 Capsule(style: .continuous)
-                    .fill(active ? RotaryTheme.accent : RotaryTheme.inactivePillFill)
+                    .fill(active ? RotaryTheme.accentSoftFill : RotaryTheme.inactivePillFill)
             )
             .overlay(
                 Capsule(style: .continuous)
-                    .stroke(RotaryTheme.cardStroke.opacity(active ? 0 : 1), lineWidth: 1)
+                    .stroke(active ? RotaryTheme.accentSoftStroke : RotaryTheme.cardStroke.opacity(1), lineWidth: 1)
             )
     }
 }
@@ -293,12 +322,16 @@ struct RotaryPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(.white)
+            .foregroundStyle(RotaryTheme.accentOnEmphasis)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(RotaryTheme.accent.opacity(configuration.isPressed ? 0.8 : 1))
+                    .fill(RotaryTheme.accentEmphasisFill.opacity(configuration.isPressed ? 0.88 : 1))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(RotaryTheme.accentSoftStroke, lineWidth: 1)
             )
             .scaleEffect(configuration.isPressed ? 0.99 : 1)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
@@ -315,25 +348,34 @@ struct RotaryGlassIcon: View {
     let size: CGFloat
     let frameSize: CGFloat
     let shape: RotaryGlassIconShape
+    let showsBackground: Bool
 
     init(
         systemName: String,
         size: CGFloat = 18,
         frameSize: CGFloat = 36,
-        shape: RotaryGlassIconShape = .roundedRect
+        shape: RotaryGlassIconShape = .roundedRect,
+        showsBackground: Bool = true
     ) {
         self.systemName = systemName
         self.size = size
         self.frameSize = frameSize
         self.shape = shape
+        self.showsBackground = showsBackground
     }
 
     var body: some View {
+        if !showsBackground {
+            iconLabel
+                .foregroundStyle(.primary)
+        } else {
         Group {
             if #available(iOS 26, *) {
                 iconLabel
                     .glassEffect(
-                        .regular.tint(.white.opacity(shape == .circle ? 0.14 : 0.10)).interactive(),
+                        .regular
+                            .tint(.white.opacity(shape == .circle ? 0.14 : 0.10))
+                            .interactive(false),
                         in: glassShape
                     )
             } else {
@@ -346,6 +388,7 @@ struct RotaryGlassIcon: View {
             }
         }
         .foregroundStyle(.primary)
+        }
     }
 
     private var iconLabel: some View {
@@ -389,6 +432,7 @@ struct RotaryGlassIconButton: View {
     let size: CGFloat
     let frameSize: CGFloat
     let shape: RotaryGlassIconShape
+    let showsBackground: Bool
     let action: () -> Void
 
     init(
@@ -396,12 +440,14 @@ struct RotaryGlassIconButton: View {
         size: CGFloat = 18,
         frameSize: CGFloat = 36,
         shape: RotaryGlassIconShape = .roundedRect,
+        showsBackground: Bool = true,
         action: @escaping () -> Void
     ) {
         self.systemName = systemName
         self.size = size
         self.frameSize = frameSize
         self.shape = shape
+        self.showsBackground = showsBackground
         self.action = action
     }
 
@@ -411,7 +457,8 @@ struct RotaryGlassIconButton: View {
                 systemName: systemName,
                 size: size,
                 frameSize: frameSize,
-                shape: shape
+                shape: shape,
+                showsBackground: showsBackground
             )
         }
         .buttonStyle(RotaryPressScaleButtonStyle())
@@ -431,7 +478,7 @@ struct RotaryGlassTextButton: View {
                         .lineLimit(1)
                         .padding(.horizontal, 14)
                         .frame(height: 36)
-                        .glassEffect(.regular.tint(.white.opacity(0.22)).interactive(), in: .capsule)
+                        .glassEffect(.regular.tint(.white.opacity(0.18)), in: .capsule)
                 } else {
                     Text(title)
                         .font(.system(size: 15, weight: .semibold))
@@ -511,12 +558,18 @@ struct RotaryGlassMenuChip: View {
 
     var body: some View {
         if title == nil && !showsChevron {
-            RotaryGlassIcon(systemName: systemName, size: 17, frameSize: 36, shape: .roundedRect)
+            RotaryGlassIcon(
+                systemName: systemName,
+                size: 17,
+                frameSize: 36,
+                shape: .roundedRect,
+                showsBackground: false
+            )
         } else {
             Group {
                 if #available(iOS 26, *) {
                     label
-                        .glassEffect(.regular.tint(.white.opacity(0.22)).interactive(), in: .capsule)
+                        .glassEffect(.regular.tint(.white.opacity(0.18)), in: .capsule)
                 } else {
                     label
                         .background(Color(uiColor: .secondarySystemGroupedBackground), in: Capsule())
@@ -555,15 +608,18 @@ struct RotaryGlassMenuChip: View {
 struct RotaryFloatingActionButton: View {
     let systemName: String
     let tint: Color
+    let glassTintOpacity: Double
     let action: () -> Void
 
     init(
         systemName: String,
         tint: Color = RotaryTheme.accent,
+        glassTintOpacity: Double = 0.54,
         action: @escaping () -> Void
     ) {
         self.systemName = systemName
         self.tint = tint
+        self.glassTintOpacity = min(max(glassTintOpacity, 0.16), 0.9)
         self.action = action
     }
 
@@ -575,7 +631,7 @@ struct RotaryFloatingActionButton: View {
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 58, height: 58)
-                        .glassEffect(.regular.tint(tint.opacity(0.36)).interactive(), in: .circle)
+                        .glassEffect(.regular.tint(tint.opacity(glassTintOpacity)).interactive(), in: .circle)
                 } else {
                     Image(systemName: systemName)
                         .font(.system(size: 20, weight: .semibold))
@@ -660,15 +716,18 @@ struct RotarySearchField: View {
 
     let prompt: String
     let onMic: (() -> Void)?
+    let isFocused: FocusState<Bool>.Binding?
 
     init(
         text: Binding<String>,
         prompt: String,
-        onMic: (() -> Void)? = nil
+        onMic: (() -> Void)? = nil,
+        isFocused: FocusState<Bool>.Binding? = nil
     ) {
         _text = text
         self.prompt = prompt
         self.onMic = onMic
+        self.isFocused = isFocused
     }
 
     var body: some View {
@@ -677,10 +736,7 @@ struct RotarySearchField: View {
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(.secondary)
 
-            TextField(prompt, text: $text)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .submitLabel(.search)
+            searchFieldInput
 
             if text.isEmpty {
                 if let onMic {
@@ -704,6 +760,20 @@ struct RotarySearchField: View {
         .padding(.horizontal, 16)
         .frame(minHeight: 48)
         .background(searchFieldBackground)
+    }
+
+    @ViewBuilder
+    private var searchFieldInput: some View {
+        let field = TextField(prompt, text: $text)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .submitLabel(.search)
+
+        if let isFocused {
+            field.focused(isFocused)
+        } else {
+            field
+        }
     }
 
     @ViewBuilder
@@ -765,84 +835,109 @@ struct RotaryComposerBar<MenuContent: View>: View {
         !trimmedText.isEmpty
     }
 
+    private var supportsMultilineInput: Bool {
+        maxLines.upperBound > 1
+    }
+
     var body: some View {
-        HStack(alignment: .bottom, spacing: 10) {
+        HStack(alignment: .center, spacing: 8) {
             if showsMenu {
                 Menu(content: menuContent) {
-                    RotaryGlassIcon(systemName: "plus", size: 18, frameSize: 42, shape: .circle)
+                    Image(systemName: "plus")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .frame(width: 34, height: 34)
+                        .background(RotaryTheme.softSurface.opacity(0.7), in: Circle())
                 }
                 .buttonStyle(.plain)
             }
 
-            HStack(alignment: .bottom, spacing: 8) {
-                composerField
+            composerField
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                if showingSend {
-                    Button(action: onSend) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 28, weight: .semibold))
-                            .foregroundStyle(RotaryTheme.accent)
-                            .frame(width: 30, height: 30)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isWorking)
-                } else if let onMic {
-                    Button(action: onMic) {
-                        Image(systemName: "waveform")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .frame(width: 28, height: 28)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isWorking)
+            if showingSend {
+                Button(action: onSend) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundStyle(RotaryTheme.accent)
+                        .frame(width: 30, height: 30)
                 }
+                .buttonStyle(.plain)
+                .disabled(isWorking)
+            } else if let onMic {
+                Button(action: onMic) {
+                    Image(systemName: "waveform")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 28, height: 28)
+                }
+                .buttonStyle(.plain)
+                .disabled(isWorking)
             }
-            .padding(.leading, 14)
-            .padding(.trailing, 12)
-            .padding(.vertical, 7)
-            .frame(minHeight: 52)
-            .background(composerBackground)
         }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .frame(minHeight: 50)
+        .background(composerBackground)
         .padding(.horizontal, 12)
-        .padding(.top, 6)
-        .padding(.bottom, 8)
-        .background {
-            ZStack(alignment: .top) {
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-
-                Rectangle()
-                    .fill(RotaryTheme.chromeStroke)
-                    .frame(height: 1 / UIScreen.main.scale)
-                    .opacity(0.55)
-            }
-            .ignoresSafeArea(edges: .bottom)
-        }
+        .padding(.top, 2)
+        .padding(.bottom, 0)
     }
 
     @ViewBuilder
     private var composerField: some View {
-        let field = ZStack(alignment: .topLeading) {
-            if !placeholder.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-               text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Text(placeholder)
-                    .foregroundStyle(RotaryTheme.placeholderText)
-                    .padding(.top, 8)
-                    .padding(.leading, 5)
-            }
-
-            TextEditor(text: $text)
-                .scrollContentBackground(.hidden)
-                .frame(height: editorHeight)
+        if supportsMultilineInput {
+            focusedComposerField(
+                TextField(
+                    "",
+                    text: $text,
+                    prompt: Text(placeholder).foregroundStyle(RotaryTheme.placeholderText),
+                    axis: .vertical
+                )
+                .lineLimit(maxLines)
                 .textInputAutocapitalization(.sentences)
                 .autocorrectionDisabled(false)
+                .submitLabel(.send)
+                .font(.body)
                 .foregroundStyle(.primary)
                 .tint(RotaryTheme.accent)
-                .padding(.horizontal, 1)
+                .onSubmit {
+                    if showingSend {
+                        onSend()
+                    }
+                }
+                .padding(.horizontal, 2)
+                .padding(.vertical, 4)
+                .frame(minHeight: 34, alignment: .center)
+            )
+        } else {
+            focusedComposerField(
+                TextField(
+                    "",
+                    text: $text,
+                    prompt: Text(placeholder).foregroundStyle(RotaryTheme.placeholderText)
+                )
+                .lineLimit(1)
+                .textInputAutocapitalization(.sentences)
+                .autocorrectionDisabled(false)
+                .submitLabel(.send)
+                .font(.body)
+                .foregroundStyle(.primary)
+                .tint(RotaryTheme.accent)
+                .onSubmit {
+                    if showingSend {
+                        onSend()
+                    }
+                }
+                .padding(.horizontal, 2)
                 .padding(.vertical, 2)
+                .frame(minHeight: 30, alignment: .center)
+            )
         }
-        .frame(height: editorHeight, alignment: .leading)
+    }
 
+    @ViewBuilder
+    private func focusedComposerField<Content: View>(_ field: Content) -> some View {
         if let isFocused {
             field
                 .focused(isFocused)
@@ -867,22 +962,6 @@ struct RotaryComposerBar<MenuContent: View>: View {
         }
     }
 
-    private var editorMaxHeight: CGFloat {
-        let lineHeight: CGFloat = 22
-        let verticalPadding: CGFloat = 10
-        return CGFloat(maxLines.upperBound) * lineHeight + verticalPadding
-    }
-
-    private var editorHeight: CGFloat {
-        let lineHeight: CGFloat = 22
-        let baseHeight: CGFloat = 28
-        let normalized = text.replacingOccurrences(of: "\r\n", with: "\n")
-        let explicitLines = max(1, normalized.components(separatedBy: "\n").count)
-        let wrappedLines = max(1, Int(ceil(Double(normalized.count) / 28.0)))
-        let estimatedLines = max(explicitLines, wrappedLines)
-        let clampedLines = min(max(estimatedLines, maxLines.lowerBound), maxLines.upperBound)
-        return max(baseHeight, CGFloat(clampedLines) * lineHeight)
-    }
 }
 
 enum RotaryDateFormatting {
@@ -902,6 +981,11 @@ enum RotaryDateFormatting {
             return date.formatted(.dateTime.hour().minute())
         }
         return date.formatted(.dateTime.month().day().hour().minute())
+    }
+
+    static func messageTimeOnly(_ value: String) -> String {
+        guard let date = parse(value) else { return "" }
+        return date.formatted(.dateTime.hour().minute())
     }
 
     static func listTimestamp(_ value: String) -> String {

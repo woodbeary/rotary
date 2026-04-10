@@ -24,7 +24,7 @@ func shouldRetryAuthorizedRequest(after error: Error) -> Bool {
     switch error {
     case RotaryAPIError.unauthenticated:
         return true
-    case let RotaryAPIError.requestFailed(statusCode, _, _):
+    case let RotaryAPIError.requestFailed(statusCode, _, _, _):
         return statusCode == 401
     default:
         return false

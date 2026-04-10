@@ -13,3 +13,10 @@ xcuserdata/
 Packages/
 .build/
 Vendor/clerk-ios/
+
+# Local artifacts and scratch outputs
+.artifacts/
+tmp/
+output/
+patch_*.py
+riverside

@@ -1,9 +1,188 @@
 import SwiftUI
 
+private let rotaryDebugSelectTabNotification = Notification.Name("rotary.debug.selectTab")
+
 private struct RotaryCallAlert: Identifiable {
     let id = UUID()
     let title: String
     let message: String
+}
+
+private enum RotaryLanguageCopy {
+    static var isKorean: Bool {
+        Locale.preferredLanguages.first?.lowercased().hasPrefix("ko") == true
+    }
+
+    static func text(_ english: String, _ korean: String) -> String {
+        isKorean ? korean : english
+    }
+}
+
+private struct RotaryCallStatusChip: View {
+    let title: String
+    let tint: Color
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(tint)
+                .frame(width: 6, height: 6)
+
+            Text(title)
+                .font(.caption.weight(.semibold))
+        }
+        .foregroundStyle(tint)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .background(
+            Capsule(style: .continuous)
+                .fill(tint.opacity(0.12))
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .stroke(tint.opacity(0.18), lineWidth: 1)
+        )
+    }
+}
+
+private struct RotaryCallPanel<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    let alignment: HorizontalAlignment
+    let spacing: CGFloat
+    let cornerRadius: CGFloat
+    @ViewBuilder let content: Content
+
+    init(
+        alignment: HorizontalAlignment = .leading,
+        spacing: CGFloat = 16,
+        cornerRadius: CGFloat = 30,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.alignment = alignment
+        self.spacing = spacing
+        self.cornerRadius = cornerRadius
+        self.content = content()
+    }
+
+    var body: some View {
+        Group {
+            if #available(iOS 26, *) {
+                GlassEffectContainer(spacing: spacing) {
+                    panelBody
+                        .glassEffect(
+                            .regular.tint(Color.white.opacity(colorScheme == .dark ? 0.06 : 0.13)).interactive(false),
+                            in: .rect(cornerRadius: cornerRadius)
+                        )
+                }
+            } else {
+                panelBody
+                    .background(
+                        RotaryTheme.secondarySurface,
+                        in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .stroke(RotaryTheme.cardStroke, lineWidth: 1)
+                    )
+            }
+        }
+    }
+
+    private var panelBody: some View {
+        VStack(alignment: alignment, spacing: spacing) {
+            content
+        }
+        .padding(22)
+        .background(
+            Color.white.opacity(colorScheme == .dark ? 0.015 : 0.16),
+            in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        )
+        .shadow(color: RotaryTheme.shadow.opacity(colorScheme == .dark ? 0.15 : 0.08), radius: 10, x: 0, y: 5)
+    }
+}
+
+private struct RotaryCallAvatarBadge: View {
+    let title: String
+    let size: CGFloat
+    let namespace: Namespace.ID
+
+    var body: some View {
+        Group {
+            if #available(iOS 26, *) {
+                Circle()
+                    .fill(.clear)
+                    .glassEffect(
+                        .regular.tint(RotaryTheme.callAccent.opacity(0.24)).interactive(false),
+                        in: .circle
+                    )
+                    .glassEffectID("rotary-call-avatar", in: namespace)
+                    .overlay(
+                        RotaryAvatarView(title: title, size: size * 0.64)
+                    )
+            } else {
+                Circle()
+                    .fill(RotaryTheme.softSurface)
+                    .overlay(
+                        RotaryAvatarView(title: title, size: size * 0.64)
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(RotaryTheme.elevatedStroke, lineWidth: 1)
+                    )
+            }
+        }
+        .frame(width: size, height: size)
+        .shadow(color: RotaryTheme.shadow.opacity(0.12), radius: 10, x: 0, y: 5)
+    }
+}
+
+private struct RotaryCallActionTile: View {
+    let title: String
+    let systemImage: String
+    let active: Bool
+    let tint: Color
+    let enabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                symbol
+
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(active ? tint : .primary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+        .opacity(enabled ? 1 : 0.52)
+    }
+
+    @ViewBuilder
+    private var symbol: some View {
+        ZStack {
+            Circle()
+                .fill(active ? tint.opacity(0.28) : RotaryTheme.elevatedSurface.opacity(0.96))
+
+            Circle()
+                .stroke(active ? tint.opacity(0.34) : RotaryTheme.elevatedStroke, lineWidth: 1)
+
+            Image(systemName: systemImage)
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(symbolForeground)
+        }
+        .frame(width: 66, height: 66)
+        .shadow(color: RotaryTheme.shadow.opacity(0.10), radius: 6, x: 0, y: 3)
+    }
+
+    private var symbolForeground: Color {
+        active ? .white : .primary
+    }
 }
 
 private extension RotaryCallPresentationState {
@@ -19,20 +198,58 @@ private extension RotaryCallPresentationState {
     var statusTitle: String {
         switch self {
         case .requestingCallKit:
-            return "Starting Call"
+            return RotaryLanguageCopy.text("Starting Call", "통화 시작 중")
         case .startedConnecting:
-            return "Calling"
+            return RotaryLanguageCopy.text("Calling", "전화 거는 중")
         case .ringing:
-            return "Ringing"
+            return RotaryLanguageCopy.text("Ringing", "벨이 울리는 중")
         case .connected:
-            return "On Call"
+            return RotaryLanguageCopy.text("On Call", "통화 중")
         case .ended:
-            return "Call Ended"
+            return RotaryLanguageCopy.text("Call Ended", "통화 종료")
         case .idle:
-            return "Phone"
+            return RotaryLanguageCopy.text("Phone", "전화")
         case .failed:
-            return "Call Failed"
+            return RotaryLanguageCopy.text("Call Failed", "통화 실패")
         }
+    }
+}
+
+private enum LiveSteerMode: String, CaseIterable, Identifiable {
+    case interrupt
+    case steer
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .interrupt:
+            return "Interrupt"
+        case .steer:
+            return "Steer"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .interrupt:
+            return "bolt.fill"
+        case .steer:
+            return "arrowshape.turn.up.right.fill"
+        }
+    }
+
+    var assistantHint: String {
+        switch self {
+        case .interrupt:
+            return "Cuts in immediately with your instruction."
+        case .steer:
+            return "Lets Rotary continue while following your direction."
+        }
+    }
+
+    var shouldAutoApplyRecommended: Bool {
+        self == .steer
     }
 }
 
@@ -41,26 +258,38 @@ struct RotaryTabShell: View {
     let appModel: AppModel
     let bootstrap: MobileBootstrapReadyState
     @Bindable var voiceCoordinator: VoiceCoordinator
+    @Binding var pendingDeepLink: RotaryDeepLink?
+    @Namespace private var callSurfaceNamespace
 
     @State private var messagesStore: MessagesStore
     @State private var callsStore: CallsStore
     @State private var selectedTab = 0
     @State private var showingSettings = false
-    @State private var liveAssistCall: MobileCall?
+    @State private var activeLiveAssistCall: MobileCall?
+    @State private var liveAssistSheetCall: MobileCall?
     @State private var callAlert: RotaryCallAlert?
-    @State private var missedCallCount = 0
-    @State private var unreadMessageCount = 0
+    @State private var rawMissedCallCount = 0
+    @State private var acknowledgedMissedCallCount = 0
+    @State private var isViewingMissedCalls = false
+    @State private var rawUnreadMessageCount = 0
+    @State private var acknowledgedUnreadMessageCount = 0
+    @State private var rawAgentActivityCount = 0
+    @State private var acknowledgedAgentActivityCount = 0
+    @State private var pendingMessagesThreadID: String?
+    @State private var pendingAgentID: String?
 
     init(
         appearanceMode: Binding<RotaryAppearanceMode>,
         appModel: AppModel,
         bootstrap: MobileBootstrapReadyState,
-        voiceCoordinator: VoiceCoordinator
+        voiceCoordinator: VoiceCoordinator,
+        pendingDeepLink: Binding<RotaryDeepLink?>
     ) {
         _appearanceMode = appearanceMode
         self.appModel = appModel
         self.bootstrap = bootstrap
         self.voiceCoordinator = voiceCoordinator
+        _pendingDeepLink = pendingDeepLink
 
         let tokenProvider: RotaryTokenProvider = { forceRefresh in
             try await appModel.token(forceRefresh: forceRefresh)
@@ -69,7 +298,8 @@ struct RotaryTabShell: View {
         _messagesStore = State(initialValue: MessagesStore(
             bootstrap: bootstrap,
             api: appModel.apiClient,
-            tokenProvider: tokenProvider
+            tokenProvider: tokenProvider,
+            mutationDispatcher: appModel.mutationDispatcher
         ))
         _callsStore = State(initialValue: CallsStore(
             bootstrap: bootstrap,
@@ -106,6 +336,21 @@ struct RotaryTabShell: View {
         .joined(separator: "|")
     }
 
+    private var displayedMissedCallBadgeCount: Int {
+        if selectedTab == 0 && isViewingMissedCalls {
+            return 0
+        }
+        return max(rawMissedCallCount - acknowledgedMissedCallCount, 0)
+    }
+
+    private var displayedUnreadMessageBadgeCount: Int {
+        max(rawUnreadMessageCount - acknowledgedUnreadMessageCount, 0)
+    }
+
+    private var displayedAgentActivityBadgeCount: Int {
+        max(rawAgentActivityCount - acknowledgedAgentActivityCount, 0)
+    }
+
     var body: some View {
         let callPresentationState = voiceCoordinator.callPresentationState
         let isCallScreenPresented = voiceCoordinator.isCallScreenPresented
@@ -116,6 +361,7 @@ struct RotaryTabShell: View {
                 CallsScreen(
                     bootstrap: bootstrap,
                     store: callsStore,
+                    messagesStore: messagesStore,
                     api: appModel.apiClient,
                     tokenProvider: tokenProvider,
                     showSettings: { showingSettings = true },
@@ -126,14 +372,22 @@ struct RotaryTabShell: View {
                         Task { await startManualCall(phoneNumber: phoneNumber, fromNumber: fromNumber) }
                     },
                     openLiveAssist: { call in
-                        liveAssistCall = call
+                        if call.shouldShowLiveSteerControls {
+                            liveAssistSheetCall = call
+                        }
                     },
-                    onMissedCallCountChange: { missedCallCount = $0 }
+                    onMissedCallCountChange: { handleMissedCallCountUpdate($0) },
+                    onViewingMissedCallsChange: { isViewing in
+                        isViewingMissedCalls = isViewing
+                        if isViewing, selectedTab == 0 {
+                            acknowledgeMissedCalls()
+                        }
+                    }
                 )
                 .tabItem {
                     Label("Calls", systemImage: "phone.fill")
                 }
-                .badge(missedCallCount > 0 ? missedCallCount : 0)
+                .badge(displayedMissedCallBadgeCount > 0 ? displayedMissedCallBadgeCount : 0)
                 .tag(0)
 
                 RotaryMessagesScreen(
@@ -142,12 +396,13 @@ struct RotaryTabShell: View {
                     startCall: { phoneNumber, fromNumber in
                         Task { await startManualCall(phoneNumber: phoneNumber, fromNumber: fromNumber) }
                     },
-                    onUnreadCountChange: { unreadMessageCount = $0 }
+                    onUnreadCountChange: { handleUnreadMessageCountUpdate($0) },
+                    pendingThreadID: $pendingMessagesThreadID
                 )
                 .tabItem {
                     Label("Messages", systemImage: "message.fill")
                 }
-                .badge(unreadMessageCount > 0 ? unreadMessageCount : 0)
+                .badge(displayedUnreadMessageBadgeCount > 0 ? displayedUnreadMessageBadgeCount : 0)
                 .tag(1)
 
                 AgentsScreen(
@@ -157,13 +412,18 @@ struct RotaryTabShell: View {
                     messagesStore: messagesStore,
                     callsStore: callsStore,
                     voiceCoordinator: voiceCoordinator,
-                    refresh: { Task { await appModel.bootstrap(forceRefresh: true) } }
+                    mutationDispatcher: appModel.mutationDispatcher,
+                    refresh: { Task { await appModel.bootstrap(forceRefresh: true) } },
+                    onActivityCountChange: { handleAgentActivityCountUpdate($0) },
+                    pendingAgentID: $pendingAgentID
                 )
                 .tabItem {
                     Label("Agents", systemImage: "person.2.fill")
                 }
+                .badge(displayedAgentActivityBadgeCount > 0 ? displayedAgentActivityBadgeCount : 0)
                 .tag(2)
             }
+            .tint(RotaryTheme.accent)
             .toolbarBackground(.visible, for: .tabBar)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .tabBar)
             .fullScreenCover(isPresented: $showingSettings) {
@@ -171,10 +431,12 @@ struct RotaryTabShell: View {
                     appearanceMode: $appearanceMode,
                     appModel: appModel,
                     bootstrap: bootstrap,
-                    voiceCoordinator: voiceCoordinator
+                    voiceCoordinator: voiceCoordinator,
+                    mutationDispatcher: appModel.mutationDispatcher,
+                    inferenceModeStore: appModel.inferenceModeStore
                 )
             }
-            .sheet(item: $liveAssistCall) { call in
+            .sheet(item: $liveAssistSheetCall) { call in
                 LiveAssistSheet(
                     call: call,
                     api: appModel.apiClient,
@@ -192,8 +454,8 @@ struct RotaryTabShell: View {
             .task(id: storeSyncSignature) {
                 messagesStore.applyBootstrap(bootstrap)
                 callsStore.applyBootstrap(bootstrap)
-                missedCallCount = callsStore.missedCallCount
-                unreadMessageCount = messagesStore.unreadCount()
+                handleMissedCallCountUpdate(callsStore.missedCallCount)
+                handleUnreadMessageCountUpdate(messagesStore.unreadCount())
             }
             .task(id: voiceSessionSignature) {
                 do {
@@ -213,6 +475,9 @@ struct RotaryTabShell: View {
             .task(id: voiceCoordinator.activeSessionTrackingKey) {
                 await monitorObservedCall()
             }
+            .task(id: pendingDeepLink?.routingKey) {
+                await handlePendingDeepLink()
+            }
             .onChange(of: callPresentationState) { oldValue, newValue in
                 updateActiveCallPresentation(for: newValue)
 
@@ -229,6 +494,34 @@ struct RotaryTabShell: View {
                     )
                 }
             }
+            .onChange(of: selectedTab) { _, newValue in
+                switch newValue {
+                case 0:
+                    if isViewingMissedCalls {
+                        acknowledgeMissedCalls()
+                    }
+                case 1:
+                    acknowledgeMessages()
+                case 2:
+                    acknowledgeAgentActivity()
+                default:
+                    break
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: rotaryDebugSelectTabNotification)) { notification in
+                guard let rawTab = notification.userInfo?["tab"] as? String else { return }
+                let normalized = rawTab.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                switch normalized {
+                case "calls", "0":
+                    selectedTab = 0
+                case "messages", "1":
+                    selectedTab = 1
+                case "agents", "2":
+                    selectedTab = 2
+                default:
+                    break
+                }
+            }
             .zIndex(0)
 
             if showsMinimizedCallBanner {
@@ -236,7 +529,8 @@ struct RotaryTabShell: View {
                     Spacer()
                     RotaryMinimizedCallBanner(
                         voiceCoordinator: voiceCoordinator,
-                        observedCall: liveAssistCall
+                        observedCall: activeLiveAssistCall,
+                        glassNamespace: callSurfaceNamespace
                     ) {
                         voiceCoordinator.restoreCallScreen()
                     }
@@ -250,9 +544,10 @@ struct RotaryTabShell: View {
             if isCallScreenPresented {
                 RotaryActiveCallScreen(
                     voiceCoordinator: voiceCoordinator,
-                    activeLiveAssistCall: liveAssistCall,
+                    activeLiveAssistCall: activeLiveAssistCall,
                     api: appModel.apiClient,
                     tokenProvider: tokenProvider,
+                    glassNamespace: callSurfaceNamespace,
                     dismiss: { voiceCoordinator.minimizeCallScreen() }
                 )
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -260,6 +555,99 @@ struct RotaryTabShell: View {
             }
         }
         .animation(.snappy(duration: 0.28, extraBounce: 0.05), value: isCallScreenPresented)
+    }
+
+    private func handleMissedCallCountUpdate(_ count: Int) {
+        rawMissedCallCount = max(count, 0)
+        if acknowledgedMissedCallCount > rawMissedCallCount {
+            acknowledgedMissedCallCount = rawMissedCallCount
+        }
+        if selectedTab == 0, isViewingMissedCalls {
+            acknowledgeMissedCalls()
+        }
+    }
+
+    private func handleUnreadMessageCountUpdate(_ count: Int) {
+        rawUnreadMessageCount = max(count, 0)
+        if acknowledgedUnreadMessageCount > rawUnreadMessageCount {
+            acknowledgedUnreadMessageCount = rawUnreadMessageCount
+        }
+        if selectedTab == 1 {
+            acknowledgeMessages()
+        }
+    }
+
+    private func handleAgentActivityCountUpdate(_ count: Int) {
+        rawAgentActivityCount = max(count, 0)
+        if acknowledgedAgentActivityCount > rawAgentActivityCount {
+            acknowledgedAgentActivityCount = rawAgentActivityCount
+        }
+        if selectedTab == 2 {
+            acknowledgeAgentActivity()
+        }
+    }
+
+    private func acknowledgeMissedCalls() {
+        acknowledgedMissedCallCount = rawMissedCallCount
+    }
+
+    private func acknowledgeMessages() {
+        acknowledgedUnreadMessageCount = rawUnreadMessageCount
+    }
+
+    private func acknowledgeAgentActivity() {
+        acknowledgedAgentActivityCount = rawAgentActivityCount
+    }
+
+    private func handlePendingDeepLink() async {
+        guard let pendingDeepLink else { return }
+
+        switch pendingDeepLink {
+        case .calls:
+            selectedTab = 0
+        case let .callsLiveAssist(callID):
+            selectedTab = 0
+            await openLiveAssist(for: callID)
+        case let .messagesThread(threadID):
+            selectedTab = 1
+            pendingMessagesThreadID = threadID
+        case let .agentConversation(agentID):
+            selectedTab = 2
+            pendingAgentID = agentID
+        case .settings:
+            showingSettings = true
+        }
+
+        self.pendingDeepLink = nil
+    }
+
+    private func openLiveAssist(for callID: String?) async {
+        if let activeLiveAssistCall,
+           callID == nil || activeLiveAssistCall.id == callID || activeLiveAssistCall.callSid == callID {
+            liveAssistSheetCall = activeLiveAssistCall
+            return
+        }
+
+        _ = await callsStore.loadCalls(forceRefresh: true)
+
+        let matchedCall = callsStore.allCalls.first { call in
+            guard let callID else {
+                return call.shouldShowLiveSteerControls
+            }
+            return call.id == callID || call.callSid == callID
+        }
+
+        guard let matchedCall, matchedCall.shouldShowLiveSteerControls else {
+            callAlert = RotaryCallAlert(
+                title: "Call Not Available",
+                message: "Rotary could not find a live assist call for that notification."
+            )
+            return
+        }
+
+        activeLiveAssistCall = matchedCall
+        voiceCoordinator.syncObservedCallRecord(matchedCall)
+        liveAssistSheetCall = matchedCall
     }
 
     private func startCall(for call: MobileCall) async {
@@ -352,16 +740,19 @@ struct RotaryTabShell: View {
             return
         }
         if case .ended = newValue {
-            liveAssistCall = nil
+            activeLiveAssistCall = nil
+            liveAssistSheetCall = nil
         }
         if case .failed = newValue {
-            liveAssistCall = nil
+            activeLiveAssistCall = nil
+            liveAssistSheetCall = nil
         }
     }
 
     private func monitorObservedCall() async {
         guard voiceCoordinator.callPresentationState.presentsActiveCallScreen else {
-            liveAssistCall = nil
+            activeLiveAssistCall = nil
+            liveAssistSheetCall = nil
             return
         }
 
@@ -391,7 +782,7 @@ struct RotaryTabShell: View {
                 return
             }
             await refreshObservedCall(forceRefresh: true)
-            if liveAssistCall != nil {
+            if activeLiveAssistCall != nil {
                 return
             }
         }
@@ -399,15 +790,69 @@ struct RotaryTabShell: View {
 
     private func refreshObservedCall(forceRefresh: Bool) async {
         _ = await callsStore.loadCalls(forceRefresh: forceRefresh)
-        let matchedCall = voiceCoordinator.matchingObservedCall(in: callsStore.allCalls)
-        liveAssistCall = matchedCall
+        let observedCall = voiceCoordinator.matchingObservedCall(in: callsStore.allCalls)
+        var matchedCall = observedCall?.shouldShowLiveSteerControls == true ? observedCall : nil
+#if DEBUG
+        if matchedCall == nil, voiceCoordinator.isDebugPreviewCallSession {
+            matchedCall = debugSyntheticLiveAssistCall()
+        }
+#endif
+        activeLiveAssistCall = matchedCall
         voiceCoordinator.syncObservedCallRecord(matchedCall)
     }
+
+#if DEBUG
+    private func debugSyntheticLiveAssistCall() -> MobileCall? {
+        guard voiceCoordinator.callPresentationState.presentsActiveCallScreen else {
+            return nil
+        }
+
+        let handle = voiceCoordinator.activeHandle?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let contactName = (handle?.isEmpty == false ? handle! : "Interpreter Desk")
+        let callUUID = voiceCoordinator.activeCallUUID?.uuidString ?? "preview"
+        let now = ISO8601DateFormatter().string(from: Date())
+
+        var debugCall = MobileCall(
+            id: "debug-live-assist-\(callUUID)",
+            callSid: "CA_DEBUG_\(callUUID)",
+            contactId: nil,
+            contactName: contactName,
+            contactPhone: "+19493066291",
+            lineId: bootstrap.ownerLine?.id,
+            fromNumber: bootstrap.ownerLine?.phoneNumber ?? bootstrap.capabilities.defaultMainLine,
+            toNumber: "+19493066291",
+            status: "in-progress",
+            durationSeconds: 64,
+            screeningOutcome: nil,
+            transferOutcome: nil,
+            recordingUrl: nil,
+            transcript: "Julia: Hi Olivia, I am calling on behalf of Jacob to coordinate a sign language interpreter for Innovation Expo.",
+            summary: "Interpreter coordination call in progress.",
+            agentId: "debug-agent",
+            folderId: nil,
+            transcriptStatus: "complete",
+            summarySmsSentAt: nil,
+            readAt: nil,
+            intakePayload: [
+                "call_mode": .string("agent_autonomous"),
+                "last_status": .string("connected"),
+                "line_owner_type": .string("agent"),
+                "voice_agent_id": .string("debug-agent"),
+            ],
+            createdAt: now,
+            updatedAt: now
+        )
+        debugCall.liveAssistEligible = true
+        debugCall.executionMode = "agent_autonomous"
+        return debugCall
+    }
+#endif
 }
 
 private struct RotaryMinimizedCallBanner: View {
     @Bindable var voiceCoordinator: VoiceCoordinator
     let observedCall: MobileCall?
+    let glassNamespace: Namespace.ID
     let restore: () -> Void
 
     private var bannerTitle: String {
@@ -419,17 +864,14 @@ private struct RotaryMinimizedCallBanner: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 14) {
             Button(action: restore) {
                 HStack(spacing: 12) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.green.opacity(0.18))
-                            .frame(width: 42, height: 42)
-                        Image(systemName: "phone.fill")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(Color.green)
-                    }
+                    RotaryCallAvatarBadge(
+                        title: bannerTitle,
+                        size: 44,
+                        namespace: glassNamespace
+                    )
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Return to call")
@@ -444,22 +886,18 @@ private struct RotaryMinimizedCallBanner: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+                .buttonStyle(.plain)
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 10)
 
-            Button {
+            RotaryGlassIconButton(
+                systemName: voiceCoordinator.isMuted ? "mic.slash.fill" : "mic.fill",
+                size: 15,
+                frameSize: 40,
+                shape: .circle
+            ) {
                 voiceCoordinator.toggleMute()
-            } label: {
-                ZStack {
-                    Circle()
-                        .fill(RotaryTheme.softSurface)
-                        .frame(width: 38, height: 38)
-                    Image(systemName: voiceCoordinator.isMuted ? "mic.slash.fill" : "mic.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                }
             }
-            .buttonStyle(.plain)
             .disabled(!voiceCoordinator.supportsInAppCallControls || voiceCoordinator.isEndingCall)
             .opacity((voiceCoordinator.supportsInAppCallControls && !voiceCoordinator.isEndingCall) ? 1 : 0.54)
 
@@ -469,25 +907,42 @@ private struct RotaryMinimizedCallBanner: View {
                 ZStack {
                     Circle()
                         .fill(RotaryTheme.destructive)
-                        .frame(width: 38, height: 38)
+                        .frame(width: 40, height: 40)
                     Image(systemName: voiceCoordinator.isEndingCall ? "hourglass" : "phone.down.fill")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
                 }
             }
+            .buttonStyle(.plain)
+            .disabled(voiceCoordinator.isEndingCall)
+            .opacity(voiceCoordinator.isEndingCall ? 0.7 : 1)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(.regularMaterial)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.2))
-        }
-        .shadow(color: Color.black.opacity(0.08), radius: 18, y: 10)
+        .padding(.vertical, 12)
+        .background(bannerBackground)
+        .overlay(bannerStroke)
+        .shadow(color: RotaryTheme.shadow.opacity(0.18), radius: 18, x: 0, y: 10)
         .accessibilityIdentifier("rotary.minimizedCallBanner")
+    }
+
+    @ViewBuilder
+    private var bannerBackground: some View {
+        if #available(iOS 26, *) {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .fill(.clear)
+                .glassEffect(
+                    .regular.tint(Color.white.opacity(0.14)).interactive(false),
+                    in: .rect(cornerRadius: 26)
+                )
+        } else {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .fill(.regularMaterial)
+        }
+    }
+
+    private var bannerStroke: some View {
+        RoundedRectangle(cornerRadius: 26, style: .continuous)
+            .strokeBorder(Color.white.opacity(0.22), lineWidth: 1)
     }
 }
 
@@ -496,6 +951,7 @@ private struct RotaryActiveCallScreen: View {
     let activeLiveAssistCall: MobileCall?
     let api: RotaryAPIClient
     let tokenProvider: RotaryTokenProvider
+    let glassNamespace: Namespace.ID
     let dismiss: () -> Void
 
     @State private var keypadEntry = ""
@@ -510,12 +966,53 @@ private struct RotaryActiveCallScreen: View {
             !voiceCoordinator.isEndingCall
     }
 
+    private var liveAssistVisible: Bool {
+        activeLiveAssistCall?.shouldShowLiveSteerControls == true
+    }
+
     private var callStatusTitle: String {
         activeLiveAssistCall?.liveStatusTitle ?? voiceCoordinator.callPresentationState.statusTitle
     }
 
+    private var callStatusTint: Color {
+        switch voiceCoordinator.callPresentationState {
+        case .ringing, .requestingCallKit, .startedConnecting:
+            return RotaryTheme.warning
+        case .connected:
+            return RotaryTheme.callAccent
+        case .ended, .failed:
+            return RotaryTheme.destructive
+        case .idle:
+            return RotaryTheme.accent
+        }
+    }
+
+    private var heroSubtitle: String {
+        let lastAction = voiceCoordinator.lastActionMessage?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let lastAction, !lastAction.isEmpty {
+            return lastAction
+        }
+
+        let remote = voiceCoordinator.activeRemoteAddress?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let remote, !remote.isEmpty {
+            return remote
+        }
+
+        if !liveAssistVisible {
+            return RotaryLanguageCopy.text(
+                "Rotary is keeping this live call stable while you stay in control.",
+                "Rotary가 통화를 안정적으로 유지하고 있어요. 계속 제어할 수 있습니다."
+            )
+        }
+
+        return RotaryLanguageCopy.text(
+            "Rotary is keeping the call transcribed and ready for live steering.",
+            "Rotary가 통화를 실시간으로 기록하고, 실시간 조종에 준비되어 있어요."
+        )
+    }
+
     private var audioControlTitle: String {
-        "Audio"
+        RotaryLanguageCopy.text("Speaker", "스피커")
     }
 
     private var audioControlAction: () -> Void {
@@ -530,26 +1027,12 @@ private struct RotaryActiveCallScreen: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
+            ZStack {
                 RotaryBackdrop()
                 GeometryReader { proxy in
-                    ViewThatFits(in: .vertical) {
-                        activeCallLayout(compact: false, availableHeight: proxy.size.height)
-                        activeCallLayout(compact: true, availableHeight: proxy.size.height)
-                    }
+                    let compact = proxy.size.height <= 760
+                    activeCallLayout(compact: compact)
                 }
-
-                RotaryFloatingActionButton(
-                    systemName: "circle.grid.3x3.fill",
-                    tint: RotaryTheme.callAccent,
-                    action: {
-                        showingKeypad = true
-                    }
-                )
-                .accessibilityLabel("Keypad")
-                .accessibilityIdentifier("rotary.callKeypadButton")
-                .padding(.trailing, 18)
-                .padding(.bottom, 132)
             }
             .sheet(isPresented: $showingKeypad) {
                 RotaryDialpadSheet(
@@ -576,186 +1059,217 @@ private struct RotaryActiveCallScreen: View {
                     tokenProvider: tokenProvider
                 )
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
+            .onChange(of: voiceCoordinator.debugLiveAssistSheetRequestID) { _, _ in
+                guard let activeLiveAssistCall else {
+                    voiceCoordinator.lastActionMessage = "Live assist opens after Rotary links a live call record."
+                    return
                 }
+                liveAssistSheetCall = activeLiveAssistCall
+            }
+            .onChange(of: voiceCoordinator.debugShowKeypadRequestID) { _, _ in
+                showingKeypad = true
+            }
+            .onChange(of: voiceCoordinator.debugHideKeypadRequestID) { _, _ in
+                showingKeypad = false
             }
         }
     }
 
-    private func activeCallLayout(compact: Bool, availableHeight: CGFloat) -> some View {
-        let sectionSpacing: CGFloat = compact ? 12 : 16
-        let avatarSize: CGFloat = compact ? 76 : 92
-        let titleSize: CGFloat = compact ? 28 : 32
-        let topPadding: CGFloat = compact ? 10 : 18
-        let bottomPadding: CGFloat = compact ? 18 : 24
+    private func activeCallContent(compact: Bool) -> some View {
+        VStack(spacing: compact ? 14 : 16) {
+            callHeader(compact: compact)
+            controlsGridSurface(compact: compact)
+        }
+    }
 
-        return VStack(spacing: sectionSpacing) {
-            RotaryGlassCard {
-                VStack(spacing: compact ? 12 : 16) {
-                    RotaryAvatarView(
-                        title: voiceCoordinator.activeHandle ?? "Rotary call",
-                        size: avatarSize
-                    )
-
-                    VStack(spacing: 6) {
-                        Text(voiceCoordinator.activeHandle ?? "Rotary call")
-                            .font(.system(size: titleSize, weight: .semibold))
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
-
-                        Text(callStatusTitle)
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-
-                        if let lastActionMessage = voiceCoordinator.lastActionMessage,
-                           !lastActionMessage.isEmpty {
-                            Text(lastActionMessage)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(compact ? 2 : 3)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity)
-            }
-
-            RotaryGlassCard {
-                VStack(spacing: compact ? 10 : 12) {
-                    HStack {
-                        Text("Call controls")
-                            .font(.headline)
-                        Spacer()
-                        if !controlsEnabled {
-                            Text("Waiting for audio")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
-                    HStack(spacing: compact ? 16 : 22) {
-                        callControlButton(
-                            title: voiceCoordinator.isMuted ? "Unmute" : "Mute",
-                            systemImage: voiceCoordinator.isMuted ? "mic.slash.fill" : "mic.fill",
-                            active: voiceCoordinator.isMuted,
-                            enabled: controlsEnabled,
-                            action: { voiceCoordinator.toggleMute() }
-                        )
-                        callControlButton(
-                            title: audioControlTitle,
-                            systemImage: voiceCoordinator.currentAudioOutput.systemImage,
-                            active: voiceCoordinator.isSpeakerEnabled,
-                            enabled: controlsEnabled,
-                            action: audioControlAction
-                        )
-                    }
-
-                    HStack(spacing: compact ? 16 : 22) {
-                        callControlButton(
-                            title: voiceCoordinator.isCallOnHold ? "Resume" : "Hold",
-                            systemImage: voiceCoordinator.isCallOnHold ? "play.fill" : "pause.fill",
-                            active: voiceCoordinator.isCallOnHold,
-                            enabled: controlsEnabled,
-                            action: { voiceCoordinator.toggleHold() }
-                        )
-                        callControlButton(
-                            title: "Live steer",
-                            systemImage: "text.bubble.fill",
-                            active: activeLiveAssistCall != nil,
-                            enabled: true,
-                            action: {
-                                if let activeLiveAssistCall {
-                                    liveAssistSheetCall = activeLiveAssistCall
-                                } else {
-                                    voiceCoordinator.lastActionMessage = "Matching the live call so steer, join, and listen unlock right away."
-                                }
-                            }
-                        )
-                        callControlButton(
-                            title: "Minimize",
-                            systemImage: "chevron.down",
-                            active: false,
-                            enabled: true,
-                            action: dismiss
-                        )
-                    }
-                }
-            }
-
-            ActiveCallLiveAssistPanel(
-                call: activeLiveAssistCall,
-                api: api,
-                voiceCoordinator: voiceCoordinator,
-                tokenProvider: tokenProvider,
-                compact: compact,
-                openDetails: {
-                    if let activeLiveAssistCall {
-                        liveAssistSheetCall = activeLiveAssistCall
-                    }
-                }
+    private func callHeader(compact: Bool) -> some View {
+        VStack(spacing: compact ? 12 : 14) {
+            RotaryCallAvatarBadge(
+                title: voiceCoordinator.activeHandle ?? "Rotary call",
+                size: compact ? 84 : 108,
+                namespace: glassNamespace
             )
 
-            Spacer(minLength: compact ? 0 : 8)
+            Text(voiceCoordinator.activeHandle ?? "Rotary call")
+                .font(.system(size: compact ? 27 : 36, weight: .semibold, design: .rounded))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
 
-            Button {
-                voiceCoordinator.endCurrentCall()
-            } label: {
-                HStack(spacing: 10) {
-                    if voiceCoordinator.isEndingCall {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .tint(.white)
-                    } else {
-                        Image(systemName: "phone.down.fill")
-                    }
-                    Text(voiceCoordinator.isEndingCall ? "Ending call" : "End call")
-                        .fontWeight(.semibold)
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, compact ? 16 : 18)
-                .background(RotaryTheme.destructive, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            }
-            .buttonStyle(.plain)
-            .disabled(voiceCoordinator.isEndingCall)
-            .opacity(voiceCoordinator.isEndingCall ? 0.7 : 1)
+            RotaryCallStatusChip(title: callStatusTitle, tint: callStatusTint)
+
+            Text(heroSubtitle)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(compact ? 2 : 3)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, topPadding)
-        .padding(.bottom, bottomPadding)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity)
     }
 
-    private func callControlButton(
-        title: String,
-        systemImage: String,
-        active: Bool = false,
-        enabled: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(active ? RotaryTheme.accent.opacity(0.18) : RotaryTheme.elevatedSurface)
-                        .frame(width: 72, height: 72)
-                    Image(systemName: systemImage)
-                        .font(.system(size: 24, weight: .semibold))
+    private func controlsGridSurface(compact: Bool) -> some View {
+        let spacing: CGFloat = compact ? 14 : 16
+        let columns = Array(repeating: GridItem(.flexible(), spacing: spacing), count: 3)
+
+        return Group {
+            if #available(iOS 26, *) {
+                GlassEffectContainer(spacing: spacing) {
+                    LazyVGrid(columns: columns, spacing: spacing) {
+                        callControlTiles
+                    }
                 }
-                Text(title)
-                    .font(.caption.weight(.semibold))
-                    .multilineTextAlignment(.center)
+            } else {
+                LazyVGrid(columns: columns, spacing: spacing) {
+                    callControlTiles
+                }
             }
-            .foregroundStyle(active ? RotaryTheme.accent : Color.primary)
+        }
+        .padding(.horizontal, compact ? 6 : 12)
+    }
+
+    @ViewBuilder
+    private var callControlTiles: some View {
+        RotaryCallActionTile(
+            title: voiceCoordinator.isMuted
+                ? RotaryLanguageCopy.text("Unmute", "음소거 해제")
+                : RotaryLanguageCopy.text("Mute", "음소거"),
+            systemImage: voiceCoordinator.isMuted ? "mic.slash.fill" : "mic.fill",
+            active: voiceCoordinator.isMuted,
+            tint: RotaryTheme.destructive,
+            enabled: controlsEnabled,
+            action: { voiceCoordinator.toggleMute() }
+        )
+
+        RotaryCallActionTile(
+            title: audioControlTitle,
+            systemImage: "speaker.wave.2.fill",
+            active: voiceCoordinator.isSpeakerEnabled,
+            tint: RotaryTheme.callAccent,
+            enabled: controlsEnabled,
+            action: audioControlAction
+        )
+
+        RotaryCallActionTile(
+            title: RotaryLanguageCopy.text("Keypad", "키패드"),
+            systemImage: "circle.grid.3x3.fill",
+            active: showingKeypad,
+            tint: RotaryTheme.accent,
+            enabled: controlsEnabled,
+            action: { showingKeypad = true }
+        )
+
+        RotaryCallActionTile(
+            title: voiceCoordinator.isCallOnHold
+                ? RotaryLanguageCopy.text("Resume", "재개")
+                : RotaryLanguageCopy.text("Hold", "보류"),
+            systemImage: voiceCoordinator.isCallOnHold ? "play.fill" : "pause.fill",
+            active: voiceCoordinator.isCallOnHold,
+            tint: RotaryTheme.warning,
+            enabled: controlsEnabled,
+            action: { voiceCoordinator.toggleHold() }
+        )
+
+        RotaryCallActionTile(
+            title: RotaryLanguageCopy.text("Conference", "회의"),
+            systemImage: "person.3.fill",
+            active: activeLiveAssistCall != nil,
+            tint: RotaryTheme.callAccent,
+            enabled: true,
+            action: {
+                if let activeLiveAssistCall {
+                    liveAssistSheetCall = activeLiveAssistCall
+                } else {
+                    voiceCoordinator.lastActionMessage = RotaryLanguageCopy.text(
+                        "Conference add/remove unlocks once Rotary matches this live call.",
+                        "Rotary가 라이브 통화를 연결하면 회의 참가자 추가/제거가 활성화됩니다."
+                    )
+                }
+            }
+        )
+
+        RotaryCallActionTile(
+            title: RotaryLanguageCopy.text("Transcript", "대화록"),
+            systemImage: "text.bubble.fill",
+            active: liveAssistVisible,
+            tint: RotaryTheme.accent,
+            enabled: true,
+            action: {
+                if let activeLiveAssistCall {
+                    liveAssistSheetCall = activeLiveAssistCall
+                } else {
+                    voiceCoordinator.lastActionMessage = "Live transcript opens after Rotary links this call."
+                }
+            }
+        )
+    }
+
+    @ViewBuilder
+    private func activeCallLayout(compact: Bool) -> some View {
+        let topPadding: CGFloat = compact ? 8 : 16
+        let bottomPadding: CGFloat = compact ? 10 : 22
+
+        VStack(spacing: 0) {
+            activeCallContent(compact: compact)
+                .padding(.horizontal, 20)
+                .padding(.top, topPadding)
+
+            Spacer(minLength: compact ? 4 : 10)
+
+            endCallButton(compact: compact)
+                .padding(.horizontal, 20)
+                .padding(.bottom, bottomPadding)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    RotaryGlassIcon(systemName: "chevron.down", size: 14, frameSize: 34)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(RotaryLanguageCopy.text("Minimize call", "통화 최소화"))
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 6)
+        }
+    }
+
+    private func endCallButton(compact: Bool) -> some View {
+        Button {
+            voiceCoordinator.endCurrentCall()
+        } label: {
+            HStack(spacing: 12) {
+                if voiceCoordinator.isEndingCall {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.white)
+                } else {
+                    Image(systemName: "phone.down.fill")
+                        .font(.system(size: compact ? 18 : 19, weight: .semibold))
+                }
+
+                Text(
+                    RotaryLanguageCopy.text(
+                        voiceCoordinator.isEndingCall ? "Ending call" : "End call",
+                        voiceCoordinator.isEndingCall ? "통화 종료 중" : "통화 종료"
+                    )
+                )
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+            }
+            .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
+            .padding(.vertical, compact ? 16 : 18)
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(RotaryTheme.destructive)
+            )
+            .shadow(color: RotaryTheme.destructive.opacity(0.25), radius: 12, x: 0, y: 6)
         }
         .buttonStyle(.plain)
-        .disabled(!enabled)
-        .opacity(enabled ? 1 : 0.54)
+        .disabled(voiceCoordinator.isEndingCall)
+        .opacity(voiceCoordinator.isEndingCall ? 0.7 : 1)
     }
 }
 
@@ -774,8 +1288,8 @@ private struct RotaryDialpadSheet: View {
                 VStack(spacing: 16) {
                     RotaryGlassCard {
                         HStack {
-                            Text("Keypad")
-                                .font(.headline)
+                            Color.clear
+                                .frame(width: 1, height: 1)
                             Spacer()
                             if !keypadEntry.isEmpty {
                                 Button("Clear") {
@@ -814,12 +1328,16 @@ private struct RotaryDialpadSheet: View {
                 }
                 .padding(20)
             }
-            .navigationTitle("Keypad")
+            .navigationTitle("")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
                         dismiss()
+                    } label: {
+                        RotaryGlassIcon(systemName: "chevron.left", size: 14, frameSize: 34)
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Back")
                 }
             }
         }
@@ -838,7 +1356,12 @@ private struct ActiveCallLiveAssistPanel: View {
     @State private var errorMessage: String?
     @State private var actionMessage: String?
     @State private var customInstruction = ""
+    @State private var steerMode: LiveSteerMode = .steer
+    @State private var queuedUtterance: String?
     @State private var isWorking = false
+    @State private var autoRecommendationTask: Task<Void, Never>?
+    @State private var autoRecommendationToken: String?
+    @State private var autoRecommendationCountdown = 0
 
     private var warmTranscript: String {
         if let call {
@@ -886,138 +1409,67 @@ private struct ActiveCallLiveAssistPanel: View {
         ]
     }
 
+    private var steeringOptions: [String] {
+        let options = (liveAssist?.steeringOptions ?? fallbackSteeringOptions)
+            .compactMap(normalizedText)
+        return options.isEmpty ? fallbackSteeringOptions : options
+    }
+
+    private var recommendedOption: String? {
+        steeringOptions.first
+    }
+
+    private var queuedPreview: String {
+        if let queuedUtterance {
+            return queuedUtterance
+        }
+        if let suggested = normalizedText(liveAssist?.suggestedNext) {
+            return suggested
+        }
+        return warmSuggestedNext
+    }
+
     var body: some View {
-        RotaryGlassCard {
+        RotaryCallPanel(alignment: .leading, spacing: compact ? 10 : 12, cornerRadius: 30) {
             VStack(alignment: .leading, spacing: compact ? 10 : 12) {
-                HStack {
-                    Text("Live steer")
-                        .font(.headline)
-                    Spacer()
-                    Button("Full view") {
-                        if call != nil {
-                            openDetails()
-                        }
-                    }
-                    .font(.footnote.weight(.semibold))
-                    .disabled(call == nil)
-                    .opacity(call == nil ? 0.54 : 1)
-                }
+                HStack(spacing: 8) {
+                    panelActionIcon(
+                        systemImage: "ear.fill",
+                        enabled: call != nil,
+                        action: { Task { await control(action: "listen_only") } }
+                    )
+                    panelActionIcon(
+                        systemImage: "person.wave.2.fill",
+                        enabled: call != nil,
+                        action: { Task { await control(action: "join") } }
+                    )
+                    panelActionIcon(
+                        systemImage: "figure.stand",
+                        enabled: call != nil,
+                        action: { Task { await control(action: "take_over") } }
+                    )
 
-                if let liveAssist {
-                    VStack(alignment: .leading, spacing: compact ? 8 : 10) {
-                        Text(liveAssist.transcript.isEmpty ? liveAssist.intentSummary : liveAssist.transcript)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(compact ? 3 : 4)
+                    Spacer(minLength: 0)
 
-                        Text(liveAssist.suggestedNext)
-                            .font(.subheadline.weight(.semibold))
-                            .lineLimit(2)
-
-                        HStack(spacing: 8) {
-                            ForEach(Array(liveAssist.steeringOptions.prefix(2).enumerated()), id: \.offset) { index, option in
-                                Button {
-                                    Task { await steer(selectedOption: option, customText: nil) }
-                                } label: {
-                                    Text(index == 0 ? "Recommended" : option)
-                                        .font(.footnote.weight(.semibold))
-                                        .lineLimit(2)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 10)
-                                        .padding(.horizontal, 12)
-                                        .background(
-                                            (index == 0 ? RotaryTheme.accent.opacity(0.14) : RotaryTheme.softSurface),
-                                            in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        )
-                                }
-                                .buttonStyle(.plain)
-                                .disabled(isWorking)
+                    panelActionIcon(
+                        systemImage: "arrow.up.left.and.arrow.down.right",
+                        enabled: call != nil,
+                        action: {
+                            if call != nil {
+                                openDetails()
                             }
                         }
-
-                        HStack(spacing: 8) {
-                            liveAssistActionPill(
-                                title: "Listen",
-                                systemImage: "ear.fill",
-                                enabled: true,
-                                action: { Task { await control(action: "listen_only") } }
-                            )
-                            liveAssistActionPill(
-                                title: "Join",
-                                systemImage: "person.wave.2.fill",
-                                enabled: true,
-                                action: { Task { await control(action: "join") } }
-                            )
-                            liveAssistActionPill(
-                                title: "Take over",
-                                systemImage: "figure.stand",
-                                enabled: true,
-                                action: { Task { await control(action: "take_over") } }
-                            )
-                        }
-                    }
-                } else {
-                    VStack(alignment: .leading, spacing: compact ? 8 : 10) {
-                        Text(warmTranscript)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(compact ? 3 : 4)
-
-                        Text(warmSuggestedNext)
-                            .font(.subheadline.weight(.semibold))
-                            .lineLimit(2)
-
-                        VStack(spacing: 8) {
-                            ForEach(fallbackSteeringOptions, id: \.self) { option in
-                                Button {
-                                    Task { await steer(selectedOption: option, customText: nil) }
-                                } label: {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(option)
-                                                .font(.footnote.weight(.semibold))
-                                                .foregroundStyle(.primary)
-                                                .multilineTextAlignment(.leading)
-                                        }
-                                        Spacer(minLength: 8)
-                                        Image(systemName: "arrow.up.right.circle.fill")
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundStyle(RotaryTheme.accent)
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 10)
-                                    .background(
-                                        RotaryTheme.softSurface,
-                                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                                .disabled(isWorking || call == nil)
-                                .opacity((isWorking || call == nil) ? 0.56 : 1)
-                            }
-                        }
-
-                        HStack(spacing: 8) {
-                            liveAssistActionPill(
-                                title: "Listen",
-                                systemImage: "ear.fill",
-                                enabled: call != nil,
-                                action: { Task { await control(action: "listen_only") } }
-                            )
-                            liveAssistActionPill(
-                                title: "Join",
-                                systemImage: "person.wave.2.fill",
-                                enabled: call != nil,
-                                action: { Task { await control(action: "join") } }
-                            )
-                            liveAssistActionPill(
-                                title: "Take over",
-                                systemImage: "figure.stand",
-                                enabled: call != nil,
-                                action: { Task { await control(action: "take_over") } }
-                            )
-                        }
-                    }
+                    )
                 }
+
+                Text(liveAssist == nil ? warmTranscript : (liveAssist?.transcript.isEmpty == false ? liveAssist?.transcript ?? "" : liveAssist?.intentSummary ?? ""))
+                    .foregroundStyle(.secondary)
+                    .font(.footnote)
+                    .lineLimit(compact ? 4 : 5)
+
+                suggestionTabs
+
+                composerDock
 
                 if let actionMessage, !actionMessage.isEmpty {
                     Text(actionMessage)
@@ -1039,6 +1491,7 @@ private struct ActiveCallLiveAssistPanel: View {
                 liveAssist = nil
                 errorMessage = nil
                 actionMessage = nil
+                cancelAutoRecommendation(resetToken: true)
                 return
             }
 
@@ -1048,28 +1501,110 @@ private struct ActiveCallLiveAssistPanel: View {
                 await reload(for: call)
             }
         }
+        .onChange(of: customInstruction) { _, value in
+            if !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                cancelAutoRecommendation()
+            }
+        }
+        .onChange(of: steerMode) { _, _ in
+            guard let call else { return }
+            scheduleAutoRecommendationIfNeeded(for: call)
+        }
+        .onChange(of: voiceCoordinator.debugSteerRequestID) { _, _ in
+            applyDebugSteerRequest()
+        }
+        .onDisappear {
+            cancelAutoRecommendation(resetToken: true)
+        }
     }
 
-    private func liveAssistActionPill(
-        title: String,
+    private var suggestionTabs: some View {
+        HStack(spacing: 8) {
+            ForEach(Array(steeringOptions.prefix(3).enumerated()), id: \.offset) { index, option in
+                Button {
+                    Task { await steer(selectedOption: option, customText: nil, source: .manual) }
+                } label: {
+                    HStack(spacing: 6) {
+                        if index == 0 {
+                            Image(systemName: "sparkles")
+                                .font(.caption2.weight(.bold))
+                        }
+                        Text(option)
+                            .font(.caption.weight(.semibold))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 9)
+                    .background(
+                        (index == 0 ? RotaryTheme.callAccent.opacity(0.16) : RotaryTheme.softSurface),
+                        in: Capsule(style: .continuous)
+                    )
+                    .foregroundStyle(index == 0 ? RotaryTheme.callAccent : .primary)
+                }
+                .buttonStyle(.plain)
+                .disabled(isWorking || call == nil)
+                .opacity((isWorking || call == nil) ? 0.56 : 1)
+            }
+        }
+    }
+
+    private var composerDock: some View {
+        HStack(spacing: 8) {
+            modeIcon(mode: .interrupt, systemImage: "bolt.fill", accessibilityLabel: "Interrupt mode")
+            modeIcon(mode: .steer, systemImage: "arrowshape.turn.up.right.fill", accessibilityLabel: "Steer mode")
+
+            TextField(RotaryLanguageCopy.text("Whisper to agent", "에이전트에게 속삭이기"), text: $customInstruction, axis: .vertical)
+                .lineLimit(1 ... 3)
+                .rotaryTextFieldStyle()
+
+            Button {
+                Task { await steer(selectedOption: nil, customText: customInstruction, source: .manual) }
+            } label: {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(
+                        customInstruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            ? .secondary
+                            : RotaryTheme.callAccent
+                    )
+            }
+            .buttonStyle(.plain)
+            .disabled(isWorking || customInstruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }
+    }
+
+    private func modeIcon(mode: LiveSteerMode, systemImage: String, accessibilityLabel: String) -> some View {
+        Button {
+            steerMode = mode
+        } label: {
+            Image(systemName: systemImage)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(mode == steerMode ? RotaryTheme.callAccent : .secondary)
+                .frame(width: 30, height: 30)
+                .background(
+                    mode == steerMode ? RotaryTheme.callAccent.opacity(0.14) : RotaryTheme.softSurface,
+                    in: Circle()
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private func panelActionIcon(
         systemImage: String,
         enabled: Bool,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 15, weight: .semibold))
-                Text(title)
-                    .font(.caption.weight(.semibold))
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(
-                RotaryTheme.softSurface,
-                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-            )
+            Image(systemName: systemImage)
+                .font(.system(size: 15, weight: .semibold))
+                .frame(width: 30, height: 30)
+                .background(
+                    RotaryTheme.softSurface,
+                    in: Circle()
+                )
         }
         .buttonStyle(.plain)
         .disabled(isWorking || !enabled)
@@ -1082,17 +1617,24 @@ private struct ActiveCallLiveAssistPanel: View {
                 try await api.liveAssist(token: token, callId: call.id)
             }
             errorMessage = nil
+            scheduleAutoRecommendationIfNeeded(for: call)
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
-    private func steer(selectedOption: String?, customText: String?) async {
+    private func steer(selectedOption: String?, customText: String?, source: LiveSteerSource) async {
         guard let call else {
             errorMessage = "Live steer is still preparing."
             return
         }
 
+        guard let payload = steerPayload(selectedOption: selectedOption, customText: customText) else {
+            errorMessage = "Add a valid instruction before steering."
+            return
+        }
+
+        cancelAutoRecommendation(resetToken: source == .manual)
         isWorking = true
         defer { isWorking = false }
 
@@ -1101,14 +1643,17 @@ private struct ActiveCallLiveAssistPanel: View {
                 try await api.steerCall(
                     token: token,
                     callId: call.id,
-                    selectedOption: selectedOption,
-                    customText: customText?.trimmingCharacters(in: .whitespacesAndNewlines)
+                    selectedOption: payload.selectedOption,
+                    customText: payload.customText
                 )
             }
             if selectedOption == nil {
                 customInstruction = ""
             }
-            actionMessage = "Applied: \(result.applied)"
+            queuedUtterance = payload.queuedPreview
+            actionMessage = source == .automatic
+                ? "Auto-applied recommended: \(result.applied)"
+                : "Applied (\(steerMode.title.lowercased())): \(result.applied)"
             await reload(for: call)
         } catch {
             errorMessage = error.localizedDescription
@@ -1148,6 +1693,98 @@ private struct ActiveCallLiveAssistPanel: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func steerPayload(selectedOption: String?, customText: String?) -> (selectedOption: String?, customText: String?, queuedPreview: String)? {
+        if let option = normalizedText(selectedOption) {
+            switch steerMode {
+            case .steer:
+                return (selectedOption: option, customText: nil, queuedPreview: option)
+            case .interrupt:
+                let interruptText = "Interrupt now and prioritize this line: \(option)"
+                return (selectedOption: nil, customText: interruptText, queuedPreview: option)
+            }
+        }
+
+        guard let custom = normalizedText(customText) else {
+            return nil
+        }
+
+        switch steerMode {
+        case .interrupt:
+            return (
+                selectedOption: nil,
+                customText: "Interrupt now and say: \(custom)",
+                queuedPreview: custom
+            )
+        case .steer:
+            return (selectedOption: nil, customText: custom, queuedPreview: custom)
+        }
+    }
+
+    private func scheduleAutoRecommendationIfNeeded(for call: MobileCall) {
+        guard steerMode.shouldAutoApplyRecommended,
+              customInstruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !isWorking,
+              let recommendation = recommendedOption else {
+            cancelAutoRecommendation()
+            return
+        }
+
+        let token = "\(call.id)|\(recommendation)|\(steerMode.rawValue)"
+        guard token != autoRecommendationToken else { return }
+
+        cancelAutoRecommendation()
+        autoRecommendationToken = token
+        autoRecommendationCountdown = 4
+
+        autoRecommendationTask = Task {
+            for remaining in stride(from: 3, through: 0, by: -1) {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                autoRecommendationCountdown = remaining
+            }
+            guard !Task.isCancelled else { return }
+            await steer(selectedOption: recommendation, customText: nil, source: .automatic)
+        }
+    }
+
+    private func cancelAutoRecommendation(resetToken: Bool = false) {
+        autoRecommendationTask?.cancel()
+        autoRecommendationTask = nil
+        autoRecommendationCountdown = 0
+        if resetToken {
+            autoRecommendationToken = nil
+        }
+    }
+
+    private func normalizedText(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func applyDebugSteerRequest() {
+        guard let modeRawValue = normalizedText(voiceCoordinator.debugSteerMode) else {
+            return
+        }
+        let requestedMode = modeRawValue == "queue" ? LiveSteerMode.steer : LiveSteerMode(rawValue: modeRawValue)
+        guard let requestedMode else { return }
+        steerMode = requestedMode
+
+        guard let recommendation = recommendedOption else {
+            errorMessage = "No steering recommendation is available yet."
+            return
+        }
+
+        Task {
+            await steer(selectedOption: recommendation, customText: nil, source: .manual)
+        }
+    }
+
+    private enum LiveSteerSource {
+        case manual
+        case automatic
     }
 }
 
@@ -1163,237 +1800,440 @@ private struct LiveAssistSheet: View {
     @State private var errorMessage: String?
     @State private var actionMessage: String?
     @State private var customInstruction = ""
+    @State private var steerMode: LiveSteerMode = .steer
+    @State private var queuedUtterance: String?
     @State private var isWorking = false
+    @State private var autoRecommendationTask: Task<Void, Never>?
+    @State private var autoRecommendationToken: String?
+    @State private var autoRecommendationCountdown = 0
+    @State private var suggestionDetail: LiveAssistSuggestionDetail?
 
     private var warmLiveAssistSummary: String {
         let candidates = [call.summary, call.transcript, voiceCoordinator.lastActionMessage]
             .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
         return candidates.first(where: { !$0.isEmpty })
-            ?? "Rotary is syncing the live transcript and steering options in the background."
+            ?? RotaryLanguageCopy.text(
+                "Rotary is syncing the live transcript and steering options in the background.",
+                "Rotary가 실시간 대화록과 조종 옵션을 백그라운드에서 동기화하고 있어요."
+            )
     }
 
     private var fallbackSteeringOptions: [String] {
         [
-            "Ask a clarifying question.",
-            "Summarize the last point.",
-            "Confirm the caller's preferred next step.",
+            RotaryLanguageCopy.text("Ask a clarifying question.", "확인 질문을 해 주세요."),
+            RotaryLanguageCopy.text("Summarize the last point.", "방금 내용을 요약해 주세요."),
+            RotaryLanguageCopy.text("Confirm the caller's preferred next step.", "상대가 원하는 다음 단계를 확인해 주세요."),
         ]
+    }
+
+    private var steeringOptions: [String] {
+        let options = (liveAssist?.steeringOptions ?? fallbackSteeringOptions)
+            .compactMap(normalizedText)
+        return options.isEmpty ? fallbackSteeringOptions : options
+    }
+
+    private var recommendedOption: String? {
+        steeringOptions.first
+    }
+
+    private var queuedPreview: String {
+        if let queuedUtterance {
+            return queuedUtterance
+        }
+        if let suggested = normalizedText(liveAssist?.suggestedNext) {
+            return suggested
+        }
+        return RotaryLanguageCopy.text("Rotary will suggest the next line here.", "Rotary가 다음 문장을 여기에서 제안해요.")
+    }
+
+    private var transcriptPreview: String {
+        if let liveAssist, !liveAssist.transcript.isEmpty {
+            return liveAssist.transcript
+        }
+        return warmLiveAssistSummary
+    }
+
+    private var transcriptLines: [LiveAssistTranscriptLine] {
+        let source = transcriptPreview
+            .split(whereSeparator: \.isNewline)
+            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        guard !source.isEmpty else {
+            return [LiveAssistTranscriptLine(id: 0, speaker: nil, message: warmLiveAssistSummary, fromAgent: true)]
+        }
+
+        return source.enumerated().map { index, line in
+            if let separator = line.firstIndex(of: ":") {
+                let speaker = String(line[..<separator]).trimmingCharacters(in: .whitespacesAndNewlines)
+                let message = String(line[line.index(after: separator)...]).trimmingCharacters(in: .whitespacesAndNewlines)
+                let normalizedSpeaker = speaker.lowercased()
+                let fromAgent = normalizedSpeaker.contains("agent")
+                    || normalizedSpeaker.contains("rotary")
+                    || normalizedSpeaker.contains("julia")
+                    || normalizedSpeaker.contains("assistant")
+                return LiveAssistTranscriptLine(
+                    id: index,
+                    speaker: speaker.isEmpty ? nil : speaker,
+                    message: message.isEmpty ? line : message,
+                    fromAgent: fromAgent
+                )
+            }
+
+            return LiveAssistTranscriptLine(id: index, speaker: nil, message: line, fromAgent: true)
+        }
     }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 RotaryBackdrop()
-                ScrollView {
-                    VStack(spacing: 16) {
-                        headerCard
-                        assistContent
-                    }
-                    .padding(20)
-                }
+                transcriptScrollContent
             }
-            .navigationTitle("Live Assist")
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                steeringDock
+            }
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        dismiss()
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Button(RotaryLanguageCopy.text("Join", "참여"), systemImage: "phone.arrow.up.right") {
+                            Task { await control(action: "join") }
+                        }
+                        Button(RotaryLanguageCopy.text("Listen", "듣기"), systemImage: "ear") {
+                            Task { await control(action: "listen_only") }
+                        }
+                        Button(RotaryLanguageCopy.text("Take Over", "직접 개입"), systemImage: "hand.raised.fill") {
+                            Task { await control(action: "take_over") }
+                        }
+                        Button(RotaryLanguageCopy.text("Resume Agent", "에이전트 재개"), systemImage: "arrow.trianglehead.clockwise") {
+                            Task { await control(action: "resume_agent") }
+                        }
+                        Button(RotaryLanguageCopy.text("Leave", "나가기"), systemImage: "arrow.uturn.backward.circle") {
+                            Task { await control(action: "leave") }
+                        }
+                        Divider()
+                        Button(RotaryLanguageCopy.text("End Call", "통화 종료"), systemImage: "phone.down.fill", role: .destructive) {
+                            Task { await control(action: "end_call") }
+                        }
+                    } label: {
+                        RotaryGlassIcon(systemName: "slider.horizontal.3", size: 13, frameSize: 34)
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(RotaryLanguageCopy.text("Call actions", "통화 작업"))
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        RotaryGlassIcon(systemName: "xmark", size: 12, frameSize: 34)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(RotaryLanguageCopy.text("Close live assist", "라이브 어시스트 닫기"))
                 }
             }
-            .task {
-                await reload()
-            }
-        }
-    }
-
-    private var headerCard: some View {
-        RotaryGlassCard {
-            Text(call.contactName)
-                .font(.title2.weight(.bold))
-            Text(call.contactPhone ?? call.toNumber ?? call.fromNumber ?? "Unknown number")
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    @ViewBuilder
-    private var assistContent: some View {
-        if let liveAssist {
-            liveAssistDetails(liveAssist)
-        } else if let errorMessage {
-            RotaryGlassCard {
-                Text(errorMessage)
-            }
-        } else {
-            RotaryGlassCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Live assist is warming up")
-                        .font(.headline)
-                    Text(warmLiveAssistSummary)
-                        .foregroundStyle(.secondary)
-                    Text("You can steer the call now. The live transcript will fill in as soon as Rotary gets the snapshot.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-
-                    VStack(spacing: 8) {
-                        ForEach(fallbackSteeringOptions, id: \.self) { option in
-                            Button {
-                                Task { await steer(selectedOption: option, customText: nil) }
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(option)
-                                            .font(.subheadline.weight(.semibold))
-                                            .foregroundStyle(.primary)
-                                            .multilineTextAlignment(.leading)
-                                    }
-                                    Spacer(minLength: 8)
-                                    Image(systemName: "arrow.up.right.circle.fill")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundStyle(RotaryTheme.accent)
-                                }
+            .sheet(item: $suggestionDetail) { detail in
+                NavigationStack {
+                    ZStack {
+                        RotaryBackdrop()
+                        ScrollView {
+                            Text(detail.text)
+                                .font(.body)
+                                .foregroundStyle(.primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 10)
-                                .background(
-                                    RotaryTheme.softSurface,
-                                    in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .disabled(isWorking)
-                            .opacity(isWorking ? 0.56 : 1)
+                                .padding(20)
                         }
                     }
-
-                    HStack(spacing: 8) {
-                        liveAssistActionPill(
-                            title: "Listen",
-                            systemImage: "ear.fill",
-                            enabled: true,
-                            action: { Task { await control(action: "listen_only") } }
-                        )
-                        liveAssistActionPill(
-                            title: "Join",
-                            systemImage: "person.wave.2.fill",
-                            enabled: true,
-                            action: { Task { await control(action: "join") } }
-                        )
-                        liveAssistActionPill(
-                            title: "Take over",
-                            systemImage: "figure.stand",
-                            enabled: true,
-                            action: { Task { await control(action: "take_over") } }
-                        )
+                    .navigationTitle("")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                suggestionDetail = nil
+                            } label: {
+                                RotaryGlassIcon(systemName: "xmark", size: 12, frameSize: 34)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
+                }
+            }
+            .task(id: call.id) {
+                await reload()
+                while !Task.isCancelled && voiceCoordinator.callPresentationState.presentsActiveCallScreen {
+                    try? await Task.sleep(for: .seconds(2))
+                    await reload()
+                }
+            }
+            .onChange(of: customInstruction) { _, value in
+                if !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    cancelAutoRecommendation()
+                }
+            }
+            .onChange(of: steerMode) { _, _ in
+                scheduleAutoRecommendationIfNeeded()
+            }
+            .onChange(of: voiceCoordinator.debugSteerRequestID) { _, _ in
+                applyDebugSteerRequest()
+            }
+            .onChange(of: voiceCoordinator.debugDismissLiveAssistSheetRequestID) { _, _ in
+                dismiss()
+            }
+            .onChange(of: voiceCoordinator.callPresentationState) { _, state in
+                if !state.presentsActiveCallScreen {
+                    dismiss()
+                }
+            }
+            .onDisappear {
+                cancelAutoRecommendation(resetToken: true)
+            }
+        }
+    }
+
+    private var transcriptScrollContent: some View {
+        ScrollViewReader { reader in
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 10) {
+                    ForEach(transcriptLines) { line in
+                        transcriptBubble(line)
+                    }
+
+                    if let actionMessage, !actionMessage.isEmpty {
+                        Text(actionMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
+                    if let errorMessage, !errorMessage.isEmpty {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(3)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
+                    Color.clear
+                        .frame(height: 1)
+                        .id("transcript-bottom")
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 12)
+            }
+            .onAppear {
+                withAnimation(.easeOut(duration: 0.18)) {
+                    reader.scrollTo("transcript-bottom", anchor: .bottom)
+                }
+            }
+            .onChange(of: liveAssist?.transcript ?? "") { _, _ in
+                withAnimation(.easeOut(duration: 0.18)) {
+                    reader.scrollTo("transcript-bottom", anchor: .bottom)
                 }
             }
         }
     }
 
-    private func liveAssistActionPill(
-        title: String,
+    private var steeringDock: some View {
+        VStack(spacing: 8) {
+            suggestionList
+            HStack {
+                if let intentSummary = normalizedText(liveAssist?.intentSummary) {
+                    Text(intentSummary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    Text(queuedPreview)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
+                if steerMode.shouldAutoApplyRecommended, autoRecommendationCountdown > 0 {
+                    RotaryPill(text: "Auto \(autoRecommendationCountdown)s", active: true)
+                }
+            }
+            composerDock
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 12)
+        .background(.clear)
+    }
+
+    private var suggestionList: some View {
+        VStack(spacing: 6) {
+            ForEach(Array(steeringOptions.prefix(3).enumerated()), id: \.offset) { index, option in
+                HStack(spacing: 8) {
+                    Button {
+                        Task { await steer(selectedOption: option, customText: nil, source: .manual) }
+                    } label: {
+                        HStack(spacing: 8) {
+                            if index == 0 {
+                                Image(systemName: "sparkles")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(RotaryTheme.callAccent)
+                            }
+                            Text(option)
+                                .font(.caption.weight(.semibold))
+                                .lineLimit(2)
+                                .truncationMode(.tail)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 9)
+                        .background(
+                            index == 0 ? RotaryTheme.callAccent.opacity(0.14) : RotaryTheme.softSurface,
+                            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        )
+                        .foregroundStyle(index == 0 ? RotaryTheme.callAccent : .primary)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isWorking)
+                    .opacity(isWorking ? 0.56 : 1)
+
+                    Button {
+                        suggestionDetail = LiveAssistSuggestionDetail(text: option)
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 30, height: 30)
+                            .background(
+                                RotaryTheme.softSurface,
+                                in: Circle()
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private var composerDock: some View {
+        HStack(spacing: 8) {
+            modeIcon(mode: .interrupt, systemImage: "bolt.fill", accessibilityLabel: "Interrupt mode")
+            modeIcon(mode: .steer, systemImage: "arrowshape.turn.up.right.fill", accessibilityLabel: "Steer mode")
+
+            TextField(RotaryLanguageCopy.text("Whisper to agent", "에이전트에게 속삭이기"), text: $customInstruction, axis: .vertical)
+                .lineLimit(1 ... 3)
+                .rotaryTextFieldStyle()
+
+            Button {
+                Task { await steer(selectedOption: nil, customText: customInstruction, source: .manual) }
+            } label: {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(
+                        customInstruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            ? .secondary
+                            : RotaryTheme.callAccent
+                    )
+            }
+            .buttonStyle(.plain)
+            .disabled(isWorking || customInstruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }
+    }
+
+    private func compactActionIcon(
         systemImage: String,
         enabled: Bool,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 15, weight: .semibold))
-                Text(title)
-                    .font(.caption.weight(.semibold))
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(
-                RotaryTheme.softSurface,
-                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-            )
+            Image(systemName: systemImage)
+                .font(.system(size: 15, weight: .semibold))
+                .frame(width: 30, height: 30)
+                .background(
+                    RotaryTheme.softSurface,
+                    in: Circle()
+                )
         }
         .buttonStyle(.plain)
         .disabled(isWorking || !enabled)
         .opacity((isWorking || !enabled) ? 0.56 : 1)
     }
 
-    private func liveAssistDetails(_ liveAssist: MobileLiveAssistResponse) -> some View {
-        Group {
-            RotaryGlassCard {
-                Text("Intent")
-                    .font(.headline)
-                Text(liveAssist.intentSummary)
-                    .foregroundStyle(.secondary)
-                Divider()
-                Text("Suggested next")
-                    .font(.headline)
-                Text(liveAssist.suggestedNext)
-                    .foregroundStyle(.secondary)
-                Divider()
-                Text("Steering")
-                    .font(.headline)
-                ForEach(Array(liveAssist.steeringOptions.enumerated()), id: \.offset) { index, option in
-                    Button {
-                        Task { await steer(selectedOption: option, customText: nil) }
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(option)
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                Text(index == 0 ? "Recommended" : "Steer the next move")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            if index == 0 {
-                                RotaryPill(text: "Recommended", active: true)
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(14)
-                        .background(RotaryTheme.softSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    }
-                    .buttonStyle(.plain)
-                }
-                TextField("Custom steer", text: $customInstruction, axis: .vertical)
-                    .lineLimit(1 ... 4)
-                    .rotaryTextFieldStyle()
-                Button(isWorking ? "Applying..." : "Send custom steer") {
-                    Task { await steer(selectedOption: nil, customText: customInstruction) }
-                }
-                .buttonStyle(RotaryPrimaryButtonStyle())
-                .disabled(isWorking || customInstruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    private func controlButton(
+        _ title: String,
+        systemImage: String,
+        destructive: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 14, weight: .semibold))
+                Text(title)
+                    .font(.caption2.weight(.semibold))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(destructive ? RotaryTheme.destructive : Color.primary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RotaryTheme.elevatedSurface,
+                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(isWorking)
+        .opacity(isWorking ? 0.56 : 1)
+    }
+
+    private func modeIcon(mode: LiveSteerMode, systemImage: String, accessibilityLabel: String) -> some View {
+        Button {
+            steerMode = mode
+        } label: {
+            Image(systemName: systemImage)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(mode == steerMode ? RotaryTheme.callAccent : .secondary)
+                .frame(width: 30, height: 30)
+                .background(
+                    mode == steerMode ? RotaryTheme.callAccent.opacity(0.14) : RotaryTheme.softSurface,
+                    in: Circle()
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private func transcriptBubble(_ line: LiveAssistTranscriptLine) -> some View {
+        HStack {
+            if line.fromAgent {
+                Spacer(minLength: 36)
             }
 
-            RotaryGlassCard {
-                Text("Call controls")
-                    .font(.headline)
-                LiveAssistActionGrid(
-                    isWorking: isWorking,
-                    onJoin: { Task { await control(action: "join") } },
-                    onListenOnly: { Task { await control(action: "listen_only") } },
-                    onTakeOver: { Task { await control(action: "take_over") } },
-                    onResumeAgent: { Task { await control(action: "resume_agent") } },
-                    onLeave: { Task { await control(action: "leave") } },
-                    onEndCall: { Task { await control(action: "end_call") } }
-                )
-                if let actionMessage, !actionMessage.isEmpty {
-                    Text(actionMessage)
-                        .font(.footnote)
+            VStack(alignment: .leading, spacing: 4) {
+                if let speaker = line.speaker {
+                    Text(speaker)
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
-                if let voiceError = voiceCoordinator.lastError, !voiceError.isEmpty {
-                    Text(voiceError)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                }
+                Text(line.message)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.leading)
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .background(
+                line.fromAgent ? RotaryTheme.callAccent.opacity(0.16) : RotaryTheme.softSurface,
+                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(line.fromAgent ? RotaryTheme.callAccent.opacity(0.3) : RotaryTheme.elevatedStroke, lineWidth: 1)
+            )
 
-            RotaryGlassCard {
-                Text("Transcript")
-                    .font(.headline)
-                Text(liveAssist.transcript)
-                    .foregroundStyle(.secondary)
+            if !line.fromAgent {
+                Spacer(minLength: 36)
             }
         }
     }
@@ -1404,12 +2244,19 @@ private struct LiveAssistSheet: View {
                 try await api.liveAssist(token: token, callId: call.id)
             }
             errorMessage = nil
+            scheduleAutoRecommendationIfNeeded()
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
-    private func steer(selectedOption: String?, customText: String?) async {
+    private func steer(selectedOption: String?, customText: String?, source: LiveSteerSource) async {
+        guard let payload = steerPayload(selectedOption: selectedOption, customText: customText) else {
+            errorMessage = "Add a valid instruction before steering."
+            return
+        }
+
+        cancelAutoRecommendation(resetToken: source == .manual)
         isWorking = true
         defer { isWorking = false }
 
@@ -1418,14 +2265,17 @@ private struct LiveAssistSheet: View {
                 try await api.steerCall(
                     token: token,
                     callId: call.id,
-                    selectedOption: selectedOption,
-                    customText: customText?.trimmingCharacters(in: .whitespacesAndNewlines)
+                    selectedOption: payload.selectedOption,
+                    customText: payload.customText
                 )
             }
             if selectedOption == nil {
                 customInstruction = ""
             }
-            actionMessage = "Applied: \(result.applied)"
+            queuedUtterance = payload.queuedPreview
+            actionMessage = source == .automatic
+                ? "Auto-applied recommended: \(result.applied)"
+                : "Applied (\(steerMode.title.lowercased())): \(result.applied)"
             await reload()
         } catch {
             errorMessage = error.localizedDescription
@@ -1461,50 +2311,108 @@ private struct LiveAssistSheet: View {
             errorMessage = error.localizedDescription
         }
     }
-}
 
-private struct LiveAssistActionGrid: View {
-    let isWorking: Bool
-    let onJoin: () -> Void
-    let onListenOnly: () -> Void
-    let onTakeOver: () -> Void
-    let onResumeAgent: () -> Void
-    let onLeave: () -> Void
-    let onEndCall: () -> Void
+    private func steerPayload(selectedOption: String?, customText: String?) -> (selectedOption: String?, customText: String?, queuedPreview: String)? {
+        if let option = normalizedText(selectedOption) {
+            switch steerMode {
+            case .steer:
+                return (selectedOption: option, customText: nil, queuedPreview: option)
+            case .interrupt:
+                let interruptText = "Interrupt now and prioritize this line: \(option)"
+                return (selectedOption: nil, customText: interruptText, queuedPreview: option)
+            }
+        }
 
-    var body: some View {
-        let columns = [GridItem(.flexible()), GridItem(.flexible())]
+        guard let custom = normalizedText(customText) else {
+            return nil
+        }
 
-        LazyVGrid(columns: columns, spacing: 10) {
-            actionButton("Join", systemImage: "phone.arrow.up.right", action: onJoin)
-            actionButton("Listen", systemImage: "ear", action: onListenOnly)
-            actionButton("Take over", systemImage: "hand.raised.fill", action: onTakeOver)
-            actionButton("Resume agent", systemImage: "arrow.trianglehead.clockwise", action: onResumeAgent)
-            actionButton("Leave", systemImage: "arrow.uturn.backward.circle", action: onLeave)
-            actionButton("End call", systemImage: "phone.down.fill", destructive: true, action: onEndCall)
+        switch steerMode {
+        case .interrupt:
+            return (
+                selectedOption: nil,
+                customText: "Interrupt now and say: \(custom)",
+                queuedPreview: custom
+            )
+        case .steer:
+            return (selectedOption: nil, customText: custom, queuedPreview: custom)
         }
     }
 
-    @ViewBuilder
-    private func actionButton(
-        _ title: String,
-        systemImage: String,
-        destructive: Bool = false,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: systemImage)
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-            }
-            .foregroundStyle(destructive ? RotaryTheme.destructive : Color.primary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(RotaryTheme.elevatedSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    private func scheduleAutoRecommendationIfNeeded() {
+        guard steerMode.shouldAutoApplyRecommended,
+              customInstruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !isWorking,
+              let recommendation = recommendedOption else {
+            cancelAutoRecommendation()
+            return
         }
-        .buttonStyle(.plain)
-        .disabled(isWorking)
-        .opacity(isWorking ? 0.65 : 1)
+
+        let token = "\(call.id)|\(recommendation)|\(steerMode.rawValue)"
+        guard token != autoRecommendationToken else { return }
+
+        cancelAutoRecommendation()
+        autoRecommendationToken = token
+        autoRecommendationCountdown = 4
+
+        autoRecommendationTask = Task {
+            for remaining in stride(from: 3, through: 0, by: -1) {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                autoRecommendationCountdown = remaining
+            }
+            guard !Task.isCancelled else { return }
+            await steer(selectedOption: recommendation, customText: nil, source: .automatic)
+        }
+    }
+
+    private func cancelAutoRecommendation(resetToken: Bool = false) {
+        autoRecommendationTask?.cancel()
+        autoRecommendationTask = nil
+        autoRecommendationCountdown = 0
+        if resetToken {
+            autoRecommendationToken = nil
+        }
+    }
+
+    private func normalizedText(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func applyDebugSteerRequest() {
+        guard let modeRawValue = normalizedText(voiceCoordinator.debugSteerMode) else {
+            return
+        }
+        let requestedMode = modeRawValue == "queue" ? LiveSteerMode.steer : LiveSteerMode(rawValue: modeRawValue)
+        guard let requestedMode else { return }
+        steerMode = requestedMode
+
+        guard let recommendation = recommendedOption else {
+            errorMessage = "No steering recommendation is available yet."
+            return
+        }
+
+        Task {
+            await steer(selectedOption: recommendation, customText: nil, source: .manual)
+        }
+    }
+
+    private enum LiveSteerSource {
+        case manual
+        case automatic
+    }
+
+    private struct LiveAssistTranscriptLine: Identifiable {
+        let id: Int
+        let speaker: String?
+        let message: String
+        let fromAgent: Bool
+    }
+
+    private struct LiveAssistSuggestionDetail: Identifiable {
+        let id = UUID()
+        let text: String
     }
 }

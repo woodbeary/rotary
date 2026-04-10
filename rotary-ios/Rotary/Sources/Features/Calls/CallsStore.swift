@@ -51,7 +51,7 @@ final class CallsStore {
         self.api = api
         self.tokenProvider = tokenProvider
         self.allCalls = Self.sortedCalls(bootstrap.callPreview)
-        self.voicemails = Self.sortedCalls(bootstrap.callPreview.filter(Self.isPlayableVoicemail))
+        self.voicemails = Self.sortedCalls(bootstrap.callPreview.filter(Self.isVoicemailLike))
         self.threadPreview = bootstrap.threadPreview
         self.agents = bootstrap.agents
         self.ownerLinePhoneNumber = bootstrap.ownerLine?.phoneNumber ?? bootstrap.capabilities.defaultMainLine
@@ -66,7 +66,7 @@ final class CallsStore {
         allCalls = Self.mergeCalls(existing: allCalls, incoming: bootstrap.callPreview)
         voicemails = Self.mergeCalls(
             existing: voicemails,
-            incoming: bootstrap.callPreview.filter(Self.isPlayableVoicemail)
+            incoming: bootstrap.callPreview.filter(Self.isVoicemailLike)
         )
 
         rebuildDerivedData()
@@ -253,7 +253,29 @@ final class CallsStore {
         return trimmed.isEmpty ? nil : trimmed
     }
 
-    private static func isPlayableVoicemail(_ call: MobileCall) -> Bool {
-        call.hasPlayableVoicemailRecording
+    private static func isVoicemailLike(_ call: MobileCall) -> Bool {
+        if call.playbackKindResolved == "voicemail" || call.isVoicemailConversation {
+            return true
+        }
+
+        let normalizedStatus = call.status.lowercased()
+        let missedOrVoicemail =
+            normalizedStatus.contains("missed")
+            || normalizedStatus.contains("voicemail")
+            || call.livePhase == .noAnswer
+            || call.livePhase == .voicemail
+            || call.screeningOutcome?.lowercased().contains("voicemail") == true
+
+        if missedOrVoicemail,
+           call.summary?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            return true
+        }
+
+        if missedOrVoicemail,
+           call.transcript?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            return true
+        }
+
+        return false
     }
 }

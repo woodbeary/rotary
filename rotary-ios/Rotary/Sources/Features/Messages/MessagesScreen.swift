@@ -110,9 +110,7 @@ struct MessagesScreen: View {
                         .padding(.top, 6)
                         .padding(.bottom, 8)
 
-                    if isLoading && !hasAttemptedLoad {
-                        loadingState
-                    } else if filteredThreads.isEmpty {
+                    if filteredThreads.isEmpty {
                         emptyState
                     } else {
                         List(filteredThreads) { thread in
@@ -380,50 +378,49 @@ struct MessagesScreen: View {
 
     private var emptyState: some View {
         VStack(spacing: 12) {
-            Spacer()
-            Image(systemName: selectedFilter == .deleted ? "trash" : "message")
-                .font(.system(size: 28, weight: .regular))
-                .foregroundStyle(.secondary)
-            Text(searchText.isEmpty ? emptyTitle : "No matching conversations")
-                .font(.headline)
-            Text(searchText.isEmpty ? emptyMessage : "Search names, numbers, or previews.")
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            if let loadError, !loadError.isEmpty {
-                Text(loadError)
-                    .font(.footnote)
-                    .foregroundStyle(.red)
+            Spacer(minLength: 24)
+
+            VStack(spacing: 10) {
+                Circle()
+                    .fill(RotaryTheme.softSurface)
+                    .frame(width: 72, height: 72)
+                    .overlay(
+                        Image(systemName: "bubble.left.and.bubble.right")
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    )
+
+                Text(loadError?.isEmpty == false ? "Messages could not load" : "No messages yet")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.primary)
+
+                Text(loadError?.isEmpty == false ? loadError! : "Start a conversation to see it appear here.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .lineLimit(3)
+
+                if loadError == nil || loadError?.isEmpty == true {
+                    Button("New Message") {
+                        showingCompose = true
+                    }
+                    .buttonStyle(RotaryPrimaryButtonStyle())
+                    .frame(maxWidth: 220)
+                    .padding(.top, 6)
+                }
             }
-            Spacer()
+            .frame(maxWidth: 300)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
+            .background(RotaryTheme.secondarySurface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .stroke(RotaryTheme.elevatedStroke, lineWidth: 1)
+            )
+
+            Spacer(minLength: 24)
         }
         .padding(.horizontal, 24)
-    }
-
-    private var emptyTitle: String {
-        switch selectedFilter {
-        case .all:
-            return "No conversations yet"
-        case .known:
-            return "No known senders yet"
-        case .spam:
-            return "No spam conversations"
-        case .deleted:
-            return "Nothing deleted"
-        }
-    }
-
-    private var emptyMessage: String {
-        switch selectedFilter {
-        case .all:
-            return "Messages from your real Rotary numbers will appear here."
-        case .known:
-            return "Conversations with named senders will appear here."
-        case .spam:
-            return "Unknown and spam conversations live here."
-        case .deleted:
-            return "Deleted conversations can be recovered here."
-        }
     }
 
     private func count(for filter: MessageInboxFilter) -> Int? {
@@ -628,9 +625,11 @@ struct MessageThreadScreen: View {
                         }
                     }
                 } else if isWorking {
-                    RotaryConversationSkeleton(rows: 5)
-                        .padding(.horizontal, 12)
-                        .padding(.top, 12)
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            composerFocused = false
+                        }
                 } else if let errorMessage {
                     VStack(spacing: 12) {
                         Spacer()
@@ -1090,11 +1089,10 @@ private struct ComposeMessageSheet: View {
         }
 
         do {
-            try await Task.sleep(for: .milliseconds(180))
-            guard recipientQuery.trimmingCharacters(in: .whitespacesAndNewlines) == query else { return }
             let payload = try await withAuthorizedRetry(tokenProvider: tokenProvider) { token in
                 try await api.searchContacts(token: token, query: query)
             }
+            guard recipientQuery.trimmingCharacters(in: .whitespacesAndNewlines) == query else { return }
             suggestions = payload.results
         } catch {
             if !Task.isCancelled {

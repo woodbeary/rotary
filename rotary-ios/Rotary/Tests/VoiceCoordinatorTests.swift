@@ -60,7 +60,7 @@ final class VoiceCoordinatorTests: XCTestCase {
         )
     }
 
-    func testOutboundRouteFallsBackOnlyWhenCallbackBridgeIsEnabled() {
+    func testOutboundRouteRequiresNativeVoiceTokenReadiness() {
         let tokenState = MobileVoiceTokenResponse(
             enabled: false,
             incomingEnabled: false,
@@ -77,13 +77,6 @@ final class VoiceCoordinatorTests: XCTestCase {
             VoiceOutboundCallPlanner.resolveRoute(
                 tokenState: tokenState,
                 callbackBridgeEnabled: true
-            ),
-            .callbackBridge
-        )
-        XCTAssertEqual(
-            VoiceOutboundCallPlanner.resolveRoute(
-                tokenState: tokenState,
-                callbackBridgeEnabled: false
             ),
             .unavailable("Voice is not enabled for this workspace.")
         )
@@ -104,6 +97,33 @@ final class VoiceCoordinatorTests: XCTestCase {
         XCTAssertEqual(
             VoiceDTMFDigits.sanitize("1 2-3p,#x*"),
             "123#*"
+        )
+    }
+
+    func testStartCallTransitionPublishesOnlyForCurrentActiveAttempt() {
+        XCTAssertTrue(
+            VoiceCoordinator.shouldPublishStartCallTransition(
+                isCurrentAttempt: true,
+                isEndingCall: false
+            )
+        )
+    }
+
+    func testStartCallTransitionSuppressesWhenEndingCall() {
+        XCTAssertFalse(
+            VoiceCoordinator.shouldPublishStartCallTransition(
+                isCurrentAttempt: true,
+                isEndingCall: true
+            )
+        )
+    }
+
+    func testStartCallTransitionSuppressesForStaleAttempt() {
+        XCTAssertFalse(
+            VoiceCoordinator.shouldPublishStartCallTransition(
+                isCurrentAttempt: false,
+                isEndingCall: false
+            )
         )
     }
 

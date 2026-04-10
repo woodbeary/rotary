@@ -7,6 +7,8 @@ struct SettingsSheet: View {
     @Bindable var appModel: AppModel
     let bootstrap: MobileBootstrapReadyState
     @Bindable var voiceCoordinator: VoiceCoordinator
+    @Bindable var mutationDispatcher: RotaryMutationDispatcher
+    @Bindable var inferenceModeStore: InferenceModeStore
 
     @State private var screeningEnabled = false
     @State private var screeningLineNumber: String?
@@ -15,6 +17,8 @@ struct SettingsSheet: View {
     @State private var isSendingTraceSnapshot = false
     @State private var traceStatusMessage: String?
     @State private var traceStore = RotaryTraceStore.shared
+    @State private var localModelManager = LocalModelManager.shared
+    @State private var failedMutationRecords: [OfflineMutationRecord] = []
 
     private var diagnosticsPayload: String {
         let lineSummary = bootstrap.lines
@@ -120,6 +124,39 @@ struct SettingsSheet: View {
                     screeningError: screeningError
                 )
 
+                SettingsOfflineSection(
+                    mode: Binding(
+                        get: { inferenceModeStore.mode },
+                        set: { inferenceModeStore.mode = $0 }
+                    ),
+                    localStatusTitle: localModelManager.statusTitle,
+                    localStatus: localModelManager.status,
+                    localStorageFootprint: localModelManager.storageFootprint,
+                    isOnline: appModel.connectivityMonitor.isOnline,
+                    pendingCount: mutationDispatcher.pendingCount,
+                    failedCount: mutationDispatcher.failedCount,
+                    isSyncing: mutationDispatcher.isSyncing,
+                    lastSuccessfulSyncAt: mutationDispatcher.lastSuccessfulSyncAt,
+                    latestFailureReason: mutationDispatcher.latestFailureReason,
+                    failedMutationRecords: failedMutationRecords,
+                    prepareLocalAssistant: {
+                        await localModelManager.warmup()
+                        if localModelManager.isReadyForExecution {
+                            inferenceModeStore.mode = .local
+                        } else {
+                            inferenceModeStore.mode = .cloud
+                        }
+                    },
+                    disableLocalAssistant: {
+                        inferenceModeStore.mode = .cloud
+                        localModelManager.unload()
+                    },
+                    retryNow: {
+                        await mutationDispatcher.retryFailedMutations()
+                        await refreshOfflineFailures()
+                    }
+                )
+
                 SettingsSupportSection(
                     diagnosticsPayload: { diagnosticsPayload },
                     traceStore: traceStore,
@@ -146,6 +183,15 @@ struct SettingsSheet: View {
         }
         .task(id: bootstrap.ownerLine?.id ?? bootstrap.session.orgId) {
             await loadScreening()
+        }
+        .task(id: "\(mutationDispatcher.pendingCount)|\(mutationDispatcher.failedCount)") {
+            await refreshOfflineFailures()
+        }
+        .task(id: inferenceModeStore.mode.rawValue) {
+            await localModelManager.refreshAvailability()
+            if inferenceModeStore.mode == .local, !localModelManager.isReadyForExecution {
+                inferenceModeStore.mode = .cloud
+            }
         }
     }
 
@@ -208,6 +254,10 @@ struct SettingsSheet: View {
             traceStatusMessage = "Support snapshot failed: \(error.localizedDescription)"
             RotaryHaptics.error()
         }
+    }
+
+    private func refreshOfflineFailures() async {
+        failedMutationRecords = await mutationDispatcher.failedRecords()
     }
 }
 
@@ -279,6 +329,137 @@ private struct SettingsCallsSection: View {
             if let screeningError, !screeningError.isEmpty {
                 SettingsDetailText(screeningError, color: .red)
             }
+        }
+    }
+}
+
+private struct SettingsOfflineSection: View {
+    @Binding var mode: InferenceMode
+    let localStatusTitle: String
+    let localStatus: LocalInferenceStatus
+    let localStorageFootprint: String
+    let isOnline: Bool
+    let pendingCount: Int
+    let failedCount: Int
+    let isSyncing: Bool
+    let lastSuccessfulSyncAt: Date?
+    let latestFailureReason: String?
+    let failedMutationRecords: [OfflineMutationRecord]
+    let prepareLocalAssistant: () async -> Void
+    let disableLocalAssistant: () -> Void
+    let retryNow: () async -> Void
+
+    private var isLocalReady: Bool {
+        if case .ready = localStatus {
+            return true
+        }
+        return false
+    }
+
+    private var shouldShowPrepareButton: Bool {
+        switch localStatus {
+        case .idle, .failed:
+            return true
+        case .loading, .ready, .unavailable:
+            return false
+        }
+    }
+
+    private var prepareButtonTitle: String {
+        switch localStatus {
+        case .failed:
+            return "Retry Offline Assistant"
+        default:
+            return "Prepare Offline Assistant"
+        }
+    }
+
+    var body: some View {
+        Section("Offline & Local AI") {
+            SettingsValueRow(title: "Offline assistant", value: localStatusTitle)
+            SettingsValueRow(title: "Local storage", value: localStorageFootprint)
+
+            if case .loading = localStatus {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.85)
+                    Text("Preparing the on-device assistant")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if isLocalReady {
+                Toggle(
+                    isOn: Binding(
+                        get: { mode == .local },
+                        set: { mode = $0 ? .local : .cloud }
+                    )
+                ) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Use Offline Assistant")
+                            .font(.body.weight(.semibold))
+                        Text("Replies run on this iPhone when Apple’s on-device model is ready.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else if shouldShowPrepareButton {
+                Button {
+                    Task { await prepareLocalAssistant() }
+                } label: {
+                    Label(prepareButtonTitle, systemImage: "arrow.down.circle")
+                }
+            }
+
+            if mode == .local && isLocalReady {
+                Button("Use Cloud Instead") {
+                    disableLocalAssistant()
+                }
+            }
+
+            SettingsValueRow(
+                title: "Connection",
+                value: isOnline ? "Online" : "Offline"
+            )
+            SettingsValueRow(title: "Queued changes", value: "\(pendingCount)")
+            SettingsValueRow(title: "Failed sync items", value: "\(failedCount)")
+
+            if let lastSuccessfulSyncAt {
+                SettingsValueRow(
+                    title: "Last sync",
+                    value: lastSuccessfulSyncAt.formatted(.dateTime.month().day().hour().minute())
+                )
+            }
+
+            if let latestFailureReason, !latestFailureReason.isEmpty {
+                SettingsDetailText(latestFailureReason, color: .red)
+            }
+
+            if failedCount > 0 {
+                Button {
+                    Task { await retryNow() }
+                } label: {
+                    Label(isSyncing ? "Syncing…" : "Retry Sync", systemImage: "arrow.clockwise")
+                }
+                .disabled(isSyncing)
+            }
+
+            if !failedMutationRecords.isEmpty {
+                ForEach(failedMutationRecords.prefix(3), id: \.id) { record in
+                    SettingsDetailText(
+                        "\(record.payload.debugLabel): \(record.failureReason ?? "Unknown sync failure")",
+                        color: .secondary
+                    )
+                }
+            }
+
+            SettingsDetailText(localStatus.detailText)
+            SettingsDetailText(
+                mode == .local
+                    ? "Local mode is active for supported devices. Rotary automatically falls back to cloud if the on-device runtime is unavailable."
+                    : "Cloud mode is the default and stays active on unsupported devices, including older iPhone SE-class hardware."
+            )
         }
     }
 }

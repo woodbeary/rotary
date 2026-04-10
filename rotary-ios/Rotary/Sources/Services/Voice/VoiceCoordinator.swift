@@ -172,17 +172,13 @@ private enum VoiceActiveSessionOrigin {
 enum VoiceOutboundCallPlanner {
     static func resolveRoute(
         tokenState: MobileVoiceTokenResponse?,
-        callbackBridgeEnabled: Bool
+        callbackBridgeEnabled _: Bool
     ) -> VoiceOutboundRoute {
         if let tokenState,
            tokenState.enabled,
            let voiceToken = tokenState.token,
            !voiceToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return .native
-        }
-
-        if callbackBridgeEnabled {
-            return .callbackBridge
         }
 
         let reason = tokenState?.reason?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -316,6 +312,8 @@ private enum RotaryDebugVoiceEnvironment {
 @Observable
 final class VoiceCoordinator: NSObject {
     static let shared = VoiceCoordinator()
+    private static let pushTokenDefaultsKey = "rotary.voice.pushToken"
+    private static let voipPushTokenDefaultsKey = "rotary.voice.voipPushToken"
 
     private let api: RotaryAPIClient
 
@@ -336,7 +334,14 @@ final class VoiceCoordinator: NSObject {
     var isSpeakerEnabled = false
     var currentAudioOutput: VoiceAudioOutput = .unknown
     var availableAudioRoutes: [VoiceAudioRouteOption] = []
+    var debugLiveAssistSheetRequestID = 0
+    var debugDismissLiveAssistSheetRequestID = 0
+    var debugShowKeypadRequestID = 0
+    var debugHideKeypadRequestID = 0
+    var debugSteerRequestID = 0
+    var debugSteerMode: String?
     var lastRegistrationAt: Date?
+    private var lastVoiceStateRefreshAt: Date?
     var callPresentationState: RotaryCallPresentationState = .idle {
         didSet {
             syncRingbackPlayback()
@@ -356,6 +361,8 @@ final class VoiceCoordinator: NSObject {
     private var activeSessionOrigin: VoiceActiveSessionOrigin?
     private var activeSessionStartedAt: Date?
     private var linePhoneNumbersByID: [String: String] = [:]
+    private var activePushTokenHex: String?
+    private var activePushTokenData: Data?
     private var activeVoipPushTokenHex: String?
     private var activeVoipPushTokenData: Data?
     private var pendingConnectRequest: RotaryPendingConnectRequest?
@@ -381,6 +388,8 @@ final class VoiceCoordinator: NSObject {
     init(api: RotaryAPIClient? = nil) {
         self.api = api ?? RotaryAPIClient()
         super.init()
+        restorePersistedPushToken()
+        restorePersistedVoipToken()
 
         audioRouteObserver = NotificationCenter.default.addObserver(
             forName: AVAudioSession.routeChangeNotification,
@@ -406,6 +415,45 @@ final class VoiceCoordinator: NSObject {
         callKitProvider = provider
 #endif
         refreshAudioRoute()
+    }
+
+    var isDebugPreviewCallSession: Bool {
+#if DEBUG
+        return isDebugPreviewCallActive
+#else
+        return false
+#endif
+    }
+
+    func requestDebugLiveAssistSheetPresentation() {
+#if DEBUG
+        debugLiveAssistSheetRequestID &+= 1
+#endif
+    }
+
+    func requestDebugLiveAssistSheetDismissal() {
+#if DEBUG
+        debugDismissLiveAssistSheetRequestID &+= 1
+#endif
+    }
+
+    func requestDebugKeypadPresentation() {
+#if DEBUG
+        debugShowKeypadRequestID &+= 1
+#endif
+    }
+
+    func requestDebugKeypadDismissal() {
+#if DEBUG
+        debugHideKeypadRequestID &+= 1
+#endif
+    }
+
+    func requestDebugSteer(mode: String) {
+#if DEBUG
+        debugSteerMode = mode.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        debugSteerRequestID &+= 1
+#endif
     }
 
 #if DEBUG
@@ -436,6 +484,9 @@ final class VoiceCoordinator: NSObject {
     }
 
     func clearSession() {
+#if canImport(TwilioVoice)
+        unregisterCurrentTwilioBinding(reason: "session_clear")
+#endif
         authToken = nil
         tokenProvider = nil
         orgId = nil
@@ -444,6 +495,7 @@ final class VoiceCoordinator: NSObject {
         linePhoneNumbersByID = [:]
         tokenState = nil
         registrationState = nil
+        lastVoiceStateRefreshAt = nil
         lastJoinContext = nil
         lastActionMessage = nil
         lastError = nil
@@ -471,6 +523,7 @@ final class VoiceCoordinator: NSObject {
         do {
             RotaryLogger.trace("voice refresh start", category: "voice")
             tokenState = try await api.voiceToken(token: token)
+            lastVoiceStateRefreshAt = Date()
             lastError = nil
 
             guard let state = tokenState else { return }
@@ -480,8 +533,12 @@ final class VoiceCoordinator: NSObject {
                 return
             }
 
-            if let voipPushTokenHex = activeVoipPushTokenHex {
-                await registerCurrentDevice(token: token, voipPushToken: voipPushTokenHex)
+            if activePushTokenHex != nil || activeVoipPushTokenHex != nil {
+                await registerCurrentDevice(
+                    token: token,
+                    pushToken: activePushTokenHex,
+                    voipPushToken: activeVoipPushTokenHex
+                )
             }
             RotaryLogger.trace(
                 "voice refresh ready incoming=\(String(describing: state.incomingEnabled))",
@@ -493,19 +550,34 @@ final class VoiceCoordinator: NSObject {
         }
     }
 
-    func registerCurrentDevice(token: String, voipPushToken: String? = nil) async {
+    func registerCurrentDevice(
+        token: String,
+        pushToken: String? = nil,
+        voipPushToken: String? = nil
+    ) async {
         isRegistering = true
         defer { isRegistering = false }
 
         do {
             RotaryLogger.trace("voice register device start", category: "voice")
-            let effectivePushToken = voipPushToken ?? activeVoipPushTokenHex
-            registrationState = try await api.registerDevice(
-                token: token,
-                voipPushToken: effectivePushToken,
+            let effectivePushToken = pushToken ?? activePushTokenHex
+            let effectiveVoipPushToken = voipPushToken ?? activeVoipPushTokenHex
+            let dispatchResult = try await RotaryMutationDispatcher.shared.registerDevice(
+                pushToken: effectivePushToken,
+                voipPushToken: effectiveVoipPushToken,
                 clientReady: true
             )
-            lastRegistrationAt = Date()
+
+            switch dispatchResult {
+            case .executed(let response):
+                registrationState = response
+                lastRegistrationAt = Date()
+            case .queued:
+                lastError = nil
+                lastActionMessage = "Device registration queued offline and will sync automatically."
+                RotaryLogger.trace("voice register device queued offline", category: "voice")
+                return
+            }
 
 #if canImport(TwilioVoice)
             if let voiceToken = tokenState?.token,
@@ -518,6 +590,27 @@ final class VoiceCoordinator: NSObject {
             lastActionMessage = "Rotary is ready for app calls on this device."
             RotaryLogger.trace("voice register device success", category: "voice")
         } catch {
+            if case RotaryAPIError.unauthenticated = error {
+                do {
+                    let effectivePushToken = pushToken ?? activePushTokenHex
+                    let effectiveVoipPushToken = voipPushToken ?? activeVoipPushTokenHex
+                    registrationState = try await api.registerDevice(
+                        token: token,
+                        pushToken: effectivePushToken,
+                        voipPushToken: effectiveVoipPushToken,
+                        clientReady: true
+                    )
+                    lastRegistrationAt = Date()
+                    lastError = nil
+                    lastActionMessage = "Rotary is ready for app calls on this device."
+                    return
+                } catch {
+                    lastError = error.localizedDescription
+                    RotaryLogger.trace("voice register device failed: \(error.localizedDescription)", category: "voice", level: "error")
+                    return
+                }
+            }
+
             lastError = error.localizedDescription
             RotaryLogger.trace("voice register device failed: \(error.localizedDescription)", category: "voice", level: "error")
         }
@@ -527,14 +620,42 @@ final class VoiceCoordinator: NSObject {
         let tokenData = credentials.token
         activeVoipPushTokenData = tokenData
         activeVoipPushTokenHex = tokenData.map { String(format: "%02x", $0) }.joined()
+        persistVoipPushToken(tokenData)
 
         guard let authToken else { return }
-        await registerCurrentDevice(token: authToken, voipPushToken: activeVoipPushTokenHex)
+        await registerCurrentDevice(
+            token: authToken,
+            pushToken: activePushTokenHex,
+            voipPushToken: activeVoipPushTokenHex
+        )
+    }
+
+    func updatePushCredentials(_ tokenData: Data) async {
+        activePushTokenData = tokenData
+        activePushTokenHex = tokenData.map { String(format: "%02x", $0) }.joined()
+        persistPushToken(tokenData)
+
+        guard let authToken else { return }
+        await registerCurrentDevice(
+            token: authToken,
+            pushToken: activePushTokenHex,
+            voipPushToken: activeVoipPushTokenHex
+        )
+    }
+
+    func invalidatePushToken() {
+        activePushTokenHex = nil
+        activePushTokenData = nil
+        UserDefaults.standard.removeObject(forKey: Self.pushTokenDefaultsKey)
     }
 
     func invalidateVoipToken() {
+#if canImport(TwilioVoice)
+        unregisterCurrentTwilioBinding(reason: "voip_token_invalidated")
+#endif
         activeVoipPushTokenHex = nil
         activeVoipPushTokenData = nil
+        UserDefaults.standard.removeObject(forKey: Self.voipPushTokenDefaultsKey)
     }
 
     func handleIncomingPush(payload: PKPushPayload, completion: (() -> Void)? = nil) {
@@ -595,7 +716,7 @@ final class VoiceCoordinator: NSObject {
         isCallScreenPresented = true
         isEndingCall = false
 
-        if tokenState == nil {
+        if shouldRefreshVoiceStateForDial() {
             await refreshVoiceState(token: authToken)
         }
 
@@ -635,34 +756,10 @@ final class VoiceCoordinator: NSObject {
         }
 
         guard let orgId else {
-            if callbackBridgeEnabled {
-                didAttemptCallbackFallbackCurrentOutboundCall = true
-                try await startCallbackBridgeCall(
-                    attemptID: attemptID,
-                    token: authToken,
-                    phoneNumber: phoneNumber,
-                    lineId: lineId,
-                    contactId: contactId,
-                    displayName: displayName
-                )
-                return
-            }
             throw VoiceCoordinatorError.missingVoiceIdentity
         }
 
         guard let fromLine, !fromLine.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            if callbackBridgeEnabled {
-                didAttemptCallbackFallbackCurrentOutboundCall = true
-                try await startCallbackBridgeCall(
-                    attemptID: attemptID,
-                    token: authToken,
-                    phoneNumber: phoneNumber,
-                    lineId: lineId,
-                    contactId: contactId,
-                    displayName: displayName
-                )
-                return
-            }
             throw VoiceCoordinatorError.missingLine
         }
 
@@ -699,6 +796,7 @@ final class VoiceCoordinator: NSObject {
         callPresentationState = .requestingCallKit
         try await requestStartCall(
             uuid: uuid,
+            attemptID: attemptID,
             handle: phoneNumber,
             handleType: .phoneNumber,
             localizedCallerName: contactName ?? displayName
@@ -737,6 +835,15 @@ final class VoiceCoordinator: NSObject {
             fromNumber: fromNumber
         )
         guard isCurrentOutboundAttempt(attemptID) else {
+            if let staleCallSid = response.callSid?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !staleCallSid.isEmpty {
+                _ = try? await api.cancelCallback(token: token, callSid: staleCallSid)
+                RotaryLogger.trace(
+                    "voice callback bridge stale response canceled callSid=\(staleCallSid)",
+                    category: "voice",
+                    level: "warning"
+                )
+            }
             RotaryLogger.trace(
                 "voice callback bridge response ignored because the call was canceled",
                 category: "voice",
@@ -752,7 +859,17 @@ final class VoiceCoordinator: NSObject {
         activeSessionStartedAt = Date()
         lastOutboundDialRequest = nil
         lastError = nil
-        lastActionMessage = "Rotary is calling you back to bridge this call."
+        let bridgeState = response.bridgeState?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard bridgeState == "agent_autonomous" else {
+            if let callSid = response.callSid?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !callSid.isEmpty {
+                _ = try? await api.cancelCallback(token: token, callSid: callSid)
+            }
+            throw VoiceCoordinatorError.nativeVoiceUnavailable(
+                "Agent runtime was not ready, so Rotary canceled the fallback call."
+            )
+        }
+        lastActionMessage = "Your agent is placing the call now."
         callPresentationState = .startedConnecting
         isCallScreenPresented = true
         isEndingCall = false
@@ -769,7 +886,7 @@ final class VoiceCoordinator: NSObject {
 
         let authToken = try await currentAuthToken()
 
-        if tokenState == nil {
+        if shouldRefreshVoiceStateForDial() {
             await refreshVoiceState(token: authToken)
         }
 
@@ -811,6 +928,7 @@ final class VoiceCoordinator: NSObject {
         isEndingCall = false
         try await requestStartCall(
             uuid: uuid,
+            attemptID: attemptID,
             handle: call.contactName,
             handleType: .generic,
             localizedCallerName: call.contactName
@@ -967,8 +1085,12 @@ final class VoiceCoordinator: NSObject {
             callPresentationState = .ringing
             lastActionMessage = "Ringing…"
         case .connected:
+            let previousState = callPresentationState
             callPresentationState = .connected
             lastActionMessage = "Call connected."
+            if previousState != .connected {
+                RotaryHaptics.success()
+            }
         case .voicemail, .busy, .noAnswer, .failed, .ended, .none:
             break
         }
@@ -1411,6 +1533,7 @@ final class VoiceCoordinator: NSObject {
 
     private func requestStartCall(
         uuid: UUID,
+        attemptID: UUID,
         handle: String,
         handleType: CXHandle.HandleType,
         localizedCallerName: String?
@@ -1422,6 +1545,14 @@ final class VoiceCoordinator: NSObject {
         let transaction = CXTransaction(action: action)
 
         try await request(transaction: transaction)
+        guard Self.shouldPublishStartCallTransition(
+            isCurrentAttempt: isCurrentOutboundAttempt(attemptID),
+            isEndingCall: isEndingCall
+        ) else {
+            // If the user already ended this attempt, ensure CallKit receives a matching end.
+            requestEndCall(uuid: uuid)
+            return
+        }
         callPresentationState = .startedConnecting
 
         let update = CXCallUpdate()
@@ -1441,6 +1572,10 @@ final class VoiceCoordinator: NSObject {
             "Twilio Voice is not linked into this Rotary build yet."
         )
 #endif
+    }
+
+    nonisolated static func shouldPublishStartCallTransition(isCurrentAttempt: Bool, isEndingCall: Bool) -> Bool {
+        isCurrentAttempt && !isEndingCall
     }
 
     private func requestEndCall(uuid: UUID?) {
@@ -1513,6 +1648,51 @@ final class VoiceCoordinator: NSObject {
             throw VoiceCoordinatorError.missingSession
         }
         return authToken
+    }
+
+    private func shouldRefreshVoiceStateForDial() -> Bool {
+        guard let tokenState else {
+            return true
+        }
+
+        let trimmedToken = tokenState.token?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if trimmedToken.isEmpty {
+            return true
+        }
+
+        guard let lastVoiceStateRefreshAt else {
+            return true
+        }
+
+        return Date().timeIntervalSince(lastVoiceStateRefreshAt) > 240
+    }
+
+    private func restorePersistedPushToken() {
+        guard let tokenData = UserDefaults.standard.data(forKey: Self.pushTokenDefaultsKey),
+              !tokenData.isEmpty
+        else {
+            return
+        }
+        activePushTokenData = tokenData
+        activePushTokenHex = tokenData.map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func persistPushToken(_ tokenData: Data) {
+        UserDefaults.standard.set(tokenData, forKey: Self.pushTokenDefaultsKey)
+    }
+
+    private func restorePersistedVoipToken() {
+        guard let tokenData = UserDefaults.standard.data(forKey: Self.voipPushTokenDefaultsKey),
+              !tokenData.isEmpty
+        else {
+            return
+        }
+        activeVoipPushTokenData = tokenData
+        activeVoipPushTokenHex = tokenData.map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func persistVoipPushToken(_ tokenData: Data) {
+        UserDefaults.standard.set(tokenData, forKey: Self.voipPushTokenDefaultsKey)
     }
 }
 
@@ -1601,8 +1781,12 @@ extension VoiceCoordinator: @preconcurrency CallDelegate {
         isInCall = true
         didConnectCurrentOutboundCall = true
         syncActiveCallState(from: call)
+        let previousState = callPresentationState
         callPresentationState = .connected
         lastActionMessage = "Call connected."
+        if previousState != .connected {
+            RotaryHaptics.success()
+        }
         isCallScreenPresented = true
         isEndingCall = false
         lastError = nil
@@ -1977,88 +2161,53 @@ extension VoiceCoordinator: @preconcurrency CXProviderDelegate {
         }
     }
 
-    @discardableResult
-    private func beginCallbackFallbackIfPossible(for errorText: String) -> Bool {
-        guard callbackBridgeEnabled else {
-            if !errorText.isEmpty {
+    private func unregisterTwilio(accessToken: String, deviceToken: Data) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            TwilioVoiceSDK.unregister(accessToken: accessToken, deviceToken: deviceToken) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+    }
+
+    private func unregisterCurrentTwilioBinding(reason: String) {
+        let accessToken = tokenState?.token?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !accessToken.isEmpty,
+              let deviceToken = activeVoipPushTokenData
+        else {
+            return
+        }
+
+        Task { @MainActor [accessToken, deviceToken] in
+            do {
+                try await unregisterTwilio(accessToken: accessToken, deviceToken: deviceToken)
                 RotaryLogger.trace(
-                    "voice callback fallback skipped because capability is disabled reason=\(errorText)",
+                    "voice unregister Twilio binding success reason=\(reason)",
+                    category: "voice"
+                )
+            } catch {
+                RotaryLogger.trace(
+                    "voice unregister Twilio binding failed reason=\(reason): \(error.localizedDescription)",
                     category: "voice",
                     level: "warning"
                 )
             }
-            return false
         }
-        guard !isEndingCall,
-              !didAttemptCallbackFallbackCurrentOutboundCall,
-              callbackFallbackTask == nil,
-              let request = lastOutboundDialRequest else {
-            return false
-        }
+    }
 
-        let attemptID = outboundCallAttemptID
-        didAttemptCallbackFallbackCurrentOutboundCall = true
-        callbackFallbackTask = Task { @MainActor [api, attemptID, request] in
-            defer { callbackFallbackTask = nil }
-
-            do {
-                try Task.checkCancellation()
-                guard self.isCurrentOutboundAttempt(attemptID), !self.isEndingCall else {
-                    return
-                }
-                if errorText.isEmpty {
-                    RotaryLogger.trace(
-                        "voice callback fallback after native connect failure",
-                        category: "voice",
-                        level: "warning"
-                    )
-                } else {
-                    RotaryLogger.trace(
-                        "voice callback fallback after native connect failure reason=\(errorText)",
-                        category: "voice",
-                        level: "warning"
-                    )
-                }
-                let sessionToken = try await currentAuthToken(forceRefresh: true)
-                try Task.checkCancellation()
-                guard self.isCurrentOutboundAttempt(attemptID), !self.isEndingCall else {
-                    return
-                }
-                let response = try await api.startCallback(
-                    token: sessionToken,
-                    phoneNumber: request.phoneNumber,
-                    contactId: request.contactId,
-                    fromNumber: request.fromNumber
-                )
-                try Task.checkCancellation()
-                guard self.isCurrentOutboundAttempt(attemptID), !self.isEndingCall else {
-                    return
-                }
-                activeCallbackCallSid =
-                    response.callSid?.trimmingCharacters(in: .whitespacesAndNewlines)
-                activeVoiceCallSid = nil
-                activeSessionOrigin = .callbackBridge
-                activeSessionStartedAt = Date()
-                lastActionMessage = "Rotary is calling you back to bridge this call."
-                lastError = nil
-                callPresentationState = .startedConnecting
-                isCallScreenPresented = true
-                isEndingCall = false
-                lastOutboundDialRequest = nil
-                RotaryLogger.trace(
-                    "voice callback fallback started callSid=\(response.callSid ?? "unknown")",
-                    category: "voice"
-                )
-            } catch is CancellationError {
-                RotaryLogger.trace("voice callback fallback cancelled", category: "voice")
-            } catch {
-                lastError = error.localizedDescription
-                callPresentationState = .failed(error.localizedDescription)
-                isCallScreenPresented = false
-                isEndingCall = false
-            }
+    @discardableResult
+    private func beginCallbackFallbackIfPossible(for errorText: String) -> Bool {
+        if !errorText.isEmpty {
+            RotaryLogger.trace(
+                "voice callback fallback disabled by policy reason=\(errorText)",
+                category: "voice",
+                level: "warning"
+            )
         }
-        return true
+        return false
     }
 }
 #endif

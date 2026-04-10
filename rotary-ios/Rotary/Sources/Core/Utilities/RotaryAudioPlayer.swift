@@ -1,6 +1,29 @@
 import AVFoundation
 import Observation
 
+enum RotaryPlaybackAudioRoute: String {
+    case speaker
+    case receiver
+
+    var systemImage: String {
+        switch self {
+        case .speaker:
+            return "speaker.wave.2.fill"
+        case .receiver:
+            return "phone.fill"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .speaker:
+            return "Speaker"
+        case .receiver:
+            return "Receiver"
+        }
+    }
+}
+
 @MainActor
 @Observable
 final class RotaryAudioPlayer {
@@ -11,6 +34,7 @@ final class RotaryAudioPlayer {
     var isPlaying = false
     var currentTime: Double = 0
     var duration: Double = 0
+    private(set) var audioRoute: RotaryPlaybackAudioRoute = .speaker
 
     func load(url: URL) {
         if currentURL == url, player != nil {
@@ -19,6 +43,8 @@ final class RotaryAudioPlayer {
 
         reset()
         currentURL = url
+        configureAudioSession()
+        applyAudioRoute(.speaker)
 
         let player = AVPlayer(url: url)
         self.player = player
@@ -61,6 +87,17 @@ final class RotaryAudioPlayer {
         player?.pause()
         isPlaying = false
         seek(to: 0)
+        resetAudioRoute()
+    }
+
+    func stopAndResetAudioRoute() {
+        stop()
+        reset()
+    }
+
+    func toggleAudioRoute() {
+        let nextRoute: RotaryPlaybackAudioRoute = (audioRoute == .speaker) ? .receiver : .speaker
+        applyAudioRoute(nextRoute)
     }
 
     private func reset() {
@@ -74,5 +111,46 @@ final class RotaryAudioPlayer {
         isPlaying = false
         currentTime = 0
         duration = 0
+        resetAudioRoute()
+    }
+
+    private func configureAudioSession() {
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(
+                .playAndRecord,
+                mode: .default,
+                options: [.allowBluetoothHFP, .allowBluetoothA2DP, .defaultToSpeaker]
+            )
+            try audioSession.setActive(true, options: [])
+        } catch {
+            // Playback still works with system defaults; route toggling may be unavailable.
+        }
+    }
+
+    private func applyAudioRoute(_ route: RotaryPlaybackAudioRoute) {
+        audioRoute = route
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            switch route {
+            case .speaker:
+                try audioSession.overrideOutputAudioPort(.speaker)
+            case .receiver:
+                try audioSession.overrideOutputAudioPort(.none)
+            }
+        } catch {
+            // Keep rendering state stable even if hardware route switching fails.
+        }
+    }
+
+    private func resetAudioRoute() {
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.overrideOutputAudioPort(.none)
+            try audioSession.setActive(false, options: [.notifyOthersOnDeactivation])
+        } catch {
+            // No-op.
+        }
+        audioRoute = .speaker
     }
 }

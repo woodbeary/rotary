@@ -17,12 +17,15 @@ struct APIErrorEnvelope: Decodable {
     let kind: String?
     let supportEmail: String?
     let support_email: String?
+    let decisionToken: String?
+    let sourceLanguage: String?
+    let targetLanguage: String?
 }
 
 enum RotaryAPIError: LocalizedError {
     case unauthenticated
     case invalidURL
-    case requestFailed(statusCode: Int, message: String, code: String?)
+    case requestFailed(statusCode: Int, message: String, code: String?, details: [String: String]?)
     case invalidResponse
 
     var errorDescription: String? {
@@ -31,7 +34,7 @@ enum RotaryAPIError: LocalizedError {
             return "No Clerk session is active."
         case .invalidURL:
             return "The API base URL is invalid."
-        case let .requestFailed(_, message, _):
+        case let .requestFailed(_, message, _, _):
             return message
         case .invalidResponse:
             return "The server response was invalid."
@@ -48,9 +51,16 @@ private enum RotaryCacheKey {
     static let voicemail = "voicemail"
     static let callScreening = "call-screening"
     static let voicePresets = "voice-presets"
+    static let callsSearchPrefix = "calls-search"
 
-    static func threadDetail(_ contactId: String) -> String {
-        "thread-detail:\(contactId)"
+    static func threadDetail(_ contactId: String, fromNumber: String? = nil) -> String {
+        let normalizedFromNumber = fromNumber?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: " ", with: "")
+        if let normalizedFromNumber, !normalizedFromNumber.isEmpty {
+            return "thread-detail:\(contactId):\(normalizedFromNumber)"
+        }
+        return "thread-detail:\(contactId)"
     }
 
     static func callDetail(_ callId: String) -> String {
@@ -64,6 +74,13 @@ private enum RotaryCacheKey {
     static func agentConversation(_ agentId: String) -> String {
         "agent-conversation:\(agentId)"
     }
+
+    static func callsSearch(_ query: String) -> String {
+        let normalized = query
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        return "\(callsSearchPrefix):\(normalized)"
+    }
 }
 
 private enum RotaryCacheTTL {
@@ -72,6 +89,7 @@ private enum RotaryCacheTTL {
     static let threadDetail: TimeInterval = 45
     static let filters: TimeInterval = 45
     static let calls: TimeInterval = 45
+    static let callsSearch: TimeInterval = 12
     static let callDetail: TimeInterval = 60
     static let voicemail: TimeInterval = 60
     static let voicemailDetail: TimeInterval = 60
@@ -96,11 +114,20 @@ private func makeDefaultRotarySession() -> URLSession {
 
 @MainActor
 final class RotaryAPIClient {
+    private struct DebugLiveAssistState {
+        var intentSummary: String
+        var suggestedNext: String
+        var steeringOptions: [String]
+        var transcriptLines: [String]
+        var provider: String
+    }
+
     private let config: AppConfig
     private let session: URLSession
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
     private let responseCache = RotaryResponseCache()
+    private static var debugLiveAssistStatesByCallID: [String: DebugLiveAssistState] = [:]
 
     init(
         config: AppConfig? = nil,
@@ -117,6 +144,24 @@ final class RotaryAPIClient {
     func resetSessionCaches() async {
         await responseCache.removeAll()
         RotaryLogger.trace("API session caches cleared", category: "api")
+    }
+
+    func resolveMediaURL(_ value: String?) -> URL? {
+        guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !value.isEmpty else {
+            return nil
+        }
+
+        if let absolute = URL(string: value),
+           let scheme = absolute.scheme?.lowercased(),
+           scheme == "http" || scheme == "https" {
+            return absolute
+        }
+
+        guard let relative = URL(string: value, relativeTo: config.apiBaseURL) else {
+            return nil
+        }
+        return relative.absoluteURL
     }
 
     func bootstrap(token: String, forceRefresh: Bool = false) async throws -> MobileBootstrapPayload {
@@ -258,11 +303,25 @@ final class RotaryAPIClient {
         return response.threads
     }
 
-    func threadDetail(token: String, contactId: String, forceRefresh: Bool = false) async throws -> MobileThreadDetail {
-        try await cachedRequest(
-            path: "/api/mobile/messages/threads/\(contactId)",
+    func threadDetail(
+        token: String,
+        contactId: String,
+        fromNumber: String? = nil,
+        forceRefresh: Bool = false
+    ) async throws -> MobileThreadDetail {
+        let threadPath: String
+        if let fromNumber = fromNumber?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !fromNumber.isEmpty,
+           let encoded = fromNumber.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            threadPath = "/api/mobile/messages/threads/\(contactId)?fromNumber=\(encoded)"
+        } else {
+            threadPath = "/api/mobile/messages/threads/\(contactId)"
+        }
+
+        return try await cachedRequest(
+            path: threadPath,
             token: token,
-            cacheKey: RotaryCacheKey.threadDetail(contactId),
+            cacheKey: RotaryCacheKey.threadDetail(contactId, fromNumber: fromNumber),
             ttl: RotaryCacheTTL.threadDetail,
             forceRefresh: forceRefresh,
             responseType: MobileThreadDetail.self
@@ -274,22 +333,54 @@ final class RotaryAPIClient {
         contactId: String?,
         toNumber: String?,
         fromNumber: String,
-        message: String
+        message: String,
+        translationFailureAction: String? = nil,
+        translationDecisionToken: String? = nil
     ) async throws -> MobileSendMessageResponse {
         struct Body: Encodable {
             let contactId: String?
             let toNumber: String?
             let fromNumber: String
             let message: String
+            let translationFailureAction: String?
+            let translationDecisionToken: String?
         }
         let response = try await request(
             path: "/api/mobile/messages/send",
             method: "POST",
             token: token,
-            body: Body(contactId: contactId, toNumber: toNumber, fromNumber: fromNumber, message: message),
+            body: Body(
+                contactId: contactId,
+                toNumber: toNumber,
+                fromNumber: fromNumber,
+                message: message,
+                translationFailureAction: translationFailureAction,
+                translationDecisionToken: translationDecisionToken
+            ),
             responseType: MobileSendMessageResponse.self
         )
         await invalidateCaches(RotaryCacheKey.threads, RotaryCacheKey.threadDetail(""), RotaryCacheKey.filters)
+        return response
+    }
+
+    func updateThreadLanguage(
+        token: String,
+        contactId: String,
+        contactLanguage: String?
+    ) async throws -> MobileThreadLanguageResponse {
+        struct Body: Encodable {
+            let contactLanguage: String?
+        }
+
+        let response = try await request(
+            path: "/api/mobile/messages/threads/\(contactId)/language",
+            method: "PATCH",
+            token: token,
+            body: Body(contactLanguage: contactLanguage),
+            responseType: MobileThreadLanguageResponse.self
+        )
+
+        await invalidateCaches(RotaryCacheKey.threads, RotaryCacheKey.threadDetail(contactId))
         return response
     }
 
@@ -303,6 +394,19 @@ final class RotaryAPIClient {
             responseType: MobileCallsPayload.self
         )
         return response.calls
+    }
+
+    func searchCalls(token: String, query: String, forceRefresh: Bool = false) async throws -> MobileCallSearchPayload {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let encodedQuery = trimmedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        return try await cachedRequest(
+            path: "/api/mobile/calls/search?q=\(encodedQuery)",
+            token: token,
+            cacheKey: RotaryCacheKey.callsSearch(trimmedQuery),
+            ttl: RotaryCacheTTL.callsSearch,
+            forceRefresh: forceRefresh,
+            responseType: MobileCallSearchPayload.self
+        )
     }
 
     func startCallback(token: String, phoneNumber: String?, contactId: String?, fromNumber: String?) async throws -> MobileCallbackResponse {
@@ -357,12 +461,26 @@ final class RotaryAPIClient {
     }
 
     func createFolder(token: String, name: String, description: String?, color: String?) async throws {
+        _ = try await createFolderDetailed(
+            token: token,
+            name: name,
+            description: description,
+            color: color
+        )
+    }
+
+    func createFolderDetailed(
+        token: String,
+        name: String,
+        description: String?,
+        color: String?
+    ) async throws -> MobileCreateFolderResponse {
         struct Body: Encodable {
             let name: String
             let description: String?
             let color: String?
         }
-        _ = try await request(
+        let response = try await request(
             path: "/api/mobile/folders",
             method: "POST",
             token: token,
@@ -370,6 +488,7 @@ final class RotaryAPIClient {
             responseType: MobileCreateFolderResponse.self
         )
         await invalidateCaches(RotaryCacheKey.bootstrap, RotaryCacheKey.folders)
+        return response
     }
 
     func updateFolder(
@@ -379,12 +498,28 @@ final class RotaryAPIClient {
         description: String? = nil,
         color: String? = nil
     ) async throws {
+        _ = try await updateFolderDetailed(
+            token: token,
+            folderId: folderId,
+            name: name,
+            description: description,
+            color: color
+        )
+    }
+
+    func updateFolderDetailed(
+        token: String,
+        folderId: String,
+        name: String,
+        description: String? = nil,
+        color: String? = nil
+    ) async throws -> MobileCreateFolderResponse {
         struct Body: Encodable {
             let name: String
             let description: String?
             let color: String?
         }
-        _ = try await request(
+        let response = try await request(
             path: "/api/mobile/folders/\(folderId)",
             method: "PATCH",
             token: token,
@@ -392,6 +527,7 @@ final class RotaryAPIClient {
             responseType: MobileCreateFolderResponse.self
         )
         await invalidateCaches(RotaryCacheKey.bootstrap, RotaryCacheKey.folders)
+        return response
     }
 
     func chatWithAgent(token: String, agentId: String, message: String, thinkingMode: String) async throws -> MobileAgentChatResponse {
@@ -491,10 +627,63 @@ final class RotaryAPIClient {
     }
 
     func liveAssist(token: String, callId: String) async throws -> MobileLiveAssistResponse {
-        try await request(path: "/api/mobile/calls/\(callId)/live-assist", method: "GET", token: token, responseType: MobileLiveAssistResponse.self)
+#if DEBUG
+        if callId.hasPrefix("debug-live-assist-") {
+            let state = debugLiveAssistState(for: callId)
+            return MobileLiveAssistResponse(
+                callId: callId,
+                intentSummary: state.intentSummary,
+                suggestedNext: state.suggestedNext,
+                steeringOptions: state.steeringOptions,
+                transcript: state.transcriptLines.joined(separator: "\n"),
+                provider: state.provider
+            )
+        }
+#endif
+        return try await request(path: "/api/mobile/calls/\(callId)/live-assist", method: "GET", token: token, responseType: MobileLiveAssistResponse.self)
     }
 
     func controlCall(token: String, callId: String, action: String) async throws -> MobileCallControlResponse {
+#if DEBUG
+        if callId.hasPrefix("debug-live-assist-") {
+            var state = debugLiveAssistState(for: callId)
+            state.transcriptLines.append("Control action: \(action.replacingOccurrences(of: "_", with: " "))")
+            switch action {
+            case "listen_only":
+                state.suggestedNext = "Listening mode is enabled. Rotary is still collecting interpreter preferences."
+            case "join":
+                state.suggestedNext = "Joined the call. Confirming interpreter date, time, and billing contact."
+            case "take_over":
+                state.suggestedNext = "Take-over mode active. Provide a direct instruction for the next sentence."
+            case "resume_agent":
+                state.suggestedNext = "Agent resumed autonomous handling."
+            case "leave":
+                state.suggestedNext = "User left the bridge. Agent continues the interpreter request."
+            case "end_call":
+                state.suggestedNext = "Call ending. Drafting completion summary."
+            default:
+                break
+            }
+            saveDebugLiveAssistState(state, for: callId)
+            let joinContext: MobileCallJoinContext? = switch action {
+            case "listen_only":
+                MobileCallJoinContext(callMode: "listen_only", conferenceName: "debug-live-assist", muted: true, takeOver: false)
+            case "join":
+                MobileCallJoinContext(callMode: "join", conferenceName: "debug-live-assist", muted: false, takeOver: false)
+            case "take_over":
+                MobileCallJoinContext(callMode: "take_over", conferenceName: "debug-live-assist", muted: false, takeOver: true)
+            default:
+                nil
+            }
+            return MobileCallControlResponse(
+                success: true,
+                action: action,
+                callId: callId,
+                conferenceName: "debug-live-assist",
+                joinContext: joinContext
+            )
+        }
+#endif
         struct Body: Encodable {
             let action: String
         }
@@ -513,6 +702,40 @@ final class RotaryAPIClient {
         selectedOption: String?,
         customText: String?
     ) async throws -> MobileCallSteerResponse {
+#if DEBUG
+        if callId.hasPrefix("debug-live-assist-") {
+            var state = debugLiveAssistState(for: callId)
+            let trimmedOption = selectedOption?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedCustom = customText?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let appliedValue = (trimmedOption?.isEmpty == false ? trimmedOption! : nil)
+                ?? (trimmedCustom?.isEmpty == false ? trimmedCustom! : nil)
+                ?? "No-op steer"
+
+            state.transcriptLines.append("Steer: \(appliedValue)")
+
+            let normalizedApplied = appliedValue.lowercased()
+            if normalizedApplied.contains("interrupt") {
+                state.suggestedNext = "Interrupting now: confirming interpreter availability before moving on."
+            } else if normalizedApplied.contains("queue") {
+                state.suggestedNext = "Queued. Rotary will ask this on the next turn."
+            } else {
+                state.suggestedNext = "Applied steer. Rotary is incorporating your direction."
+            }
+
+            state.steeringOptions = [
+                "Confirm event date, location, and expected attendee count.",
+                "Request certification and minimum booking window.",
+                "Ask for callback text/email confirmation once the interpreter is assigned.",
+            ]
+            saveDebugLiveAssistState(state, for: callId)
+
+            return MobileCallSteerResponse(
+                success: true,
+                callId: callId,
+                applied: appliedValue
+            )
+        }
+#endif
         struct Body: Encodable {
             let selectedOption: String?
             let customText: String?
@@ -526,7 +749,42 @@ final class RotaryAPIClient {
         )
     }
 
-    func registerDevice(token: String, voipPushToken: String?, clientReady: Bool) async throws -> DeviceRegistrationResponse {
+#if DEBUG
+    private func debugLiveAssistState(for callId: String) -> DebugLiveAssistState {
+        if let cached = Self.debugLiveAssistStatesByCallID[callId] {
+            return cached
+        }
+
+        let seeded = DebugLiveAssistState(
+            intentSummary: "Book an ASL interpreter for Innovation Expo and send confirmation by text or email.",
+            suggestedNext: "Ask Olivia to confirm interpreter availability for the event date.",
+            steeringOptions: [
+                "Ask if Olivia can place the interpreter request today.",
+                "Confirm the best callback channel (text or email).",
+                "Clarify interpreter duration and pricing details.",
+            ],
+            transcriptLines: [
+                "Julia: Hi Olivia, I'm assisting Jacob and calling about Innovation Expo.",
+                "Olivia: Sure, what support do you need for the event?",
+                "Julia: We need to request a sign language interpreter and receive confirmation by text or email.",
+            ],
+            provider: "debug-local-live-assist"
+        )
+        Self.debugLiveAssistStatesByCallID[callId] = seeded
+        return seeded
+    }
+
+    private func saveDebugLiveAssistState(_ state: DebugLiveAssistState, for callId: String) {
+        Self.debugLiveAssistStatesByCallID[callId] = state
+    }
+#endif
+
+    func registerDevice(
+        token: String,
+        pushToken: String?,
+        voipPushToken: String?,
+        clientReady: Bool
+    ) async throws -> DeviceRegistrationResponse {
         struct Body: Encodable {
             let platform: String
             let pushToken: String?
@@ -541,7 +799,7 @@ final class RotaryAPIClient {
             token: token,
             body: Body(
                 platform: "ios",
-                pushToken: nil,
+                pushToken: pushToken,
                 voipPushToken: voipPushToken,
                 deviceName: ProcessInfo.processInfo.hostName,
                 appVersion: "\(config.appVersion) (\(config.buildNumber))",
@@ -772,13 +1030,23 @@ final class RotaryAPIClient {
         forceRefresh: Bool,
         responseType: Response.Type
     ) async throws -> Response {
-        let data = try await cachedData(
-            path: path,
-            token: token,
-            cacheKey: cacheKey,
-            ttl: ttl,
-            forceRefresh: forceRefresh
-        )
+        if !forceRefresh, let cached = await responseCache.data(for: cacheKey) {
+            RotaryLogger.trace("API cache hit \(cacheKey)", category: "api")
+            do {
+                return try decoder.decode(Response.self, from: cached)
+            } catch {
+                // Schema changes can invalidate on-disk cache entries between app releases.
+                RotaryLogger.trace(
+                    "API cache decode miss \(cacheKey): \(error.localizedDescription)",
+                    category: "api",
+                    level: "warning"
+                )
+                await responseCache.invalidate(prefixes: [cacheKey])
+            }
+        }
+
+        let data = try await perform(path: path, method: "GET", token: token)
+        await responseCache.store(data, for: cacheKey, ttl: ttl)
         return try decoder.decode(Response.self, from: data)
     }
 
@@ -888,7 +1156,12 @@ final class RotaryAPIClient {
             throw RotaryAPIError.requestFailed(
                 statusCode: httpResponse.statusCode,
                 message: envelope?.message ?? envelope?.error ?? "Request failed with status \(httpResponse.statusCode)",
-                code: envelope?.code ?? envelope?.status ?? envelope?.kind
+                code: envelope?.code ?? envelope?.status ?? envelope?.kind,
+                details: [
+                    "decisionToken": envelope?.decisionToken,
+                    "sourceLanguage": envelope?.sourceLanguage,
+                    "targetLanguage": envelope?.targetLanguage,
+                ].compactMapValues { $0 }
             )
         }
 
