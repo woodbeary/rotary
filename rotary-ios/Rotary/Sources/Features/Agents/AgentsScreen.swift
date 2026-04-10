@@ -9,20 +9,55 @@ struct AgentsScreen: View {
     let messagesStore: MessagesStore
     let callsStore: CallsStore
     @Bindable var voiceCoordinator: VoiceCoordinator
+    @Bindable var mutationDispatcher: RotaryMutationDispatcher
     let refresh: () -> Void
+    let onActivityCountChange: ((Int) -> Void)?
+    @Binding var pendingAgentID: String?
 
     @State private var selectedFolderId: String?
     @State private var showingCreateAgent = false
     @State private var showingCreateFolder = false
     @State private var searchText = ""
+    @State private var isEditing = false
+    @State private var selectedAgentIDs = Set<String>()
     @State private var renamingFolder: MobileAgentFolderSummary?
     @State private var prefetchedConversations: [String: MobileAgentConversationPayload] = [:]
     @State private var prefetchingAgentIDs = Set<String>()
+    @FocusState private var isSearchFieldFocused: Bool
+    @State private var navigationPath = NavigationPath()
+
+    init(
+        bootstrap: MobileBootstrapReadyState,
+        appModel: AppModel,
+        api: RotaryAPIClient,
+        messagesStore: MessagesStore,
+        callsStore: CallsStore,
+        voiceCoordinator: VoiceCoordinator,
+        mutationDispatcher: RotaryMutationDispatcher,
+        refresh: @escaping () -> Void,
+        onActivityCountChange: ((Int) -> Void)? = nil,
+        pendingAgentID: Binding<String?>
+    ) {
+        self.bootstrap = bootstrap
+        self.appModel = appModel
+        self.api = api
+        self.messagesStore = messagesStore
+        self.callsStore = callsStore
+        self.voiceCoordinator = voiceCoordinator
+        self.mutationDispatcher = mutationDispatcher
+        self.refresh = refresh
+        self.onActivityCountChange = onActivityCountChange
+        _pendingAgentID = pendingAgentID
+    }
+
+    private var visibleAgents: [MobileAgent] {
+        bootstrap.agents.filter { !isHiddenPlaceholderAgent($0) }
+    }
 
     private var filteredAgents: [MobileAgent] {
         let base = selectedFolderId == nil
-            ? bootstrap.agents
-            : bootstrap.agents.filter { $0.folderId == selectedFolderId }
+            ? visibleAgents
+            : visibleAgents.filter { $0.folderId == selectedFolderId }
 
         guard !searchText.isEmpty else { return base }
         let query = searchText.lowercased()
@@ -56,14 +91,35 @@ struct AgentsScreen: View {
             .joined(separator: "|")
     }
 
+    private var agentActivityCount: Int {
+        let assignedNumbers = Set(visibleAgents.compactMap { normalizedPhone($0.assignedPhoneNumber) })
+        guard !assignedNumbers.isEmpty else { return 0 }
+
+        return messagesStore.threads
+            .filter { thread in
+                guard let preferredNumber = normalizedPhone(thread.preferredFromNumber) else {
+                    return false
+                }
+                return thread.isDeleted != true
+                    && thread.isSpam != true
+                    && assignedNumbers.contains(preferredNumber)
+            }
+            .reduce(0) { partialResult, thread in
+                partialResult + max(thread.unreadCount ?? 0, 0)
+            }
+    }
+
+    private func isHiddenPlaceholderAgent(_ agent: MobileAgent) -> Bool {
+        let signature = "\(agent.name) \(agent.slug) \(agent.voiceName)".lowercased()
+        return signature.contains("nullvoice")
+    }
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ZStack {
                 RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() })
 
                 VStack(spacing: 0) {
-                    agentsHeader
-
                     if RotaryDebugFlags.forceSkeletonPlaceholders {
                         RotarySkeletonList(rows: 6)
                             .padding(.top, 4)
@@ -71,37 +127,25 @@ struct AgentsScreen: View {
                         emptyState
                     } else {
                         List(filteredAgents) { agent in
-                            NavigationLink {
-                                AgentConversationDetailScreen(
-                                    agent: agent,
-                                    relatedCalls: relatedCalls(for: agent),
-                                    relatedThreads: relatedThreads(for: agent),
-                                    messagesStore: messagesStore,
-                                    api: api,
-                                    voiceCoordinator: voiceCoordinator,
-                                    tokenProvider: { forceRefresh in
-                                        try await appModel.token(forceRefresh: forceRefresh)
-                                    },
-                                    initialConversation: prefetchedConversations[agent.id],
-                                    onConversationLoaded: { payload in
-                                        prefetchedConversations[agent.id] = payload
-                                    }
-                                )
-                            } label: {
-                                RotaryConversationSummaryRow(
-                                    title: agent.name,
-                                    preview: latestPreview(for: agent),
-                                    timestamp: latestTimestampText(for: agent),
-                                    avatarURL: nil,
-                                    avatarSize: 50,
-                                    isUnread: false,
-                                    showsPreviewSkeleton: false,
-                                    previewSystemImage: previewSymbol(for: agent)
-                                )
+                            if isEditing {
+                                editableRow(agent)
+                            } else {
+                                NavigationLink(value: agent.id) {
+                                    RotaryConversationSummaryRow(
+                                        title: agent.name,
+                                        preview: latestPreview(for: agent),
+                                        timestamp: latestTimestampText(for: agent),
+                                        avatarURL: nil,
+                                        avatarSize: 50,
+                                        isUnread: false,
+                                        showsPreviewSkeleton: false,
+                                        previewSystemImage: previewSymbol(for: agent)
+                                    )
+                                }
+                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
                             }
-                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
                         }
                         .listStyle(.plain)
                         .scrollDismissesKeyboard(.interactively)
@@ -109,11 +153,46 @@ struct AgentsScreen: View {
                     }
                 }
             }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if isEditing {
+                    agentsEditingBar
+                } else {
+                    agentsBottomBar
+                }
+            }
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("")
+            .toolbar(.visible, for: .tabBar)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        RotaryHaptics.selection()
+                        withAnimation(.easeInOut(duration: 0.18)) {
+                            isEditing.toggle()
+                            if !isEditing {
+                                selectedAgentIDs.removeAll()
+                            }
+                        }
+                    } label: {
+                        Text(isEditing ? "Done" : "Edit")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .padding(.horizontal, 15)
+                            .frame(minWidth: 68, minHeight: 38)
+                            .background(toolbarControlFill, in: Capsule(style: .continuous))
+                            .overlay(
+                                Capsule(style: .continuous)
+                                    .stroke(toolbarControlStroke, lineWidth: 0.9)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.leading, 2)
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Section("Folders") {
                             Button {
@@ -150,25 +229,27 @@ struct AgentsScreen: View {
                                 }
                             }
                         }
+                        if isEditing {
+                            Section("Selection") {
+                                Button("Select All", systemImage: "checkmark.circle") {
+                                    selectedAgentIDs = Set(filteredAgents.map(\.id))
+                                }
+                                Button("Clear Selection", systemImage: "circle") {
+                                    selectedAgentIDs.removeAll()
+                                }
+                            }
+                        }
                     } label: {
-                        RotaryGlassMenuChip(
-                            systemName: currentFolder == nil ? "person.2.fill" : "folder.fill",
-                            showsChevron: false
-                        )
-                    }
-                }
-
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 8) {
-                        RotaryGlassIconButton(systemName: "plus") {
-                            RotaryHaptics.selection()
-                            showingCreateAgent = true
-                        }
-
-                        RotaryGlassIconButton(systemName: "arrow.clockwise") {
-                            RotaryHaptics.selection()
-                            refresh()
-                        }
+                        Image(systemName: "line.3.horizontal")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(RotaryTheme.accent)
+                            .frame(width: 44, height: 38)
+                            .background(toolbarControlFill, in: Capsule(style: .continuous))
+                            .overlay(
+                                Capsule(style: .continuous)
+                                    .stroke(toolbarControlStroke, lineWidth: 0.9)
+                            )
+                            .accessibilityLabel("Agent settings")
                     }
                 }
             }
@@ -181,48 +262,81 @@ struct AgentsScreen: View {
             .sheet(item: $renamingFolder) { folder in
                 RenameFolderSheet(appModel: appModel, folder: folder, onSaved: refresh)
             }
+            .navigationDestination(for: String.self) { agentID in
+                if let agent = agentRecord(for: agentID) {
+                    agentConversationDestination(for: agent)
+                } else {
+                    RotaryAgentUnavailableScreen()
+                }
+            }
         }
         .task(id: conversationPrefetchSignature) {
             await prefetchLikelyAgentConversations()
         }
+        .task {
+            await appModel.prewarmVoicePresets()
+            publishActivityCount()
+        }
+        .onChange(of: agentActivityCount) { _, _ in
+            publishActivityCount()
+        }
+        .task(id: pendingAgentID) {
+            await openPendingAgentIfNeeded()
+        }
     }
 
-    private var agentsHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            RotaryInlineStatusHeader(subtitle: agentsHeaderSubtitle)
+    private var agentsBottomBar: some View {
+        HStack(spacing: 10) {
+            RotarySearchField(
+                text: $searchText,
+                prompt: "Search agents",
+                onMic: {
+                    RotaryHaptics.selection()
+                    isSearchFieldFocused = true
+                },
+                isFocused: $isSearchFieldFocused
+            )
 
-            RotarySearchField(text: $searchText, prompt: "Search agents")
-
-            if let folders = bootstrap.folders, !folders.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        folderChip(title: "All", isActive: selectedFolderId == nil) {
-                            selectedFolderId = nil
-                        }
-
-                        ForEach(folders) { folder in
-                            folderChip(title: folder.name, isActive: selectedFolderId == folder.id) {
-                                selectedFolderId = folder.id
-                            }
-                        }
-                    }
-                    .padding(.vertical, 1)
-                }
+            Button {
+                RotaryHaptics.selection()
+                showingCreateAgent = true
+            } label: {
+                Image(systemName: "person.badge.plus")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .frame(width: 46, height: 46)
+                    .background(toolbarControlFill, in: Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(toolbarControlStroke, lineWidth: 0.9)
+                    )
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Create agent")
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 12)
         .padding(.top, 8)
-        .padding(.bottom, 10)
+        .padding(.bottom, 8)
     }
 
-    private var agentsHeaderSubtitle: String? {
-        if !searchText.isEmpty {
-            return filteredAgents.isEmpty ? "No matches" : "\(filteredAgents.count) result\(filteredAgents.count == 1 ? "" : "s")"
+    private var agentsEditingBar: some View {
+        HStack(spacing: 10) {
+            RotaryGlassTextButton(title: "Select All") {
+                selectedAgentIDs = Set(filteredAgents.map(\.id))
+            }
+
+            RotaryGlassTextButton(title: "Clear") {
+                selectedAgentIDs.removeAll()
+            }
+
+            Text("\(selectedAgentIDs.count) selected")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .trailing)
         }
-        if let currentFolder {
-            return currentFolder.name
-        }
-        return nil
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
     }
 
     private func folderChip(title: String, isActive: Bool, action: @escaping () -> Void) -> some View {
@@ -236,31 +350,84 @@ struct AgentsScreen: View {
         .buttonStyle(.plain)
     }
 
+    private func editableRow(_ agent: MobileAgent) -> some View {
+        Button {
+            RotaryHaptics.selection()
+            if selectedAgentIDs.contains(agent.id) {
+                selectedAgentIDs.remove(agent.id)
+            } else {
+                selectedAgentIDs.insert(agent.id)
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: selectedAgentIDs.contains(agent.id) ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(selectedAgentIDs.contains(agent.id) ? RotaryTheme.accent : .secondary)
+
+                RotaryConversationSummaryRow(
+                    title: agent.name,
+                    preview: latestPreview(for: agent),
+                    timestamp: latestTimestampText(for: agent),
+                    avatarURL: nil,
+                    avatarSize: 50,
+                    isUnread: false,
+                    showsPreviewSkeleton: false,
+                    previewSystemImage: previewSymbol(for: agent)
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+    }
+
     private var emptyState: some View {
         VStack(spacing: 12) {
-            Spacer()
-            Circle()
-                .fill(RotaryTheme.softSurface)
-                .frame(width: 68, height: 68)
-                .overlay(
-                    Image(systemName: "person.2")
-                        .font(.system(size: 24, weight: .medium))
-                        .foregroundStyle(.secondary)
-                )
-            Text(searchText.isEmpty ? "No agents yet" : "No matching agents")
-                .font(.headline)
-            Text(searchText.isEmpty ? "Create an agent to get started." : "Try a different search or folder.")
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            if searchText.isEmpty {
-                Button("Create Agent") {
-                    showingCreateAgent = true
+            Spacer(minLength: 24)
+
+            VStack(spacing: 10) {
+                Circle()
+                    .fill(RotaryTheme.softSurface)
+                    .frame(width: 72, height: 72)
+                    .overlay(
+                        Image(systemName: "person.2")
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    )
+
+                Text(searchText.isEmpty ? "No agents yet" : "No matching agents")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.primary)
+
+                Text(searchText.isEmpty ? "Create an agent to get started." : "Try a different search or folder.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+
+                if searchText.isEmpty {
+                    Button("Create Agent") {
+                        showingCreateAgent = true
+                    }
+                    .buttonStyle(RotaryPrimaryButtonStyle())
+                    .frame(maxWidth: 220)
+                    .padding(.top, 6)
                 }
-                .buttonStyle(RotaryPrimaryButtonStyle())
-                .padding(.top, 8)
-                .frame(maxWidth: 220)
             }
-            Spacer()
+            .frame(maxWidth: 300)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
+            .background(RotaryTheme.secondarySurface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .stroke(RotaryTheme.elevatedStroke, lineWidth: 1)
+            )
+
+            Spacer(minLength: 24)
         }
         .padding(.horizontal, 24)
     }
@@ -270,10 +437,10 @@ struct AgentsScreen: View {
             return preview
         }
         if let thread = relatedThreads(for: agent).first {
-            return thread.preview
+            return normalizedPreviewText(thread.preview)
         }
         if let call = relatedCalls(for: agent).first {
-            return call.summary ?? call.transcript ?? call.contactPhone ?? "Recent phone activity"
+            return normalizedPreviewText(call.summary ?? call.transcript ?? call.contactPhone ?? "Recent phone activity")
         }
         return "Ready"
     }
@@ -299,6 +466,31 @@ struct AgentsScreen: View {
         return "sparkles"
     }
 
+    private func agentRecord(for agentID: String) -> MobileAgent? {
+        visibleAgents.first { $0.id == agentID }
+    }
+
+    @ViewBuilder
+    private func agentConversationDestination(for agent: MobileAgent) -> some View {
+        AgentConversationDetailScreen(
+            agent: agent,
+            relatedCalls: relatedCalls(for: agent),
+            relatedThreads: relatedThreads(for: agent),
+            messagesStore: messagesStore,
+            api: api,
+            voiceCoordinator: voiceCoordinator,
+            tokenProvider: { forceRefresh in
+                try await appModel.token(forceRefresh: forceRefresh)
+            },
+            mutationDispatcher: mutationDispatcher,
+            inferenceModeStore: appModel.inferenceModeStore,
+            initialConversation: prefetchedConversations[agent.id],
+            onConversationLoaded: { payload in
+                prefetchedConversations[agent.id] = payload
+            }
+        )
+    }
+
     private func conversationPreview(for agent: MobileAgent) -> String? {
         guard let conversation = prefetchedConversations[agent.id] else {
             return nil
@@ -310,14 +502,18 @@ struct AgentsScreen: View {
 
         let content = lastMessage.content.trimmingCharacters(in: .whitespacesAndNewlines)
         if !content.isEmpty {
-            return content
+            return normalizedPreviewText(content)
         }
 
         if let firstAttachment = lastMessage.attachments.first {
-            return firstAttachment.fileName
+            return normalizedPreviewText(firstAttachment.fileName)
         }
 
         return nil
+    }
+
+    private func normalizedPreviewText(_ value: String) -> String {
+        rotarySanitizedConversationPreview(value)
     }
 
     private func latestConversationDate(for payload: MobileAgentConversationPayload) -> Date? {
@@ -338,6 +534,52 @@ struct AgentsScreen: View {
     private func parseDate(_ value: String?) -> Date? {
         guard let value else { return nil }
         return ISO8601DateFormatter().date(from: value)
+    }
+
+    private func normalizedPhone(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private var toolbarControlFill: Color {
+        Color(uiColor: UIColor { traits in
+            if traits.userInterfaceStyle == .dark {
+                return UIColor(red: 0.17, green: 0.18, blue: 0.22, alpha: 0.92)
+            }
+            return UIColor(red: 0.93, green: 0.94, blue: 0.96, alpha: 0.94)
+        })
+    }
+
+    private var toolbarControlStroke: Color {
+        Color(uiColor: UIColor { traits in
+            if traits.userInterfaceStyle == .dark {
+                return UIColor.separator.withAlphaComponent(0.24)
+            }
+            return UIColor.separator.withAlphaComponent(0.10)
+        })
+    }
+
+    private func publishActivityCount() {
+        onActivityCountChange?(agentActivityCount)
+    }
+
+    private func openPendingAgentIfNeeded() async {
+        guard let pendingAgentID = pendingAgentID?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !pendingAgentID.isEmpty else {
+            return
+        }
+
+        guard let agent = agentRecord(for: pendingAgentID) else {
+            self.pendingAgentID = nil
+            return
+        }
+
+        selectedFolderId = agent.folderId
+        searchText = ""
+        navigationPath = NavigationPath()
+        navigationPath.append(agent.id)
+        self.pendingAgentID = nil
     }
 
     private func nextFolderName() -> String {
@@ -398,6 +640,25 @@ struct AgentsScreen: View {
     }
 }
 
+private struct RotaryAgentUnavailableScreen: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "person.crop.circle.badge.exclamationmark")
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundStyle(.secondary)
+            Text("Agent unavailable")
+                .font(.headline)
+            Text("Rotary could not find that agent conversation yet.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(24)
+        .background(RotaryBackdrop())
+    }
+}
+
 struct CreateFolderSheet: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -445,7 +706,7 @@ struct CreateFolderSheet: View {
             .scrollContentBackground(.hidden)
             .background(RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() }))
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("New Folder")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -520,7 +781,7 @@ struct RenameFolderSheet: View {
             .scrollContentBackground(.hidden)
             .background(RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() }))
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("Rename Folder")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -561,7 +822,6 @@ struct CreateAgentSheet: View {
     let appModel: AppModel
     let onCreated: () -> Void
 
-    @State private var name = ""
     @State private var voiceOptions: [MobileVoicePreset] = []
     @State private var selectedVoiceId: String?
     @State private var selectedVoiceName = ""
@@ -576,7 +836,13 @@ struct CreateAgentSheet: View {
     }
 
     private var curatedVoiceOptions: [MobileVoicePreset] {
-        let sorted = voiceOptions.sorted { lhs, rhs in
+        let preferred = eligibleElevenLabsVoices
+        let sorted = preferred.sorted { lhs, rhs in
+            let lhsPriority = lhs.rotaryRealtimePriority
+            let rhsPriority = rhs.rotaryRealtimePriority
+            if lhsPriority != rhsPriority {
+                return lhsPriority > rhsPriority
+            }
             switch (lhs.previewUrl == nil, rhs.previewUrl == nil) {
             case (false, true): return true
             case (true, false): return false
@@ -586,35 +852,47 @@ struct CreateAgentSheet: View {
         return Array(sorted.prefix(10))
     }
 
-    private var displayVoiceOptions: [MobileVoicePreset] {
-        if curatedVoiceOptions.isEmpty {
-            return [
-                MobileVoicePreset(
-                    id: "fallback-rachel",
-                    name: "Rachel",
-                    provider: "elevenlabs",
-                    category: "fallback",
-                    description: "Warm and clear.",
-                    previewUrl: nil,
-                    labels: ["accent": "american", "gender": "female"]
-                )
-            ]
+    private var eligibleElevenLabsVoices: [MobileVoicePreset] {
+        voiceOptions.filter(\.rotaryV3ExpressiveEligible)
+    }
+
+    private var voiceEligibilityMessage: String {
+        if let explicitError = errorMessage, !explicitError.isEmpty {
+            return explicitError
         }
+
+        guard !voiceOptions.isEmpty else {
+            return isLoadingVoices ? "" : "Rotary is loading eligible ElevenLabs voices."
+        }
+
+        if displayVoiceOptions.isEmpty {
+            return voiceOptions.first?.rotaryVoiceEligibilityMessage
+                ?? "Rotary requires an ElevenLabs v3 expressive voice before creating an agent."
+        }
+
+        return ""
+    }
+
+    private var displayVoiceOptions: [MobileVoicePreset] {
         return curatedVoiceOptions
+    }
+
+    private var resolvedAgentName: String {
+        let base = selectedVoiceName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if base.isEmpty {
+            return "Rotary Assistant"
+        }
+        return "\(base) Assistant"
     }
 
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    TextField("Agent name", text: $name)
-                        .textInputAutocapitalization(.words)
-                        .autocorrectionDisabled()
-                }
-
                 Section("Popular Voices") {
-                    if isLoadingVoices {
-                        RotarySkeletonList(rows: 3, showTimestamp: false)
+                    if displayVoiceOptions.isEmpty {
+                        Text(voiceEligibilityMessage.isEmpty ? "Rotary requires an ElevenLabs v3 expressive voice before creating an agent." : voiceEligibilityMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     } else {
                         ForEach(displayVoiceOptions, id: \.id) { voice in
                             AgentVoiceOptionRow(
@@ -629,6 +907,16 @@ struct CreateAgentSheet: View {
                             )
                         }
                     }
+
+                    if isLoadingVoices {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Refreshing voice list")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
 
                 if let errorMessage, !errorMessage.isEmpty {
@@ -641,7 +929,7 @@ struct CreateAgentSheet: View {
             .scrollContentBackground(.hidden)
             .background(RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() }))
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("New Agent")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -651,47 +939,86 @@ struct CreateAgentSheet: View {
                     Button(isWorking ? "Creating" : "Create") {
                         Task { await submit() }
                     }
-                    .disabled(isWorking || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedVoiceName.isEmpty)
+                    .disabled(isWorking || selectedVoiceName.isEmpty || selectedVoiceId == nil || displayVoiceOptions.isEmpty)
                 }
             }
         }
         .task {
-            await loadVoices()
+            let cached = appModel.cachedVoicePresetsSnapshot
+            if !cached.isEmpty {
+                applyVoiceOptions(cached)
+            } else {
+                await loadVoices(showLoading: true)
+            }
+
+            // Refresh in the background so voice changes propagate without blocking sheet open.
+            Task {
+                await loadVoices(showLoading: false)
+            }
         }
         .onDisappear {
             previewPlayer.stop()
         }
     }
 
-    private func loadVoices() async {
-        isLoadingVoices = true
-        defer { isLoadingVoices = false }
+    private func loadVoices(showLoading: Bool) async {
+        if showLoading {
+            isLoadingVoices = true
+        }
+        defer {
+            if showLoading {
+                isLoadingVoices = false
+            }
+        }
 
         do {
-            voiceOptions = try await appModel.listVoicePresets()
-            if let firstVoice = displayVoiceOptions.first {
-                if selectedVoiceId == nil {
-                    selectedVoiceId = firstVoice.id
-                }
-                if selectedVoiceName.isEmpty {
-                    selectedVoiceName = firstVoice.name
-                }
-            }
+            let voices = try await appModel.refreshVoicePresets()
+            applyVoiceOptions(voices)
         } catch {
-            errorMessage = error.localizedDescription
+            if voiceOptions.isEmpty {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func applyVoiceOptions(_ voices: [MobileVoicePreset]) {
+        voiceOptions = voices
+        guard let firstVoice = displayVoiceOptions.first else {
+            selectedVoiceId = nil
+            selectedVoiceName = ""
+            return
+        }
+
+        if !displayVoiceOptions.contains(where: { $0.id == selectedVoiceId }) {
+            selectedVoiceId = firstVoice.id
+            selectedVoiceName = firstVoice.name
+            return
+        }
+
+        if selectedVoiceName.isEmpty,
+           let currentVoice = displayVoiceOptions.first(where: { $0.id == selectedVoiceId }) {
+            selectedVoiceName = currentVoice.name
         }
     }
 
     private func submit() async {
+        guard let selectedVoice = displayVoiceOptions.first(where: { $0.id == selectedVoiceId }),
+              selectedVoice.rotaryV3ExpressiveEligible else {
+            errorMessage = displayVoiceOptions.isEmpty
+                ? "Rotary requires an ElevenLabs v3 expressive voice before creating an agent."
+                : "Select an eligible ElevenLabs v3 expressive voice before creating an agent."
+            return
+        }
+
         isWorking = true
         defer { isWorking = false }
 
         do {
             try await appModel.createFirstAgent(
-                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+                name: resolvedAgentName,
                 purpose: "Everyday",
-                voiceName: selectedVoiceName,
-                voiceProfileId: selectedVoiceId,
+                voiceName: selectedVoice.name,
+                voiceProfileId: selectedVoice.id,
                 thinkingMode: "balanced",
                 folderId: nil
             )
@@ -847,7 +1174,7 @@ struct ProxyMessageSheet: View {
             .scrollContentBackground(.hidden)
             .background(RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() }))
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("New Message")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -930,7 +1257,7 @@ struct ProxyCallSheet: View {
             .scrollContentBackground(.hidden)
             .background(RotaryBackdrop(onTap: { RotaryKeyboard.dismiss() }))
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("New Call")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
