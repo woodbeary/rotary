@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "economics:unit": "node scripts/unit-economics.mjs",
     "codes:generate": "node scripts/generate-launch-codes.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "biome:check": "biome check .",
