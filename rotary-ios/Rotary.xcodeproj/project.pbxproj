@@ -1,0 +1,830 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		007FAE2980B470BD4D4535C1 /* FirstRunOnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F92899C9A2EC3F182432ACD /* FirstRunOnboardingFlow.swift */; };
+		00FBFE70B24294221BCF5ABB /* MobileModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1069437161E13758DEADCD4 /* MobileModels.swift */; };
+		13CE977A18AD7F1607C2A509 /* RotaryAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 477D0690CF889B741D9DB24F /* RotaryAppearance.swift */; };
+		164505E8C70F1BC943073DC7 /* ContactEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E82842CF41DD4B9922F6D17 /* ContactEditor.swift */; };
+		1889A49DB6C51D1D6C86E916 /* TwilioVoice.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 411957E4BFCF338802B022C6 /* TwilioVoice.xcframework */; };
+		243557111559A1BA0DF07CC1 /* ClerkNativeAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB4089CEE2D20C2FC37EA10 /* ClerkNativeAuthService.swift */; };
+		287DB989D0B80AA3D72F02C5 /* rotary-ringback.wav in Resources */ = {isa = PBXBuildFile; fileRef = B3A88BBC5521B52B44CD1E39 /* rotary-ringback.wav */; };
+		2B086199C7DAA07F59F67D0F /* TwilioVoice.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 411957E4BFCF338802B022C6 /* TwilioVoice.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		34D33A2C7A3D29D712A18F70 /* FirstRunOnboardingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06ABE9694415340DD48714 /* FirstRunOnboardingState.swift */; };
+		381991D2E9393A8FC0ACB72A /* RotaryDeepLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79387D8334BA576E291AD486 /* RotaryDeepLinkTests.swift */; };
+		39EEA451329AF29FE38BA1CA /* MessagesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F809772DC899F4C42053D3 /* MessagesStore.swift */; };
+		3AB46B21CF7761C950B7D35F /* RotaryAuthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E963CE1B0857FA9D7F121432 /* RotaryAuthStore.swift */; };
+		409BCE43720A74CD517FF8C6 /* VoiceCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F8F7470B88C533C6EA7916 /* VoiceCoordinatorTests.swift */; };
+		42DFD17A13BFCF6847453A2E /* OfflineMutationQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A9CA9226700271A7C7D423 /* OfflineMutationQueueTests.swift */; };
+		4AA5C61F708501D6D18A7249 /* OfflineLocalStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C927C5FCCEEC269AC0C5CA /* OfflineLocalStateTests.swift */; };
+		50700E44EE5EDB7830A443B9 /* RotaryMutationDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF607EC352269459978EF39 /* RotaryMutationDispatcher.swift */; };
+		56D04F596A13501C6513F2B3 /* ConnectivityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF75DAA8DEE26F980B25716 /* ConnectivityMonitor.swift */; };
+		5D603F741F109571BEF76CC8 /* RotaryAPIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CCB3C7F36DC30C048C854B /* RotaryAPIClientTests.swift */; };
+		5F339F2A8489653DA8D7BE07 /* RotaryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D581DEFAC5611EF38B68DD4A /* RotaryApp.swift */; };
+		600CF4C41797338CAC03FF1F /* ConversationTranscript.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F5B3A4742505145CDBE830 /* ConversationTranscript.swift */; };
+		6245EE7DC8DDF73E02CA76DE /* ConversationSummaryRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7D6565026831E9409C89F6 /* ConversationSummaryRow.swift */; };
+		652B1CCAA5DE0FA15632B11F /* RotaryLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB3C06363B78FD98DB29333 /* RotaryLogger.swift */; };
+		718FF26F25F5ACF091ECC3F2 /* RotaryPermissionCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B386FEF974A3EE883FAEBE36 /* RotaryPermissionCenter.swift */; };
+		78B6852E6629EA773A2EAE11 /* ConversationChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1584521C806C91CCEE413D /* ConversationChrome.swift */; };
+		79E684549015ED1829DA86C4 /* CallsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DE2DEDC2C5666536361B5C /* CallsScreen.swift */; };
+		8142536DB8F3B414DAFC6D8C /* RotaryAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374D9B3C4166B980144C36D5 /* RotaryAppDelegate.swift */; };
+		838AE39E3C6E157CD54B810D /* AuthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D1B5F826ABBCC7F3C0BF6E /* AuthScreen.swift */; };
+		8B24D46D5BB4B604DE267534 /* InferenceModeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23EE6FFA6274FAD2FDFE3406 /* InferenceModeStore.swift */; };
+		8BDA4D5241E21C0FA8FC0EE7 /* ConversationProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819D4E17D514A6D6EF2D6FC2 /* ConversationProfiles.swift */; };
+		8FEE43AB30F589036E303771 /* CallsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6F99F52E3D6F5E399A4F36 /* CallsStore.swift */; };
+		91AA9EE85226009377C54A57 /* OfflineMutationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58B5C3E630F40B89E6A3FAB1 /* OfflineMutationQueue.swift */; };
+		94FDFBF48CEE5AE54D78018A /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB2BDEA8CC8D06B0D951131 /* SettingsSheet.swift */; };
+		9894B7FD8170EB1462A17AB6 /* LocalConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFE96B96941C8911DFDF87A /* LocalConversationStore.swift */; };
+		9D7254F9037AE60677319AC2 /* RotaryDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = C616D88C599348CB0BBDF16B /* RotaryDeepLink.swift */; };
+		9F526A41215E631A0E6010D9 /* AgentConversationDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39647A0376189DDF2C36851D /* AgentConversationDetailScreen.swift */; };
+		9FD57EADB301CFC074241ED3 /* RotaryHostedAuthCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 996E42FEA30A557F7A18E36F /* RotaryHostedAuthCoordinator.swift */; };
+		A34CB5E41D0B360962CF708E /* OfflineMutationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B4584A9E1592B96978554B /* OfflineMutationTypes.swift */; };
+		B59F893FFCFF514C389F4488 /* AgentsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC63673A273FE56A8100D211 /* AgentsScreen.swift */; };
+		B6C2D9B32B8BC547EFF8A12C /* AgentCallWorkflowScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E92C66F021400EAECA367D /* AgentCallWorkflowScenario.swift */; };
+		B9EAA3E12CFE1BC66201A249 /* RotaryMessagesUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70704DD910FF4B2098B9BE81 /* RotaryMessagesUI.swift */; };
+		BDB3F2D1C1F310CAD528485B /* RotaryTabShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 707C990B1E7157156E8131CB /* RotaryTabShell.swift */; };
+		C26127286EDBFE3DEB7AA8A1 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E4C0FAD376B25CA8AE625E8 /* AppModel.swift */; };
+		C4B23B6707B405DF61BECDAF /* StatusScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3F847FBFB6BE8EE196F9E9 /* StatusScreen.swift */; };
+		C668862658311152E156B179 /* RotaryAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2000FBDD39CFC9D1ED318AFA /* RotaryAPIClient.swift */; };
+		CE0BE184E5E3A7EAA0BE75B1 /* MobileCallArtifactTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33ADBE23942ED197CA55452 /* MobileCallArtifactTests.swift */; };
+		D7873B920C6E9E4961C0DF33 /* VoiceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714C0D2194504DA7D401025C /* VoiceCoordinator.swift */; };
+		DB012E86E227A11F486C81DA /* RotaryRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F013588CEB170DE676B4B6 /* RotaryRootView.swift */; };
+		DD92D8F6C0F4577DD2255649 /* AgentCallWorkflowScenarioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACF5A74D3ACDA702209D3F19 /* AgentCallWorkflowScenarioTests.swift */; };
+		E2CC6358A01649D3923AEC16 /* FirstRunOnboardingStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA9CAB4C019CCFEC3ECAA5CD /* FirstRunOnboardingStateTests.swift */; };
+		E3A6AE2F361481CCD09BCA68 /* RotaryResponseCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A3C5D026C292358D99A1E4B /* RotaryResponseCache.swift */; };
+		EB0127756B3C2D96E2680134 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A15FE06E7EECE1E300788A60 /* OnboardingFlow.swift */; };
+		EC72A8C187F6ED910A14128D /* RotaryAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD60AC5CBA42224701C10FBF /* RotaryAudioPlayer.swift */; };
+		ECA1C3062E382005466345ED /* RotaryAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFD21FC30B0F7E4CADE27433 /* RotaryAuthorization.swift */; };
+		ECB301C8A2CC5E3B6526D3F2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11111D5882FEB483CDE8712 /* Theme.swift */; };
+		F067B21B36965204C465CA4F /* DeviceContactsImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5723D4ABEEECBD49F680E0B5 /* DeviceContactsImportCoordinator.swift */; };
+		F2F84F7B8FEE952C7EF34983 /* AgentWorkflowModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D284892776E9A8DC64D6CC98 /* AgentWorkflowModels.swift */; };
+		F4AA5294922310F76844A44F /* MessagesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E97FB061753E9B9387F7D2 /* MessagesScreen.swift */; };
+		F91E4D3C0672503D9576496A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E21C1745C561329CB902476A /* Assets.xcassets */; };
+		FB58CDDB4BF4C994A3AD7719 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19C54565F945F96CFEA23E6 /* AppConfig.swift */; };
+		FC8AF43D62261D62AB5E10BC /* LocalInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F87B3773A2F2D5BF485B8B6 /* LocalInferenceEngine.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		79351873E36275DCCFA23455 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 514CBF7B6916C18C8474A8B6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 26C0E75ACD8C1D460FF609B6;
+			remoteInfo = Rotary;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A8C5DCAE5D58506179E93A47 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				2B086199C7DAA07F59F67D0F /* TwilioVoice.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0A3C5D026C292358D99A1E4B /* RotaryResponseCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryResponseCache.swift; sourceTree = "<group>"; };
+		0B0625FA7F2356397AD57C9D /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		0D6F99F52E3D6F5E399A4F36 /* CallsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsStore.swift; sourceTree = "<group>"; };
+		0F92899C9A2EC3F182432ACD /* FirstRunOnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstRunOnboardingFlow.swift; sourceTree = "<group>"; };
+		11E97FB061753E9B9387F7D2 /* MessagesScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesScreen.swift; sourceTree = "<group>"; };
+		2000FBDD39CFC9D1ED318AFA /* RotaryAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryAPIClient.swift; sourceTree = "<group>"; };
+		23EE6FFA6274FAD2FDFE3406 /* InferenceModeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferenceModeStore.swift; sourceTree = "<group>"; };
+		2CB2BDEA8CC8D06B0D951131 /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
+		2E4C0FAD376B25CA8AE625E8 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		2F87B3773A2F2D5BF485B8B6 /* LocalInferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalInferenceEngine.swift; sourceTree = "<group>"; };
+		374D9B3C4166B980144C36D5 /* RotaryAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryAppDelegate.swift; sourceTree = "<group>"; };
+		39647A0376189DDF2C36851D /* AgentConversationDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentConversationDetailScreen.swift; sourceTree = "<group>"; };
+		39A9CA9226700271A7C7D423 /* OfflineMutationQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineMutationQueueTests.swift; sourceTree = "<group>"; };
+		3A6956E2E06E14C235170EB7 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		3C7D6565026831E9409C89F6 /* ConversationSummaryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationSummaryRow.swift; sourceTree = "<group>"; };
+		3CB4089CEE2D20C2FC37EA10 /* ClerkNativeAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClerkNativeAuthService.swift; sourceTree = "<group>"; };
+		411957E4BFCF338802B022C6 /* TwilioVoice.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TwilioVoice.xcframework; path = Vendor/TwilioVoice.xcframework; sourceTree = "<group>"; };
+		477D0690CF889B741D9DB24F /* RotaryAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryAppearance.swift; sourceTree = "<group>"; };
+		4CF607EC352269459978EF39 /* RotaryMutationDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryMutationDispatcher.swift; sourceTree = "<group>"; };
+		5723D4ABEEECBD49F680E0B5 /* DeviceContactsImportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceContactsImportCoordinator.swift; sourceTree = "<group>"; };
+		58B5C3E630F40B89E6A3FAB1 /* OfflineMutationQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineMutationQueue.swift; sourceTree = "<group>"; };
+		6AF75DAA8DEE26F980B25716 /* ConnectivityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityMonitor.swift; sourceTree = "<group>"; };
+		70704DD910FF4B2098B9BE81 /* RotaryMessagesUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryMessagesUI.swift; sourceTree = "<group>"; };
+		707C990B1E7157156E8131CB /* RotaryTabShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryTabShell.swift; sourceTree = "<group>"; };
+		714C0D2194504DA7D401025C /* VoiceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCoordinator.swift; sourceTree = "<group>"; };
+		72F809772DC899F4C42053D3 /* MessagesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesStore.swift; sourceTree = "<group>"; };
+		76C21EC695531B5369D06E3D /* RotaryTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RotaryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		79387D8334BA576E291AD486 /* RotaryDeepLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryDeepLinkTests.swift; sourceTree = "<group>"; };
+		819D4E17D514A6D6EF2D6FC2 /* ConversationProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationProfiles.swift; sourceTree = "<group>"; };
+		8D3F847FBFB6BE8EE196F9E9 /* StatusScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusScreen.swift; sourceTree = "<group>"; };
+		98F8F7470B88C533C6EA7916 /* VoiceCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCoordinatorTests.swift; sourceTree = "<group>"; };
+		996E42FEA30A557F7A18E36F /* RotaryHostedAuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryHostedAuthCoordinator.swift; sourceTree = "<group>"; };
+		9E82842CF41DD4B9922F6D17 /* ContactEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactEditor.swift; sourceTree = "<group>"; };
+		A15FE06E7EECE1E300788A60 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
+		A1E92C66F021400EAECA367D /* AgentCallWorkflowScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCallWorkflowScenario.swift; sourceTree = "<group>"; };
+		A2D1B5F826ABBCC7F3C0BF6E /* AuthScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthScreen.swift; sourceTree = "<group>"; };
+		ACF5A74D3ACDA702209D3F19 /* AgentCallWorkflowScenarioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCallWorkflowScenarioTests.swift; sourceTree = "<group>"; };
+		AD60AC5CBA42224701C10FBF /* RotaryAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryAudioPlayer.swift; sourceTree = "<group>"; };
+		B2DE2DEDC2C5666536361B5C /* CallsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsScreen.swift; sourceTree = "<group>"; };
+		B33ADBE23942ED197CA55452 /* MobileCallArtifactTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileCallArtifactTests.swift; sourceTree = "<group>"; };
+		B386FEF974A3EE883FAEBE36 /* RotaryPermissionCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryPermissionCenter.swift; sourceTree = "<group>"; };
+		B3A88BBC5521B52B44CD1E39 /* rotary-ringback.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "rotary-ringback.wav"; sourceTree = "<group>"; };
+		B6C927C5FCCEEC269AC0C5CA /* OfflineLocalStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineLocalStateTests.swift; sourceTree = "<group>"; };
+		BBFE96B96941C8911DFDF87A /* LocalConversationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalConversationStore.swift; sourceTree = "<group>"; };
+		C0AA7357B64AAD7FF3EE883D /* Rotary.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Rotary.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1069437161E13758DEADCD4 /* MobileModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileModels.swift; sourceTree = "<group>"; };
+		C11111D5882FEB483CDE8712 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		C19C54565F945F96CFEA23E6 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		C616D88C599348CB0BBDF16B /* RotaryDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryDeepLink.swift; sourceTree = "<group>"; };
+		CC63673A273FE56A8100D211 /* AgentsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentsScreen.swift; sourceTree = "<group>"; };
+		CFD21FC30B0F7E4CADE27433 /* RotaryAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryAuthorization.swift; sourceTree = "<group>"; };
+		D1B4584A9E1592B96978554B /* OfflineMutationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineMutationTypes.swift; sourceTree = "<group>"; };
+		D284892776E9A8DC64D6CC98 /* AgentWorkflowModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentWorkflowModels.swift; sourceTree = "<group>"; };
+		D4CCB3C7F36DC30C048C854B /* RotaryAPIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryAPIClientTests.swift; sourceTree = "<group>"; };
+		D581DEFAC5611EF38B68DD4A /* RotaryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryApp.swift; sourceTree = "<group>"; };
+		D7F013588CEB170DE676B4B6 /* RotaryRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryRootView.swift; sourceTree = "<group>"; };
+		DF06ABE9694415340DD48714 /* FirstRunOnboardingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstRunOnboardingState.swift; sourceTree = "<group>"; };
+		E21C1745C561329CB902476A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E963CE1B0857FA9D7F121432 /* RotaryAuthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryAuthStore.swift; sourceTree = "<group>"; };
+		EA9CAB4C019CCFEC3ECAA5CD /* FirstRunOnboardingStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstRunOnboardingStateTests.swift; sourceTree = "<group>"; };
+		EAB3C06363B78FD98DB29333 /* RotaryLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryLogger.swift; sourceTree = "<group>"; };
+		EC1584521C806C91CCEE413D /* ConversationChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationChrome.swift; sourceTree = "<group>"; };
+		F8F5B3A4742505145CDBE830 /* ConversationTranscript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationTranscript.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		847089EBA07BDAE236627ACE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1889A49DB6C51D1D6C86E916 /* TwilioVoice.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		06450EB3041D2439290C573B = {
+			isa = PBXGroup;
+			children = (
+				6321E153C207FC6FD9522087 /* Configs */,
+				1077FE92ED31D13FDB22482F /* Resources */,
+				C9F59E79A0F4CF37BA621889 /* Sources */,
+				2243CA830F7CB200CABCB14D /* Tests */,
+				FF039A2EE8EA1EB83996046A /* Frameworks */,
+				C05B7BA2B58B08AFE46982CB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1077FE92ED31D13FDB22482F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AFB3D9991206B4B698DBDFA5 /* Audio */,
+				E21C1745C561329CB902476A /* Assets.xcassets */,
+			);
+			name = Resources;
+			path = Rotary/Resources;
+			sourceTree = "<group>";
+		};
+		2243CA830F7CB200CABCB14D /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				ACF5A74D3ACDA702209D3F19 /* AgentCallWorkflowScenarioTests.swift */,
+				EA9CAB4C019CCFEC3ECAA5CD /* FirstRunOnboardingStateTests.swift */,
+				B33ADBE23942ED197CA55452 /* MobileCallArtifactTests.swift */,
+				B6C927C5FCCEEC269AC0C5CA /* OfflineLocalStateTests.swift */,
+				39A9CA9226700271A7C7D423 /* OfflineMutationQueueTests.swift */,
+				D4CCB3C7F36DC30C048C854B /* RotaryAPIClientTests.swift */,
+				79387D8334BA576E291AD486 /* RotaryDeepLinkTests.swift */,
+				98F8F7470B88C533C6EA7916 /* VoiceCoordinatorTests.swift */,
+			);
+			name = Tests;
+			path = Rotary/Tests;
+			sourceTree = "<group>";
+		};
+		28A3B6F4B2E5AE49E9D3AA48 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D284892776E9A8DC64D6CC98 /* AgentWorkflowModels.swift */,
+				C1069437161E13758DEADCD4 /* MobileModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2ACF94874BCA15B1C46E1975 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				AD60AC5CBA42224701C10FBF /* RotaryAudioPlayer.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		3A921008C4D2978D0FFDFF4C /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				C616D88C599348CB0BBDF16B /* RotaryDeepLink.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		408B09D5E58D05FD3597E53B /* Messages */ = {
+			isa = PBXGroup;
+			children = (
+				11E97FB061753E9B9387F7D2 /* MessagesScreen.swift */,
+				72F809772DC899F4C42053D3 /* MessagesStore.swift */,
+				70704DD910FF4B2098B9BE81 /* RotaryMessagesUI.swift */,
+			);
+			path = Messages;
+			sourceTree = "<group>";
+		};
+		4476F4F745C9E3CF14EF9F58 /* Contacts */ = {
+			isa = PBXGroup;
+			children = (
+				5723D4ABEEECBD49F680E0B5 /* DeviceContactsImportCoordinator.swift */,
+			);
+			path = Contacts;
+			sourceTree = "<group>";
+		};
+		4D665175976A7E7DF17C0325 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				2CB2BDEA8CC8D06B0D951131 /* SettingsSheet.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		6321E153C207FC6FD9522087 /* Configs */ = {
+			isa = PBXGroup;
+			children = (
+				0B0625FA7F2356397AD57C9D /* Debug.xcconfig */,
+				3A6956E2E06E14C235170EB7 /* Release.xcconfig */,
+			);
+			path = Configs;
+			sourceTree = "<group>";
+		};
+		67BDEF8F92ECAD13CB931FF4 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				2E4C0FAD376B25CA8AE625E8 /* AppModel.swift */,
+				DF06ABE9694415340DD48714 /* FirstRunOnboardingState.swift */,
+				D581DEFAC5611EF38B68DD4A /* RotaryApp.swift */,
+				374D9B3C4166B980144C36D5 /* RotaryAppDelegate.swift */,
+				D7F013588CEB170DE676B4B6 /* RotaryRootView.swift */,
+				707C990B1E7157156E8131CB /* RotaryTabShell.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		720C7B32712140CC5DDA57E7 /* Offline */ = {
+			isa = PBXGroup;
+			children = (
+				6AF75DAA8DEE26F980B25716 /* ConnectivityMonitor.swift */,
+				23EE6FFA6274FAD2FDFE3406 /* InferenceModeStore.swift */,
+				58B5C3E630F40B89E6A3FAB1 /* OfflineMutationQueue.swift */,
+				D1B4584A9E1592B96978554B /* OfflineMutationTypes.swift */,
+			);
+			path = Offline;
+			sourceTree = "<group>";
+		};
+		725A30A7635966C4F6B61E66 /* Agents */ = {
+			isa = PBXGroup;
+			children = (
+				A1E92C66F021400EAECA367D /* AgentCallWorkflowScenario.swift */,
+				39647A0376189DDF2C36851D /* AgentConversationDetailScreen.swift */,
+				CC63673A273FE56A8100D211 /* AgentsScreen.swift */,
+			);
+			path = Agents;
+			sourceTree = "<group>";
+		};
+		730D7A07CE97D031DFADC13E /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				9E82842CF41DD4B9922F6D17 /* ContactEditor.swift */,
+				EC1584521C806C91CCEE413D /* ConversationChrome.swift */,
+				819D4E17D514A6D6EF2D6FC2 /* ConversationProfiles.swift */,
+				3C7D6565026831E9409C89F6 /* ConversationSummaryRow.swift */,
+				F8F5B3A4742505145CDBE830 /* ConversationTranscript.swift */,
+				477D0690CF889B741D9DB24F /* RotaryAppearance.swift */,
+				C11111D5882FEB483CDE8712 /* Theme.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		777D1222971DD09448C7CEF2 /* Calls */ = {
+			isa = PBXGroup;
+			children = (
+				B2DE2DEDC2C5666536361B5C /* CallsScreen.swift */,
+				0D6F99F52E3D6F5E399A4F36 /* CallsStore.swift */,
+			);
+			path = Calls;
+			sourceTree = "<group>";
+		};
+		7FD0168F6D3C0897B7CFAFF2 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				A2D1B5F826ABBCC7F3C0BF6E /* AuthScreen.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		92302C7870499B76A7476CAF /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				3CB4089CEE2D20C2FC37EA10 /* ClerkNativeAuthService.swift */,
+				E963CE1B0857FA9D7F121432 /* RotaryAuthStore.swift */,
+				996E42FEA30A557F7A18E36F /* RotaryHostedAuthCoordinator.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		982969F7C90B939B41942EBF /* Permissions */ = {
+			isa = PBXGroup;
+			children = (
+				B386FEF974A3EE883FAEBE36 /* RotaryPermissionCenter.swift */,
+			);
+			path = Permissions;
+			sourceTree = "<group>";
+		};
+		AD94733B1870FB7BAF9F791F /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				725A30A7635966C4F6B61E66 /* Agents */,
+				7FD0168F6D3C0897B7CFAFF2 /* Auth */,
+				BCC24BCB69F7DB1BA37057AD /* Bootstrap */,
+				777D1222971DD09448C7CEF2 /* Calls */,
+				408B09D5E58D05FD3597E53B /* Messages */,
+				B1DE0A078DE03D2259F49BA3 /* Onboarding */,
+				4D665175976A7E7DF17C0325 /* Settings */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		AFB3D9991206B4B698DBDFA5 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				B3A88BBC5521B52B44CD1E39 /* rotary-ringback.wav */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		B1DE0A078DE03D2259F49BA3 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				0F92899C9A2EC3F182432ACD /* FirstRunOnboardingFlow.swift */,
+				A15FE06E7EECE1E300788A60 /* OnboardingFlow.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		BC4F18FE7BAE38EC8233BF7E /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				DEF120E20F8547622B0D6FD8 /* API */,
+				92302C7870499B76A7476CAF /* Auth */,
+				4476F4F745C9E3CF14EF9F58 /* Contacts */,
+				F20CFA407F807493B4084303 /* Offline */,
+				982969F7C90B939B41942EBF /* Permissions */,
+				CDCA07278653F6BE0A32764F /* Voice */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		BCC24BCB69F7DB1BA37057AD /* Bootstrap */ = {
+			isa = PBXGroup;
+			children = (
+				8D3F847FBFB6BE8EE196F9E9 /* StatusScreen.swift */,
+			);
+			path = Bootstrap;
+			sourceTree = "<group>";
+		};
+		C05B7BA2B58B08AFE46982CB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C0AA7357B64AAD7FF3EE883D /* Rotary.app */,
+				76C21EC695531B5369D06E3D /* RotaryTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C9F59E79A0F4CF37BA621889 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				67BDEF8F92ECAD13CB931FF4 /* App */,
+				DA3503B3C4FA9F4A37904F3F /* Core */,
+				AD94733B1870FB7BAF9F791F /* Features */,
+				BC4F18FE7BAE38EC8233BF7E /* Services */,
+			);
+			name = Sources;
+			path = Rotary/Sources;
+			sourceTree = "<group>";
+		};
+		CDCA07278653F6BE0A32764F /* Voice */ = {
+			isa = PBXGroup;
+			children = (
+				714C0D2194504DA7D401025C /* VoiceCoordinator.swift */,
+			);
+			path = Voice;
+			sourceTree = "<group>";
+		};
+		CE77186CDDA1C0667D60F3E9 /* Diagnostics */ = {
+			isa = PBXGroup;
+			children = (
+				EAB3C06363B78FD98DB29333 /* RotaryLogger.swift */,
+			);
+			path = Diagnostics;
+			sourceTree = "<group>";
+		};
+		DA3503B3C4FA9F4A37904F3F /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				730D7A07CE97D031DFADC13E /* Design */,
+				CE77186CDDA1C0667D60F3E9 /* Diagnostics */,
+				28A3B6F4B2E5AE49E9D3AA48 /* Models */,
+				3A921008C4D2978D0FFDFF4C /* Navigation */,
+				F9D085942C3AE06686537458 /* Networking */,
+				720C7B32712140CC5DDA57E7 /* Offline */,
+				2ACF94874BCA15B1C46E1975 /* Utilities */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		DEF120E20F8547622B0D6FD8 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				2000FBDD39CFC9D1ED318AFA /* RotaryAPIClient.swift */,
+				0A3C5D026C292358D99A1E4B /* RotaryResponseCache.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		F20CFA407F807493B4084303 /* Offline */ = {
+			isa = PBXGroup;
+			children = (
+				BBFE96B96941C8911DFDF87A /* LocalConversationStore.swift */,
+				2F87B3773A2F2D5BF485B8B6 /* LocalInferenceEngine.swift */,
+				4CF607EC352269459978EF39 /* RotaryMutationDispatcher.swift */,
+			);
+			path = Offline;
+			sourceTree = "<group>";
+		};
+		F9D085942C3AE06686537458 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				C19C54565F945F96CFEA23E6 /* AppConfig.swift */,
+				CFD21FC30B0F7E4CADE27433 /* RotaryAuthorization.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		FF039A2EE8EA1EB83996046A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				411957E4BFCF338802B022C6 /* TwilioVoice.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		26C0E75ACD8C1D460FF609B6 /* Rotary */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E7C1FA31D4240668CB7C2ACC /* Build configuration list for PBXNativeTarget "Rotary" */;
+			buildPhases = (
+				C93EEDA07263AA4C19DCEDD4 /* Sources */,
+				A49E2CFD8A925143534B34A9 /* Resources */,
+				847089EBA07BDAE236627ACE /* Frameworks */,
+				A8C5DCAE5D58506179E93A47 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Rotary;
+			packageProductDependencies = (
+			);
+			productName = Rotary;
+			productReference = C0AA7357B64AAD7FF3EE883D /* Rotary.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4BE2573885668F18D06280E9 /* RotaryTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 64BC7522D73DDDF880F3EAFE /* Build configuration list for PBXNativeTarget "RotaryTests" */;
+			buildPhases = (
+				BA0213AB1F999EDF7B1DC1C9 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2EC77E64A0B10783947CC3F4 /* PBXTargetDependency */,
+			);
+			name = RotaryTests;
+			packageProductDependencies = (
+			);
+			productName = RotaryTests;
+			productReference = 76C21EC695531B5369D06E3D /* RotaryTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		514CBF7B6916C18C8474A8B6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					26C0E75ACD8C1D460FF609B6 = {
+						DevelopmentTeam = YOUR_TEAM_ID;
+						ProvisioningStyle = Automatic;
+					};
+					4BE2573885668F18D06280E9 = {
+						DevelopmentTeam = YOUR_TEAM_ID;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A0F10133692C7A985C10BCD8 /* Build configuration list for PBXProject "Rotary" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 06450EB3041D2439290C573B;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C05B7BA2B58B08AFE46982CB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				26C0E75ACD8C1D460FF609B6 /* Rotary */,
+				4BE2573885668F18D06280E9 /* RotaryTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A49E2CFD8A925143534B34A9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F91E4D3C0672503D9576496A /* Assets.xcassets in Resources */,
+				287DB989D0B80AA3D72F02C5 /* rotary-ringback.wav in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BA0213AB1F999EDF7B1DC1C9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD92D8F6C0F4577DD2255649 /* AgentCallWorkflowScenarioTests.swift in Sources */,
+				E2CC6358A01649D3923AEC16 /* FirstRunOnboardingStateTests.swift in Sources */,
+				CE0BE184E5E3A7EAA0BE75B1 /* MobileCallArtifactTests.swift in Sources */,
+				4AA5C61F708501D6D18A7249 /* OfflineLocalStateTests.swift in Sources */,
+				42DFD17A13BFCF6847453A2E /* OfflineMutationQueueTests.swift in Sources */,
+				5D603F741F109571BEF76CC8 /* RotaryAPIClientTests.swift in Sources */,
+				381991D2E9393A8FC0ACB72A /* RotaryDeepLinkTests.swift in Sources */,
+				409BCE43720A74CD517FF8C6 /* VoiceCoordinatorTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C93EEDA07263AA4C19DCEDD4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B6C2D9B32B8BC547EFF8A12C /* AgentCallWorkflowScenario.swift in Sources */,
+				9F526A41215E631A0E6010D9 /* AgentConversationDetailScreen.swift in Sources */,
+				F2F84F7B8FEE952C7EF34983 /* AgentWorkflowModels.swift in Sources */,
+				B59F893FFCFF514C389F4488 /* AgentsScreen.swift in Sources */,
+				FB58CDDB4BF4C994A3AD7719 /* AppConfig.swift in Sources */,
+				C26127286EDBFE3DEB7AA8A1 /* AppModel.swift in Sources */,
+				838AE39E3C6E157CD54B810D /* AuthScreen.swift in Sources */,
+				79E684549015ED1829DA86C4 /* CallsScreen.swift in Sources */,
+				8FEE43AB30F589036E303771 /* CallsStore.swift in Sources */,
+				243557111559A1BA0DF07CC1 /* ClerkNativeAuthService.swift in Sources */,
+				56D04F596A13501C6513F2B3 /* ConnectivityMonitor.swift in Sources */,
+				164505E8C70F1BC943073DC7 /* ContactEditor.swift in Sources */,
+				78B6852E6629EA773A2EAE11 /* ConversationChrome.swift in Sources */,
+				8BDA4D5241E21C0FA8FC0EE7 /* ConversationProfiles.swift in Sources */,
+				6245EE7DC8DDF73E02CA76DE /* ConversationSummaryRow.swift in Sources */,
+				600CF4C41797338CAC03FF1F /* ConversationTranscript.swift in Sources */,
+				F067B21B36965204C465CA4F /* DeviceContactsImportCoordinator.swift in Sources */,
+				007FAE2980B470BD4D4535C1 /* FirstRunOnboardingFlow.swift in Sources */,
+				34D33A2C7A3D29D712A18F70 /* FirstRunOnboardingState.swift in Sources */,
+				8B24D46D5BB4B604DE267534 /* InferenceModeStore.swift in Sources */,
+				9894B7FD8170EB1462A17AB6 /* LocalConversationStore.swift in Sources */,
+				FC8AF43D62261D62AB5E10BC /* LocalInferenceEngine.swift in Sources */,
+				F4AA5294922310F76844A44F /* MessagesScreen.swift in Sources */,
+				39EEA451329AF29FE38BA1CA /* MessagesStore.swift in Sources */,
+				00FBFE70B24294221BCF5ABB /* MobileModels.swift in Sources */,
+				91AA9EE85226009377C54A57 /* OfflineMutationQueue.swift in Sources */,
+				A34CB5E41D0B360962CF708E /* OfflineMutationTypes.swift in Sources */,
+				EB0127756B3C2D96E2680134 /* OnboardingFlow.swift in Sources */,
+				C668862658311152E156B179 /* RotaryAPIClient.swift in Sources */,
+				5F339F2A8489653DA8D7BE07 /* RotaryApp.swift in Sources */,
+				8142536DB8F3B414DAFC6D8C /* RotaryAppDelegate.swift in Sources */,
+				13CE977A18AD7F1607C2A509 /* RotaryAppearance.swift in Sources */,
+				EC72A8C187F6ED910A14128D /* RotaryAudioPlayer.swift in Sources */,
+				3AB46B21CF7761C950B7D35F /* RotaryAuthStore.swift in Sources */,
+				ECA1C3062E382005466345ED /* RotaryAuthorization.swift in Sources */,
+				9D7254F9037AE60677319AC2 /* RotaryDeepLink.swift in Sources */,
+				9FD57EADB301CFC074241ED3 /* RotaryHostedAuthCoordinator.swift in Sources */,
+				652B1CCAA5DE0FA15632B11F /* RotaryLogger.swift in Sources */,
+				B9EAA3E12CFE1BC66201A249 /* RotaryMessagesUI.swift in Sources */,
+				50700E44EE5EDB7830A443B9 /* RotaryMutationDispatcher.swift in Sources */,
+				718FF26F25F5ACF091ECC3F2 /* RotaryPermissionCenter.swift in Sources */,
+				E3A6AE2F361481CCD09BCA68 /* RotaryResponseCache.swift in Sources */,
+				DB012E86E227A11F486C81DA /* RotaryRootView.swift in Sources */,
+				BDB3F2D1C1F310CAD528485B /* RotaryTabShell.swift in Sources */,
+				94FDFBF48CEE5AE54D78018A /* SettingsSheet.swift in Sources */,
+				C4B23B6707B405DF61BECDAF /* StatusScreen.swift in Sources */,
+				ECB301C8A2CC5E3B6526D3F2 /* Theme.swift in Sources */,
+				D7873B920C6E9E4961C0DF33 /* VoiceCoordinator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2EC77E64A0B10783947CC3F4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 26C0E75ACD8C1D460FF609B6 /* Rotary */;
+			targetProxy = 79351873E36275DCCFA23455 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5C1D4A21649EA8F6A75CAA2E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3A6956E2E06E14C235170EB7 /* Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Rotary/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.1;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"-enable-bare-slash-regex",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ROTARY_BUNDLE_IDENTIFIER)";
+				PRODUCT_NAME = Rotary;
+				ROTARY_API_BASE_URL = "https://www.textjacob.com";
+				ROTARY_AUTH_BASE_URL = "https://www.textjacob.com";
+				ROTARY_CLERK_FRONTEND_API = clerk.textjacob.com;
+				ROTARY_CLERK_PUBLISHABLE_KEY = pk_test_YOUR_CLERK_PUBLISHABLE_KEY;
+				ROTARY_HOSTED_SIGN_IN_URL = "";
+				ROTARY_SENTRY_DSN = "";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		68E808DE7B693B62A7C62751 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_NAME = RotaryTests;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rotary.app/Rotary";
+			};
+			name = Debug;
+		};
+		6EF51EAFF241697750D4D6E9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_NAME = RotaryTests;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rotary.app/Rotary";
+			};
+			name = Release;
+		};
+		8D0D61D2804E5DAFF37B29EF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Rotary/Rotary.entitlements;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Vendor\"",
+				);
+				INFOPLIST_FILE = Rotary/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Rotary;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Debug;
+		};
+		C3C2EABB2B589FFC8C3A1658 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Rotary/Rotary.entitlements;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Vendor\"",
+				);
+				INFOPLIST_FILE = Rotary/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Rotary;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Release;
+		};
+		CA5DF997D0E56306EDC7A167 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0B0625FA7F2356397AD57C9D /* Debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Rotary/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.1;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"-enable-bare-slash-regex",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ROTARY_BUNDLE_IDENTIFIER)";
+				PRODUCT_NAME = Rotary;
+				ROTARY_API_BASE_URL = "https://www.textjacob.com";
+				ROTARY_AUTH_BASE_URL = "https://www.textjacob.com";
+				ROTARY_CLERK_FRONTEND_API = clerk.textjacob.com;
+				ROTARY_CLERK_PUBLISHABLE_KEY = pk_test_YOUR_CLERK_PUBLISHABLE_KEY;
+				ROTARY_HOSTED_SIGN_IN_URL = "";
+				ROTARY_SENTRY_DSN = "";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		64BC7522D73DDDF880F3EAFE /* Build configuration list for PBXNativeTarget "RotaryTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				68E808DE7B693B62A7C62751 /* Debug */,
+				6EF51EAFF241697750D4D6E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A0F10133692C7A985C10BCD8 /* Build configuration list for PBXProject "Rotary" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA5DF997D0E56306EDC7A167 /* Debug */,
+				5C1D4A21649EA8F6A75CAA2E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E7C1FA31D4240668CB7C2ACC /* Build configuration list for PBXNativeTarget "Rotary" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D0D61D2804E5DAFF37B29EF /* Debug */,
+				C3C2EABB2B589FFC8C3A1658 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 514CBF7B6916C18C8474A8B6 /* Project object */;
+}
