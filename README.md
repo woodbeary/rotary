@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="media/rotary-story.gif" width="100%" alt="Rotary in 25 seconds. The old way: calling three businesses for a quote, on hold, crossed out. Instead you send one message ('Find a lawn service for tomorrow morning. Budget under $100.'), approve the plan, and your agent calls three businesses. You tap 'Cap the quote at $95' mid-call, and the best offer comes back: GreenEdge Landscaping at $85, down from $105, next to RapidLawn at $95 and Sunrise Yard Care at $110.">
+  <img src="media/rotary-story.gif" width="100%" alt="Rotary in 30 seconds. The old way: calling three businesses for a quote, on hold, crossed out. Instead you send one message ('Find a lawn service for tomorrow morning. Budget under $100.'), approve the plan, and your agent calls three businesses. You tap 'Cap the quote at $95' mid-call, and the best offer comes back: GreenEdge Landscaping at $85, down from $105, next to RapidLawn at $95 and Sunrise Yard Care at $110.">
 </p>
 
 <p align="center">
