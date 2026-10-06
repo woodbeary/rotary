@@ -1,44 +1,54 @@
 <p align="center">
-  <img src="media/hero.gif" width="100%" alt="Fifteen-second motion piece. TXT CLAW shipped Feb 6, 2026 and Rotary Apr 4, 2026. xAI launched Grok Bot six months later, on Aug 11, and OpenAI launched Dots on Sep 29.">
+  <img src="media/rotary-make-a-call.gif" width="100%" alt="Rotary on iPhone, 30 seconds. Pick an agent, describe the call ('Find a lawn service for tomorrow morning. Budget under $100.'), approve it, then watch the live transcript, including a line translated from Korean, and tap 'Cap quote at $95' mid-call. It comes back with three ranked offers: GreenEdge Landscaping at $85, RapidLawn at $95, Sunrise Yard Care at $110.">
 </p>
 
-<h1 align="center">TXT CLAW → Rotary</h1>
+<h1 align="center">Rotary and TXT CLAW</h1>
 
 <p align="center">
-  <b>I shipped always-on AI agents you can text in February 2026: six months before xAI's Grok Bot and eight months before OpenAI's Dots. Solo.</b><br>
-  Then I built the native iPhone app where those agents call and text for you.<br>
-  <a href="https://jacob.com.ai">Jacob Lopez</a> · February to April 2026 · the real code and its original commit history are in this repo
+  <b>AI agents you can text, and an iPhone app where your agent makes the phone call.</b><br>
+  Built solo by <a href="https://jacob.com.ai">Jacob Lopez</a>, February to April 2026. The real code and its original commit history are in this repo.
 </p>
 
 <p align="center">
-  <a href="media/txtclaw-rotary-1080p.mp4"><b>Watch in 1080p</b></a> &nbsp;·&nbsp;
-  <a href="#the-same-bet-earlier">Comparison</a> &nbsp;·&nbsp;
-  <a href="#the-code">The code</a> &nbsp;·&nbsp;
+  <a href="media/rotary-make-a-call-1080p.mp4"><b>Watch the walkthrough in 1080p</b></a> &nbsp;·&nbsp;
+  <a href="#rotary--the-iphone-app">Rotary</a> &nbsp;·&nbsp;
+  <a href="#txt-claw--agents-you-text">TXT CLAW</a> &nbsp;·&nbsp;
   <a href="#architecture">Architecture</a> &nbsp;·&nbsp;
   <a href="EVIDENCE.md">Dated evidence</a> &nbsp;·&nbsp;
   <a href="https://jacob.com.ai">jacob.com.ai</a>
 </p>
 
+<sub>The walkthrough above is rebuilt frame by frame from the SwiftUI source in <a href="rotary-ios/Rotary/Sources"><code>rotary-ios/</code></a>: the colors come from <code>Theme.swift</code>, and the screens, copy, and call come from <code>Features/Agents</code>. The call it plays is the app's built-in demo scenario, <a href="rotary-ios/Rotary/Sources/Features/Agents/AgentCallWorkflowScenario.swift"><code>AgentCallWorkflowScenario.swift</code></a>.</sub>
+
 ---
 
-## The same bet, earlier
+## Rotary · the iPhone app
 
-In February 2026 I bet that the next interface for AI is an agent that never sleeps, has a computer of its own, and lives where people already talk: their text messages. I built it alone, ran a real launch, and kept going. Six months later xAI launched Grok Bot. In September OpenAI launched Dots.
+> **Your agent makes the call. You approve it first, and you can steer it while it talks.**
 
-| | **TXT CLAW → Rotary** | **Grok Bot** (xAI) | **Dots** (OpenAI) |
-|---|---|---|---|
-| First shipped | **Feb 6, 2026** → Apr 4, 2026 | Aug 11, 2026 | Sep 29, 2026 |
-| Always on, keeps working while you're away | Yes | Yes | Yes |
-| A cloud computer of its own | A sandboxed container per user, on Cloudflare | One cloud computer your bots share | Its own cloud computer |
-| How you reach it | Text it over SMS or iMessage; native iPhone app | Desktop and iOS apps | ChatGPT, Slack, Teams; SMS "coming soon" |
-| Acts in the world | Browses, runs code, remembers; Rotary adds real phone lines, calls, and live call steering | Signs into your tools and finishes multi-step jobs | Connects to 4,000+ apps |
-| Team | One person | xAI | OpenAI |
+1. **Pick an agent.** Each agent can have its own phone number, voice, and instructions.
+2. **Say what the call is for.** Switch the chat to *Make a Call* and type it in plain English.
+3. **Approve before it dials.** Rotary shows the plan and the five things it will confirm (address, size, budget, timing, callback). Nothing is dialed until you tap Approve.
+4. **Watch it work, and steer.** A planner agent scopes the job, a caller agent dials and negotiates, and every transcript line carries its speaker and latency. Lines in other languages arrive translated, with the original underneath. One tap adds a rule mid-call, like *cap the quote at $95*.
+5. **Choose the result.** Offers come back ranked with price, time window, distance, and weather, and one tap picks one.
 
-<sub>Sources: <a href="https://www.unite.ai/xai-launches-grok-bot-always-on-ai-teammates-with-their-own-cloud-computers/">Unite.AI on Grok Bot (Aug 11, 2026)</a> · <a href="https://techcrunch.com/2026/09/29/openai-launches-dots-its-bubbly-agentic-avatar/">TechCrunch on Dots (Sep 29, 2026)</a> · <a href="https://9to5google.com/2026/09/29/openai-dots-agent/">9to5Google on Dots (Sep 29, 2026)</a>. My dates are the commits in this repo; see <a href="EVIDENCE.md">EVIDENCE.md</a>.</sub>
+The app ships this flow as a built-in demo run, and that's what the walkthrough plays.
 
-## February 2026 · TXT CLAW
+What's under it:
 
-> **Your own AI. One text away.**
+- **A native SwiftUI app on real phone lines.** Agents, Messages, and Calls tabs. Twilio Voice with CallKit and PushKit, so an agent's call rings like any other call. Swift 6, with iOS 26 Liquid Glass where available.
+- **Steering that works on live calls.** Steering and live-assist endpoints change what the assistant does during a real call, and you can join a call to authorize one detail and drop off while the agent keeps going.
+- **Works offline.** Actions queue on the device ([`OfflineMutationQueue.swift`](rotary-ios/Rotary/Sources/Core/Offline/OfflineMutationQueue.swift)), and replies fall back to Apple's on-device Foundation Models ([`LocalInferenceEngine.swift`](rotary-ios/Rotary/Sources/Services/Offline/LocalInferenceEngine.swift)).
+- **The backend.** A Next.js mobile API for agents, calls, live steering, phone-line provisioning, and voicemail, on Twilio, Supabase, and Clerk, with models from xAI, OpenAI, and Google through the Vercel AI SDK.
+
+<p align="center">
+  <img src="media/rotary-code-window.png" width="88%" alt="The real Rotary source: AgentCallWorkflowScenario.swift, defining the live call execution stage, a steering rule that caps the quote at $95, and the transcript lines of the demo call">
+</p>
+<sub>The call workflow in the app, first committed Apr 4, 2026 in <a href="https://github.com/woodbeary/rotary/commit/c5a0561">c5a0561</a>. Thirteen commits on Apr 4 and Apr 10 built the app.</sub>
+
+## TXT CLAW · agents you text
+
+> **Your own AI. Its own computer. One text away.**
 
 <table>
   <tr>
@@ -47,28 +57,13 @@ In February 2026 I bet that the next interface for AI is an agent that never sle
     <td width="33%"><img src="txtclaw-web/.playwright-cli/page-2026-02-12T21-08-39-730Z.png" alt="TXT CLAW page footer: NVIDIA Inception Program member, built on OpenClaw and Cloudflare"></td>
   </tr>
 </table>
-<sub>The real TXT CLAW site, captured on Feb 12, 2026. These files were committed that afternoon in <a href="https://github.com/woodbeary/rotary/commit/35c66b1">35c66b1</a>.</sub>
+<sub>The live TXT CLAW site, captured on Feb 12, 2026 and committed that afternoon in <a href="https://github.com/woodbeary/rotary/commit/35c66b1">35c66b1</a>.</sub>
 
-- **Every user gets an always-on agent with its own computer.** Each account maps to its own sandboxed Cloudflare container running an OpenClaw agent that browses, runs code, and keeps files, with an R2-backed workspace so memory survives restarts.
+- **Every user gets an always-on agent with its own computer.** Each account maps to its own sandboxed Cloudflare container running an OpenClaw agent (on Claude) that browses, runs code, and keeps files, with an R2-backed workspace so memory survives restarts.
 - **No app, no login. You text it.** SMS runs through a Twilio A2P 10DLC number, carrier registration included. iMessage runs through [OpenJimmy](https://github.com/woodbeary/openjimmy-public), a macOS bridge I wrote in January that reads the Messages database and replies through AppleScript.
 - **A developer platform in three days (Feb 15 to 17).** A public `/v1` API with console keys, bring-your-own-key, rate limits, graded traces, warm-sandbox keepalive, hardened R2 persistence, an MCP surface, and end-to-end tests.
-- **A real launch, run like a company.** A go-live run on Feb 11 covered 19 end-to-end scenarios and verified signed Twilio and Square webhooks ([report](txtclaw-web/docs/go-live-e2e-checklist-report-2026-02-11.md)). The controlled launch on Feb 18 was called GREEN ([report](txtclaw-web/docs/launch-execution-report-2026-02-18.md)). Carrier compliance, anti-abuse, and blast-radius policy are all [in the docs](txtclaw-web/docs).
+- **A real launch, run like a company.** A go-live run on Feb 11 covered 19 end-to-end scenarios and verified signed Twilio and Square webhooks ([report](txtclaw-web/docs/go-live-e2e-checklist-report-2026-02-11.md)). The controlled launch on Feb 18 was called GREEN ([report](txtclaw-web/docs/launch-execution-report-2026-02-18.md)). Carrier compliance, anti-abuse, and blast-radius policy are all [in the docs](txtclaw-web/docs). I launched it in person at xAI's office.
 - **One person, many agents.** Google Jules, Codex, and v0 worked in parallel on 20+ feature branches: 24 pull requests in five weeks.
-
-## April 2026 · Rotary
-
-> **Agents that call and text for you.**
-
-<p align="center">
-  <img src="media/rotary-code-window.png" width="88%" alt="The real Rotary source: AgentCallWorkflowScenario.swift, defining the live call execution stage, a steering rule that caps the quote at $95, and transcript lines where the caller agent negotiates a quote from $105 to $85">
-</p>
-<sub>The actual agent call workflow in the app: <a href="rotary-ios/Rotary/Sources/Features/Agents/AgentCallWorkflowScenario.swift"><code>AgentCallWorkflowScenario.swift</code></a>, first committed Apr 4, 2026 in <a href="https://github.com/woodbeary/rotary/commit/c5a0561">c5a0561</a>. Thirteen commits on Apr 4 and Apr 10 built the app.</sub>
-
-- **A native SwiftUI app on real phone lines.** Agents, Messages, and Calls tabs. Twilio Voice with CallKit and PushKit, so an agent's call rings like any other call. Swift 6, iOS 26 Liquid Glass where available.
-- **Agents that work the phone for you.** Ask for something ("get my lawn mowed tomorrow, under $95"). A planner agent scopes it, a caller agent dials providers and negotiates, and you get offers to compare. You can join a call to authorize one detail and drop off while the agent keeps going. The app ships this flow as a built-in demo run.
-- **Steer it mid-call.** Steering and live-assist endpoints change what the assistant does during a real call. Every transcript line carries its latency.
-- **Works offline.** Actions queue on the device ([`OfflineMutationQueue.swift`](rotary-ios/Rotary/Sources/Core/Offline/OfflineMutationQueue.swift)), and replies fall back to Apple's on-device Foundation Models ([`LocalInferenceEngine.swift`](rotary-ios/Rotary/Sources/Services/Offline/LocalInferenceEngine.swift)).
-- **The backend.** A Next.js mobile API for agents, calls, live steering, phone-line provisioning, and voicemail, on Twilio, Supabase, and Clerk, with models from xAI, OpenAI, and Google through the Vercel AI SDK.
 
 ## The code
 
@@ -76,8 +71,8 @@ This repo holds the real source of both products with their original commit hist
 
 | Folder | What it is | History |
 |---|---|---|
-| [`txtclaw-web/`](txtclaw-web) | The TXT CLAW site, developer console, billing, API docs, and launch reports (Next.js, Clerk, Square, Twilio) | 35 commits, Feb 6 to Feb 28, 2026 |
 | [`rotary-ios/`](rotary-ios) | The Rotary iPhone app (SwiftUI, Swift 6, CallKit, PushKit, Twilio Voice, Foundation Models) | 13 commits, Apr 4 to Apr 10, 2026 |
+| [`txtclaw-web/`](txtclaw-web) | The TXT CLAW site, developer console, billing, API docs, and launch reports (Next.js, Clerk, Square, Twilio) | 35 commits, Feb 6 to Feb 28, 2026 |
 | [txtclaw-stack-public](https://github.com/woodbeary/txtclaw-stack-public) | The TXT CLAW runtime: Cloudflare Worker, per-user Sandbox containers, Durable Objects, R2 | Public mirror |
 
 To build Rotary, add Twilio's `TwilioVoice.xcframework` 6.13.6 to `rotary-ios/Vendor/` (it isn't redistributed here) and open the project in Xcode 26. [`scripts/capture-rotary.sh`](scripts/capture-rotary.sh) builds it for the simulator and captures screens using the app's debug fixture mode.
@@ -106,11 +101,10 @@ To build Rotary, add Twilio's `TwilioVoice.xcframework` 6.13.6 to `rotary-ios/Ve
 | Feb 18, 2026 | Controlled launch called GREEN | [Report](txtclaw-web/docs/launch-execution-report-2026-02-18.md) |
 | Feb 28, 2026 | A2P 10DLC carrier compliance and blast-radius policy | [1759ef8](https://github.com/woodbeary/rotary/commit/1759ef8) |
 | Apr 4, 2026 | Rotary native iPhone app: 11 commits in one day | [c5a0561](https://github.com/woodbeary/rotary/commit/c5a0561) to [2b6c02d](https://github.com/woodbeary/rotary/commit/2b6c02d) |
-| Aug 11, 2026 | xAI launches Grok Bot | [Unite.AI](https://www.unite.ai/xai-launches-grok-bot-always-on-ai-teammates-with-their-own-cloud-computers/) |
-| Sep 29, 2026 | OpenAI launches Dots at DevDay | [TechCrunch](https://techcrunch.com/2026/09/29/openai-launches-dots-its-bubbly-agentic-avatar/) |
+| Apr 10, 2026 | Rotary call workflow, steering, and offline updates | [0412685](https://github.com/woodbeary/rotary/commit/0412685) |
 
 ## About me
 
-I'm Jacob. I've been building since 2005, when I ran game servers and forums at age 8. I'm self-taught, I grew up in a Deaf family, and I sold mortgages before I wrote software full time. Since mid-2023 I've made 5,900+ commits across 137 repositories, many of them deployed for real businesses. I build with fleets of coding agents, and I like being close to the people who use what I ship.
+I'm Jacob. I've been building since 2005, when I ran game servers and forums at age 8. I'm self-taught, I grew up in a Deaf family, and I sold mortgages before I wrote software full time. As of October 2026 I've made 3,650 GitHub contributions in a year (1,024 in September alone), and more than 5,900 commits across 137 repositories since mid-2023, many deployed for real businesses. I build with fleets of coding agents, and I like being close to the people who use what I ship.
 
 [jacob.com.ai](https://jacob.com.ai) &nbsp;·&nbsp; jacob@lopez.com.ai &nbsp;·&nbsp; [LinkedIn](https://www.linkedin.com/in/imjacoblopez) &nbsp;·&nbsp; [X](https://x.com/imjacoblopez) &nbsp;·&nbsp; [GitHub](https://github.com/woodbeary)
