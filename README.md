@@ -1,25 +1,44 @@
 <p align="center">
-  <img src="media/rotary-story.gif" width="100%" alt="Rotary in 25 seconds. The old way: calling three businesses for a quote, on hold, crossed out. Instead you send one message ('Find a lawn service for tomorrow morning. Budget under $100.'), approve the plan, and your agent calls three businesses. You tap 'Cap the quote at $95' mid-call, and the best offer comes back: GreenEdge Landscaping at $85, down from $105, next to RapidLawn at $95 and Sunrise Yard Care at $110.">
+  <img src="media/signal.gif" width="100%" alt="Always-on AI agents you text and call. On a 2026 timeline: TXT CLAW on Feb 6 and Rotary on Apr 4, built solo by Jacob Lopez; then xAI's Grok Bot on Aug 11 and OpenAI's Dots on Sep 29. Six months earlier. The category xAI and OpenAI launched this fall, built solo and live since February 2026.">
 </p>
 
-<h1 align="center">Rotary and TXT CLAW</h1>
+<h1 align="center">TXT CLAW → Rotary</h1>
 
 <p align="center">
-  <b>AI agents you can text, and an iPhone app where your agent makes the phone call.</b><br>
-  Built solo by <a href="https://jacob.com.ai">Jacob Lopez</a>, February to April 2026. The real code and its original commit history are in this repo.
+  <b>Always-on AI agents you reach by text (TXT CLAW, Feb 2026), then an iPhone app where your agent makes the phone call (Rotary, Apr 2026).<br>Built solo, months before xAI's Grok Bot and OpenAI's Dots. Here's the app:</b>
+</p>
+
+<p align="center">
+  <img src="media/rotary-story.gif" width="100%" alt="Rotary in 25 seconds. The old way: calling three businesses for a quote, on hold, crossed out. Instead you send one message ('Find a lawn service for tomorrow morning. Budget under $100.'), approve the plan, and your agent calls three businesses. You tap 'Cap the quote at $95' mid-call, and the best offer comes back: GreenEdge Landscaping at $85, down from $105, next to RapidLawn at $95 and Sunrise Yard Care at $110.">
 </p>
 
 <p align="center">
   <a href="media/rotary-story-1080p.mp4"><b>Watch in 1080p</b></a> &nbsp;·&nbsp;
+  <a href="#how-it-compares">How it compares</a> &nbsp;·&nbsp;
   <a href="media/rotary-make-a-call-1080p.mp4">Full app walkthrough</a> &nbsp;·&nbsp;
-  <a href="#rotary--the-iphone-app">Rotary</a> &nbsp;·&nbsp;
-  <a href="#txt-claw--agents-you-text">TXT CLAW</a> &nbsp;·&nbsp;
   <a href="#architecture">Architecture</a> &nbsp;·&nbsp;
   <a href="EVIDENCE.md">Dated evidence</a> &nbsp;·&nbsp;
   <a href="https://jacob.com.ai">jacob.com.ai</a>
 </p>
 
-<sub>The app in both videos is rebuilt frame by frame from the SwiftUI source in <a href="rotary-ios/Rotary/Sources"><code>rotary-ios/</code></a>: the colors come from <code>Theme.swift</code>, and the screens, copy, and call come from <code>Features/Agents</code>. The call it plays is the app's built-in demo scenario, <a href="rotary-ios/Rotary/Sources/Features/Agents/AgentCallWorkflowScenario.swift"><code>AgentCallWorkflowScenario.swift</code></a>.</sub>
+<sub>The app in both videos is rebuilt frame by frame from the SwiftUI source in <a href="rotary-ios/Rotary/Sources"><code>rotary-ios/</code></a>, playing the app's built-in demo call (<a href="rotary-ios/Rotary/Sources/Features/Agents/AgentCallWorkflowScenario.swift"><code>AgentCallWorkflowScenario.swift</code></a>). Rotary itself is on TestFlight.</sub>
+
+---
+
+## How it compares
+
+In February 2026 I bet that the next interface for AI is an agent that never sleeps, has a computer of its own, and lives where people already talk: their texts and their phone calls. I built it alone, launched it, and kept going. xAI launched Grok Bot in August; OpenAI launched Dots in September.
+
+| | **TXT CLAW → Rotary** | **Grok Bot** (xAI) | **Dots** (OpenAI) |
+|---|---|---|---|
+| First shipped | **Feb 6, 2026** → Apr 4, 2026 | Aug 11, 2026 | Sep 29, 2026 |
+| Always on, keeps working while you're away | Yes | Yes | Yes |
+| A cloud computer of its own | A sandboxed container per user, on Cloudflare | One cloud computer your bots share | Its own cloud computer |
+| How you reach it | Text it over SMS or iMessage; native iPhone app | Desktop and iOS apps | ChatGPT, Slack, Teams; SMS "coming soon" |
+| Acts in the world | Browses, runs code, remembers; Rotary adds real phone calls you can steer mid-call | Signs into your tools and finishes multi-step jobs | Connects to 4,000+ apps |
+| Team | One person | xAI | OpenAI |
+
+<sub>Sources: <a href="https://www.unite.ai/xai-launches-grok-bot-always-on-ai-teammates-with-their-own-cloud-computers/">Unite.AI on Grok Bot (Aug 11, 2026)</a> · <a href="https://techcrunch.com/2026/09/29/openai-launches-dots-its-bubbly-agentic-avatar/">TechCrunch on Dots (Sep 29, 2026)</a> · <a href="https://9to5google.com/2026/09/29/openai-dots-agent/">9to5Google on Dots (Sep 29, 2026)</a>. My dates are the commits in this repo; see <a href="EVIDENCE.md">EVIDENCE.md</a>.</sub>
 
 ---
 
@@ -103,6 +122,8 @@ To build Rotary, add Twilio's `TwilioVoice.xcframework` 6.13.6 to `rotary-ios/Ve
 | Feb 28, 2026 | A2P 10DLC carrier compliance and blast-radius policy | [1759ef8](https://github.com/woodbeary/rotary/commit/1759ef8) |
 | Apr 4, 2026 | Rotary native iPhone app: 11 commits in one day | [c5a0561](https://github.com/woodbeary/rotary/commit/c5a0561) to [2b6c02d](https://github.com/woodbeary/rotary/commit/2b6c02d) |
 | Apr 10, 2026 | Rotary call workflow, steering, and offline updates | [0412685](https://github.com/woodbeary/rotary/commit/0412685) |
+| Aug 11, 2026 | xAI launches Grok Bot | [Unite.AI](https://www.unite.ai/xai-launches-grok-bot-always-on-ai-teammates-with-their-own-cloud-computers/) |
+| Sep 29, 2026 | OpenAI launches Dots at DevDay | [TechCrunch](https://techcrunch.com/2026/09/29/openai-launches-dots-its-bubbly-agentic-avatar/) |
 
 ## About me
 

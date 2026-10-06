@@ -38,6 +38,13 @@ Launch reports written at the time: [go-live E2E checklist, Feb 11](txtclaw-web/
 | txtclaw #30 | 2026-02-17 04:20 | 2026-02-17 21:40 | Dev API portal: self-serve keys, docs, billing, E2E |
 | txtclaw #77 | 2026-02-27 20:03 | 2026-02-28 17:40 | A2P 10DLC remediation tracker and compliance alignment |
 
+## Launches compared
+
+| Date | Launch | Source |
+|---|---|---|
+| 2026-08-11 | xAI launches Grok Bot: always-on agents that share a cloud computer, on desktop and iOS | [Unite.AI](https://www.unite.ai/xai-launches-grok-bot-always-on-ai-teammates-with-their-own-cloud-computers/) |
+| 2026-09-29 | OpenAI launches Dots at DevDay: always-on agents with their own cloud computer, in ChatGPT, Slack, and Teams | [TechCrunch](https://techcrunch.com/2026/09/29/openai-launches-dots-its-bubbly-agentic-avatar/), [9to5Google](https://9to5google.com/2026/09/29/openai-dots-agent/) |
+
 ## What was removed before publishing
 
 API keys, team IDs, and a Twilio account ID were replaced with placeholders throughout the history. Private partnership notes, a unit-economics model, browser-automation logs, editor settings, Twilio's redistributable SDK binary, and the third-party brand mockups from the landing page's Apple Messages section were removed. Nothing else was changed, and every commit keeps its original author and date.
