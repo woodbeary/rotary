@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="media/rotary-make-a-call.gif" width="100%" alt="Rotary on iPhone, 30 seconds. Pick an agent, describe the call ('Find a lawn service for tomorrow morning. Budget under $100.'), approve it, then watch the live transcript, including a line translated from Korean, and tap 'Cap quote at $95' mid-call. It comes back with three ranked offers: GreenEdge Landscaping at $85, RapidLawn at $95, Sunrise Yard Care at $110.">
+  <img src="media/rotary-story.gif" width="100%" alt="Rotary in 25 seconds. The old way: calling three businesses for a quote, on hold, crossed out. Instead you send one message ('Find a lawn service for tomorrow morning. Budget under $100.'), approve the plan, and your agent calls three businesses. You tap 'Cap the quote at $95' mid-call, and the best offer comes back: GreenEdge Landscaping at $85, down from $105, next to RapidLawn at $95 and Sunrise Yard Care at $110.">
 </p>
 
 <h1 align="center">Rotary and TXT CLAW</h1>
@@ -10,7 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="media/rotary-make-a-call-1080p.mp4"><b>Watch the walkthrough in 1080p</b></a> &nbsp;·&nbsp;
+  <a href="media/rotary-story-1080p.mp4"><b>Watch in 1080p</b></a> &nbsp;·&nbsp;
+  <a href="media/rotary-make-a-call-1080p.mp4">Full app walkthrough</a> &nbsp;·&nbsp;
   <a href="#rotary--the-iphone-app">Rotary</a> &nbsp;·&nbsp;
   <a href="#txt-claw--agents-you-text">TXT CLAW</a> &nbsp;·&nbsp;
   <a href="#architecture">Architecture</a> &nbsp;·&nbsp;
@@ -18,7 +19,7 @@
   <a href="https://jacob.com.ai">jacob.com.ai</a>
 </p>
 
-<sub>The walkthrough above is rebuilt frame by frame from the SwiftUI source in <a href="rotary-ios/Rotary/Sources"><code>rotary-ios/</code></a>: the colors come from <code>Theme.swift</code>, and the screens, copy, and call come from <code>Features/Agents</code>. The call it plays is the app's built-in demo scenario, <a href="rotary-ios/Rotary/Sources/Features/Agents/AgentCallWorkflowScenario.swift"><code>AgentCallWorkflowScenario.swift</code></a>.</sub>
+<sub>The app in both videos is rebuilt frame by frame from the SwiftUI source in <a href="rotary-ios/Rotary/Sources"><code>rotary-ios/</code></a>: the colors come from <code>Theme.swift</code>, and the screens, copy, and call come from <code>Features/Agents</code>. The call it plays is the app's built-in demo scenario, <a href="rotary-ios/Rotary/Sources/Features/Agents/AgentCallWorkflowScenario.swift"><code>AgentCallWorkflowScenario.swift</code></a>.</sub>
 
 ---
 
