@@ -21,7 +21,7 @@
   <a href="https://jacob.com.ai">jacob.com.ai</a>
 </p>
 
-<sub>The app in both videos is rebuilt frame by frame from the SwiftUI source in <a href="rotary-ios/Rotary/Sources"><code>rotary-ios/</code></a>, playing the app's built-in demo call (<a href="rotary-ios/Rotary/Sources/Features/Agents/AgentCallWorkflowScenario.swift"><code>AgentCallWorkflowScenario.swift</code></a>). Rotary itself is on TestFlight.</sub>
+<sub>The app in both videos is rebuilt frame by frame from the SwiftUI source in <a href="rotary-ios/Rotary/Sources"><code>rotary-ios/</code></a>, playing the app's built-in demo call (<a href="rotary-ios/Rotary/Sources/Features/Agents/AgentCallWorkflowScenario.swift"><code>AgentCallWorkflowScenario.swift</code></a>). Rotary itself is on TestFlight and has placed 50+ real calls.</sub>
 
 ---
 
@@ -127,6 +127,6 @@ To build Rotary, add Twilio's `TwilioVoice.xcframework` 6.13.6 to `rotary-ios/Ve
 
 ## About me
 
-I'm Jacob. I've been building since 2005, when I ran game servers and forums at age 8. I'm self-taught, I grew up in a Deaf family, and I sold mortgages before I wrote software full time. As of October 2026 I've made 3,650 GitHub contributions in a year (1,024 in September alone), and more than 5,900 commits across 137 repositories since mid-2023, many deployed for real businesses. I build with fleets of coding agents, and I like being close to the people who use what I ship.
+I'm Jacob. I've been building since 2005, starting with game servers and forums. I'm self-taught, I grew up in a Deaf family, and I sold mortgages before I wrote software full time. As of October 2026 I've made 3,650 GitHub contributions in a year (1,024 in September alone), and more than 5,900 commits across 137 repositories since mid-2023, many deployed for real businesses. I like being close to the people who use what I ship.
 
 [jacob.com.ai](https://jacob.com.ai) &nbsp;·&nbsp; jacob@lopez.com.ai &nbsp;·&nbsp; [LinkedIn](https://www.linkedin.com/in/imjacoblopez) &nbsp;·&nbsp; [X](https://x.com/imjacoblopez) &nbsp;·&nbsp; [GitHub](https://github.com/woodbeary)
